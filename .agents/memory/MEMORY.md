@@ -1,0 +1,1 @@
+- [GYMVERSE product scope](gymverse-product-scope.md) — fitness-only social community for beginners and experienced gym users.

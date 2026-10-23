@@ -1,0 +1,199 @@
+Build a clickable mobile-first prototype for a fitness-only social media app called “GYMVERSE.”
+
+App concept:
+GYMVERSE is a gym-focused social platform for workout videos, gym motivation, transformation posts, progress tracking, and fitness challenges. It should feel like a mix of TikTok/Instagram Reels for gym content, Strava-style progress tracking, and a motivational fitness community. The goal of this prototype is to show the concept visually and allow users to click through the main screens. It does not need real authentication, real video uploading, or a backend yet. Use mock data and placeholder content.
+
+Brand vibe:
+The app should feel intense, modern, motivational, high-energy, and welcoming to both beginners and serious gym users. Since the name is GYMVERSE, the design can feel slightly futuristic, like a fitness universe/community built around progress, discipline, and transformation. It should not feel generic or corporate. It should have a dark-mode gym aesthetic.
+
+Use this color palette:
+- Background Black: #080A09
+- Charcoal Card Gray: #151A17
+- Electric Green: #39FF88
+- Motivation Orange: #FF7A1A
+- Pure White: #FFFFFF
+- Steel Gray: #9CA3A0
+- Deep Red Accent: #FF2E2E
+
+Use the colors like this:
+- Dark black/charcoal backgrounds
+- White main text
+- Steel gray secondary text
+- Electric green for primary buttons, progress bars, active tabs, streaks, and completed challenges
+- Orange for challenge buttons, motivational highlights, and calls to action
+- Red only sparingly for alerts, report buttons, or intense PR badges
+
+Build as a responsive mobile app prototype with a phone-like layout. Prioritize mobile screen size. The UI should look like an actual app demo.
+
+Main screens to build:
+
+1. Welcome / Onboarding Screen
+Purpose: Explain the app quickly.
+Include:
+- App name: GYMVERSE
+- Tagline: “Your gym feed. Nothing else.”
+- Short description: “Workouts, transformations, PRs, challenges, and motivation — all in one fitness-only community.”
+- Buttons:
+  - Get Started
+  - Explore Demo
+- Optional interest chips:
+  - Build Muscle
+  - Lose Weight
+  - Get Motivated
+  - Learn Workouts
+  - Track Progress
+  - Find Gym Community
+
+2. Home Feed Screen
+Purpose: Main TikTok/Reels-style fitness feed.
+Include:
+- Top tabs:
+  - For You
+  - Motivation
+  - Workouts
+  - Transformations
+  - Beginner
+  - PRs
+- A vertical content card/feed with mock posts.
+Each post should include:
+- Mock image/video placeholder area
+- Username
+- Caption
+- Category tag
+- Like button/count
+- Comment button/count
+- Save button
+- Share button
+- Follow button
+Sample posts:
+- @griffinlifts: “Day 42. Finally hit 225 on bench. Keep showing up.”
+- @maya_moves: “Beginner push day routine — save this for your next workout.”
+- @iron_jay: “6-month transformation. Discipline beats motivation.”
+- @coach_elena: “3 squat form tips every beginner should know.”
+- @noexcuses: “You do not need motivation. You need consistency.”
+Use gym-style placeholder gradients or cards if real images are not available.
+
+3. Explore / Categories Screen
+Purpose: Show that the app is only for fitness content.
+Include category cards:
+- Gym Motivation
+- Beginner Workouts
+- Transformations
+- Strength Training
+- Bodybuilding
+- Weight Loss
+- Nutrition
+- Powerlifting
+- Calisthenics
+- Mental Discipline
+Each category card should have an icon or visual marker, short description, and number of posts.
+
+4. Create Post Screen
+Purpose: Show how users would post fitness content.
+Include:
+- Upload video/photo placeholder
+- Caption field
+- Category selector:
+  - Workout
+  - Transformation
+  - PR
+  - Motivation
+  - Beginner
+  - Nutrition
+- Hashtag field
+- Toggle or checkbox: “Add to Progress Timeline”
+- Button: “Post to GYMVERSE”
+This does not need to actually upload content, but when clicked, show a simple success message or toast: “Post added to demo feed.”
+
+5. Profile Screen
+Purpose: Make the profile feel like a fitness journey page.
+Use mock user:
+- Username: @griffinlifts
+- Name: Griffin
+- Bio: “Building strength, discipline, and consistency.”
+- Goal: “Build muscle and stay consistent”
+- Stats:
+  - 1.2K Followers
+  - 384 Following
+  - 47 Posts
+  - 28-Day Streak
+- PRs:
+  - Bench: 225
+  - Squat: 315
+  - Deadlift: 405
+- Current challenge: “30-Day Consistency Challenge”
+- Grid/list of mock posts
+- Button: “View Progress Timeline”
+
+6. Progress Timeline Screen
+Purpose: Show a fitness-specific differentiator.
+Include timeline entries:
+- Day 1: “First day locked in.”
+- Week 2: “Starting to feel stronger.”
+- Month 1: “Hit 20 workouts.”
+- Month 3: “Bench PR + better consistency.”
+- Month 6: “Transformation update.”
+Each entry should have:
+- Date/label
+- Caption
+- Mock progress image/video placeholder
+- Optional stat chips like workouts completed, bodyweight, PR, streak
+Include a progress bar and text: “6 months of progress.”
+
+7. Challenges Screen
+Purpose: Show community motivation and repeat engagement.
+Include challenge cards:
+- 30-Day Gym Consistency Challenge
+- 100 Pushups a Day Challenge
+- First Pull-Up Challenge
+- 12-Week Transformation Challenge
+- PR Week Challenge
+- No Excuses Cardio Challenge
+Each card should show:
+- Challenge name
+- Number of people joined
+- Difficulty
+- Short description
+- Progress bar or status
+- Join button
+When a user clicks join, show visual feedback like “Joined” or a toast.
+
+Navigation:
+Create a bottom navigation bar with:
+- Home
+- Explore
+- Create
+- Challenges
+- Profile
+Make the navigation functional between screens.
+
+Prototype behavior:
+- No real authentication required.
+- No real backend required.
+- Use mock data.
+- Buttons should feel interactive.
+- Tabs/categories can update visible mock content if simple to implement.
+- Joining a challenge should update the button state.
+- Posting should show a fake success message.
+- The prototype should be clean, smooth, and easy to revise.
+
+Design requirements:
+- Mobile-first layout.
+- Dark mode.
+- Rounded cards.
+- Bold headings.
+- High contrast.
+- Modern app feel.
+- Use subtle gradients, shadows, and glowing green/orange accents.
+- Make it feel energetic and fitness-focused, not generic.
+- Add a slightly futuristic “fitness universe” feel to match the GYMVERSE name.
+- Use icons where helpful.
+- Make sure text is readable.
+
+Important:
+This is only the first prototype. Keep the code simple, organized, and easy to edit. Use reusable components for cards, buttons, navigation, category chips, post cards, challenge cards, and profile stats.
+
+After building, provide:
+1. A short summary of what was built.
+2. Instructions for how to run or preview it.
+3. Suggestions for the next 5 improvements.
