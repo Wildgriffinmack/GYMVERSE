@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { Fragment, useMemo, useState } from "react";
 import type { ComponentType, FormEvent, ReactNode } from "react";
 import {
   Activity,
@@ -38,18 +38,27 @@ import "./gymverse.css";
 
 type Screen = "welcome" | "home" | "explore" | "create" | "profile" | "progress" | "challenges";
 type FeedTab = "For You" | "Motivation" | "Workouts" | "Transformations" | "Beginner" | "PRs";
+type PostType = "Video" | "Photo" | "Gym Edit" | "Workout" | "Transformation" | "PR" | "Motivation";
+type PostVisual = "pr" | "routine" | "transformation" | "edit" | "form" | "motivation";
 
 type Post = {
   id: string;
   username: string;
   name: string;
   caption: string;
+  hashtags: string[];
+  postType: PostType;
   category: string;
-  feed: FeedTab;
+  feeds: FeedTab[];
   likes: number;
   comments: number;
   art: string;
+  visual: PostVisual;
   artLine: string;
+  badge?: string;
+  challenge?: string;
+  progressLabel?: string;
+  audio?: string;
   created?: boolean;
 };
 
@@ -63,60 +72,102 @@ const starterPosts: Post[] = [
     username: "griffinlifts",
     name: "Griffin Cole",
     caption: "Day 42. Finally hit 225 on bench. Keep showing up.",
-    category: "PERSONAL RECORD",
-    feed: "PRs",
-    likes: 284,
-    comments: 32,
+    hashtags: ["#BenchPR", "#GymMotivation", "#Consistency"],
+    postType: "Video",
+    category: "PR",
+    feeds: ["PRs", "Workouts"],
+    likes: 2400,
+    comments: 184,
     art: "lime",
+    visual: "pr",
     artLine: "225 LB / BENCH",
+    badge: "NEW PR",
+    challenge: "30-DAY CONSISTENCY",
+    progressLabel: "DAY 42 · 28-DAY STREAK",
   },
   {
     id: "maya-push",
     username: "maya_moves",
     name: "Maya Chen",
     caption: "Beginner push day routine — save this for your next workout.",
+    hashtags: ["#BeginnerFitness", "#PushDay", "#Workout"],
+    postType: "Video",
     category: "BEGINNER WORKOUT",
-    feed: "Beginner",
-    likes: 913,
-    comments: 48,
-    art: "",
+    feeds: ["Beginner", "Workouts"],
+    likes: 8700,
+    comments: 512,
+    art: "orange",
+    visual: "routine",
     artLine: "PUSH DAY / 01",
+    badge: "BEGINNER FRIENDLY",
+    progressLabel: "4 MOVES · 35 MIN",
   },
   {
     id: "jay-change",
     username: "iron_jay",
     name: "Jay Bennett",
     caption: "6-month transformation. Discipline beats motivation.",
+    hashtags: ["#Transformation", "#FitnessJourney", "#NoExcuses"],
+    postType: "Photo",
     category: "TRANSFORMATION",
-    feed: "Transformations",
-    likes: 2400,
-    comments: 186,
+    feeds: ["Transformations"],
+    likes: 14200,
+    comments: 903,
     art: "orange",
+    visual: "transformation",
     artLine: "6 MONTHS / IN",
+    badge: "6-MONTH CHECK-IN",
+  },
+  {
+    id: "gymeditz-motivation",
+    username: "gymeditz",
+    name: "Gym Editz",
+    caption: "When you don’t feel like going… that’s when it matters most.",
+    hashtags: ["#GymEdit", "#Motivation", "#LockIn"],
+    postType: "Gym Edit",
+    category: "MOTIVATION",
+    feeds: ["Motivation"],
+    likes: 21900,
+    comments: 1100,
+    art: "red",
+    visual: "edit",
+    artLine: "LOCK IN / TODAY",
+    badge: "GYM EDIT",
+    challenge: "NO EXCUSES CHALLENGE",
+    audio: "Audio: cinematic gym edit",
   },
   {
     id: "elena-form",
     username: "coach_elena",
     name: "Elena Ruiz",
     caption: "3 squat form tips every beginner should know.",
-    category: "FORM CHECK",
-    feed: "Workouts",
-    likes: 641,
-    comments: 58,
+    hashtags: ["#SquatTips", "#FormCheck", "#LegDay"],
+    postType: "Video",
+    category: "FORM TIPS",
+    feeds: ["Workouts", "Beginner"],
+    likes: 5600,
+    comments: 342,
     art: "lime",
+    visual: "form",
     artLine: "SQUAT / BETTER",
+    badge: "3 FORM CUES",
   },
   {
     id: "noexcuses-daily",
     username: "noexcuses",
     name: "No Excuses Club",
     caption: "You do not need motivation. You need consistency.",
-    category: "DAILY REMINDER",
-    feed: "Motivation",
-    likes: 1800,
-    comments: 91,
+    hashtags: ["#Discipline", "#GymMindset", "#Motivation"],
+    postType: "Photo",
+    category: "MOTIVATION",
+    feeds: ["Motivation"],
+    likes: 11300,
+    comments: 688,
     art: "red",
+    visual: "motivation",
     artLine: "SHOW UP / AGAIN",
+    badge: "28-DAY STREAK",
+    progressLabel: "CONSISTENCY WINS",
   },
 ];
 
@@ -166,6 +217,22 @@ const challenges = [
 ];
 
 const postCategories = ["Workout", "Transformation", "PR", "Motivation", "Beginner", "Nutrition"];
+const postTypes: PostType[] = ["Video", "Photo", "Gym Edit", "Workout", "Transformation", "PR", "Motivation"];
+
+function formatCount(value: number, showExact = false) {
+  if (showExact) return value.toLocaleString();
+  if (value < 1000) return value.toLocaleString();
+  return `${(value / 1000).toFixed(1).replace(/\.0$/, "")}K`;
+}
+
+function getPostVisual(type: PostType, category: string): PostVisual {
+  if (type === "PR" || category === "PR") return "pr";
+  if (type === "Transformation" || category === "Transformation") return "transformation";
+  if (type === "Gym Edit") return "edit";
+  if (type === "Motivation" || category === "Motivation") return "motivation";
+  if (type === "Workout" || category === "Workout") return "routine";
+  return type === "Photo" ? "motivation" : "form";
+}
 function Wordmark({ small = false }: { small?: boolean }) {
   return <div className="gv-wordmark" style={small ? { fontSize: 18 } : undefined}>GYM<span>VERSE</span></div>;
 }
@@ -208,6 +275,7 @@ function PostCard({
   onFollow,
   onComment,
   onShare,
+  onMore,
 }: {
   post: Post;
   liked: boolean;
@@ -218,6 +286,7 @@ function PostCard({
   onFollow: () => void;
   onComment: () => void;
   onShare: () => void;
+  onMore: () => void;
 }) {
   const initials = post.name.split(" ").map((part) => part[0]).slice(0, 2).join("");
   return (
@@ -226,28 +295,62 @@ function PostCard({
         <div className="gv-avatar">{initials}</div>
         <div className="gv-user-info">
           <div className="gv-user">@{post.username}</div>
-          <div className="gv-meta">{post.category} · {post.created ? "just now" : "2h ago"}</div>
+          <div className="gv-meta">{post.created ? "just now" : "2h ago"} · {post.postType}</div>
         </div>
-        {post.username !== "griffinlifts" && <button className="gv-follow" onClick={onFollow}>{followed ? "Following" : "Follow +"}</button>}
-        <button className="gv-icon-button" style={{ width: 31, height: 31, border: 0 }} aria-label={`More from ${post.username}`} onClick={onShare}><MoreHorizontal size={18} /></button>
+        {post.username !== "griffinlifts" && <button className={`gv-follow ${followed ? "following" : ""}`} onClick={onFollow} aria-pressed={followed}>{followed ? "Following" : "Follow +"}</button>}
+        <button className="gv-icon-button" style={{ width: 31, height: 31, border: 0 }} aria-label={`More options for ${post.username}'s post`} onClick={onMore}><MoreHorizontal size={18} /></button>
       </div>
-      <div className={`gv-art ${post.art}`}>
-        <div className="gv-art-label"><span className="gv-art-overline">GYMVERSE / FIELD NOTES</span>{post.artLine}</div>
-        <div className="gv-art-play"><Play size={15} fill="white" /></div>
+      <div className={`gv-art ${post.art} gv-art-${post.visual}`} role="img" aria-label={`${post.postType} preview: ${post.artLine}`}>
+        <div className="gv-media-topline">
+          <span className="gv-media-type">{post.postType === "Workout" ? "WORKOUT" : post.postType.toUpperCase()}</span>
+          {post.badge && <span className="gv-post-badge">{post.badge}</span>}
+        </div>
+        {post.visual === "transformation" && (
+          <div className="gv-before-after">
+            <strong>{post.artLine}</strong>
+            <div className="gv-before"><span>BEFORE</span><b>MONTH 01</b></div>
+            <div className="gv-after"><span>AFTER</span><b>MONTH 06</b></div>
+          </div>
+        )}
+        {post.visual === "routine" && (
+          <div className="gv-routine-list">
+            <strong>{post.artLine}</strong>
+            <div><span>01</span><b>DUMBBELL PRESS</b><small>3 × 10</small></div>
+            <div><span>02</span><b>INCLINE PRESS</b><small>3 × 12</small></div>
+            <div><span>03</span><b>LATERAL RAISE</b><small>3 × 15</small></div>
+          </div>
+        )}
+        {post.visual === "edit" && <div className="gv-edit-overlay">WHEN YOU<br /><span>DON’T FEEL LIKE IT</span></div>}
+        {post.visual === "form" && <div className="gv-form-overlay"><span>COACH ELENA / FORM CHECK</span><b>3 CUES.<br />BETTER SQUATS.</b><i>BRACE · DEPTH · DRIVE</i></div>}
+        {post.visual === "motivation" && <div className="gv-motivation-overlay">DISCIPLINE<br />OVER<br /><span>MOOD.</span></div>}
+        {post.visual !== "transformation" && post.visual !== "routine" && post.visual !== "edit" && post.visual !== "form" && post.visual !== "motivation" && (
+          <div className="gv-art-label"><span className="gv-art-overline">GYMVERSE / FIELD NOTES</span>{post.artLine}</div>
+        )}
+        {post.visual === "pr" && <div className="gv-pr-stamp"><Trophy size={15} /> 225 LB</div>}
+        {post.postType !== "Photo" && <div className="gv-art-play"><Play size={15} fill="white" /></div>}
+        {post.audio && <div className="gv-audio-label"><Activity size={12} />{post.audio}</div>}
       </div>
-      <div className="gv-post-caption">{post.caption}</div>
-      <div className="gv-post-actions">
-        <button className={`gv-action ${liked ? "active" : ""}`} onClick={onLike} aria-label={liked ? "Unlike post" : "Like post"}><Heart size={17} fill={liked ? "currentColor" : "none"} />{post.likes + (liked ? 1 : 0)}</button>
-        <button className="gv-action" onClick={onComment} aria-label="Open comments"><MessageCircle size={17} />{post.comments}</button>
-        <button className={`gv-action ${saved ? "active" : ""}`} onClick={onSave} aria-label={saved ? "Remove saved post" : "Save post"}><Bookmark size={17} fill={saved ? "currentColor" : "none"} /></button>
-        <button className="gv-action" onClick={onShare} aria-label="Share post"><Share2 size={17} /></button>
+      <div className="gv-post-details">
+        <div className="gv-post-tags">
+          <span className="gv-category-tag">{post.category}</span>
+          {post.challenge && <span className="gv-context-tag"><Flame size={11} />{post.challenge}</span>}
+          {post.progressLabel && <span className="gv-context-tag"><TrendingUp size={11} />{post.progressLabel}</span>}
+        </div>
+        <div className="gv-post-caption">{post.caption}</div>
+        <div className="gv-hashtags">{post.hashtags.map((tag) => <span key={tag}>{tag}</span>)}</div>
+        <div className="gv-post-actions">
+          <button className={`gv-action ${liked ? "active" : ""}`} onClick={onLike} aria-label={liked ? `Unlike post, ${post.likes + 1} likes` : `Like post, ${post.likes} likes`} aria-pressed={liked}><Heart size={18} fill={liked ? "currentColor" : "none"} /><span>{formatCount(post.likes + (liked ? 1 : 0), liked)}</span></button>
+          <button className="gv-action" onClick={onComment} aria-label={`Open ${post.comments} comments`}><MessageCircle size={18} /><span>{formatCount(post.comments)}</span></button>
+          <button className={`gv-action ${saved ? "active" : ""}`} onClick={onSave} aria-label={saved ? "Remove saved post" : "Save post"} aria-pressed={saved}><Bookmark size={18} fill={saved ? "currentColor" : "none"} /></button>
+          <button className="gv-action" onClick={onShare} aria-label="Share post"><Share2 size={18} /></button>
+        </div>
       </div>
     </article>
   );
 }
 
 export function GymverseApp() {
-  const [screen, setScreen] = useState<Screen>("welcome");
+  const [screen, setScreen] = useState<Screen>(() => new URLSearchParams(window.location.search).get("screen") === "home" ? "home" : "welcome");
   const [activeTab, setActiveTab] = useState<FeedTab>("For You");
   const [selectedInterests, setSelectedInterests] = useState<string[]>(["Build Muscle", "Track Progress"]);
   const [posts, setPosts] = useState<Post[]>(starterPosts);
@@ -260,6 +363,7 @@ export function GymverseApp() {
   const [caption, setCaption] = useState("");
   const [hashtag, setHashtag] = useState("");
   const [postCategory, setPostCategory] = useState("Workout");
+  const [postType, setPostType] = useState<PostType>("Video");
   const [addToTimeline, setAddToTimeline] = useState(false);
   const [demoMedia, setDemoMedia] = useState(false);
   const [commentPost, setCommentPost] = useState<string | null>(null);
@@ -273,7 +377,7 @@ export function GymverseApp() {
     setCommentPost(null);
     setToast("");
   };
-  const visiblePosts = useMemo(() => activeTab === "For You" ? posts : posts.filter((post) => post.feed === activeTab), [activeTab, posts]);
+  const visiblePosts = useMemo(() => activeTab === "For You" ? posts : posts.filter((post) => post.feeds.includes(activeTab)), [activeTab, posts]);
   const setToggle = (list: string[], setter: (value: string[]) => void, id: string) => {
     setter(list.includes(id) ? list.filter((item) => item !== id) : [...list, id]);
   };
@@ -299,17 +403,24 @@ export function GymverseApp() {
       return;
     }
     const mappedFeed = categoryToFeed(postCategory);
+    const visual = getPostVisual(postType, postCategory);
+    const parsedHashtags = hashtag.trim().split(/\s+/).filter(Boolean).map((tag) => tag.startsWith("#") ? tag : `#${tag}`);
     const newPost: Post = {
       id: `local-${Date.now()}`,
       username: "griffinlifts",
       name: "Griffin Cole",
-      caption: `${caption.trim()}${hashtag.trim() ? `  ${hashtag.trim().startsWith("#") ? hashtag.trim() : `#${hashtag.trim()}`}` : ""}`,
+      caption: caption.trim(),
+      hashtags: parsedHashtags,
+      postType,
       category: postCategory.toUpperCase(),
-      feed: mappedFeed,
+      feeds: [mappedFeed],
       likes: 0,
       comments: 0,
-      art: "lime",
+      art: visual === "edit" || visual === "motivation" ? "red" : visual === "transformation" ? "orange" : "lime",
+      visual,
       artLine: demoMedia ? "NEW CLIP / 01" : "TRAINING / LOG",
+      badge: postType === "PR" || postCategory === "PR" ? "NEW PR" : postType === "Transformation" ? "PROGRESS UPDATE" : undefined,
+      progressLabel: addToTimeline ? "ADDED TO TIMELINE" : undefined,
       created: true,
     };
     setPosts((current) => [newPost, ...current]);
@@ -318,9 +429,11 @@ export function GymverseApp() {
     setHashtag("");
     setDemoMedia(false);
     setAddToTimeline(false);
+    setPostType("Video");
+    setPostCategory("Workout");
     setActiveTab("For You");
     navigate("home");
-    showToast("Post added to demo feed.");
+    showToast("Your post was added to the GYMVERSE demo feed.");
   };
 
   const renderWelcome = () => (
@@ -351,42 +464,52 @@ export function GymverseApp() {
     <>
       <Topbar action={() => showToast("You’re all caught up.")} />
       <div className="gv-scroll">
-        <section className="gv-section" style={{ paddingTop: 18 }}>
-          <div className="gv-section-head">
-            <div><div className="gv-kicker">MONDAY · LET'S GET AFTER IT</div><h1 className="gv-headline" style={{ marginTop: 5 }}>Your next rep<br />starts here.</h1></div>
+        <section className="gv-section gv-feed-intro">
+          <div className="gv-feed-heading">
+            <div>
+              <div className="gv-kicker">FITNESS ONLY · MADE TO MOVE</div>
+              <h1 className="gv-feed-title">Every rep.<br /><span>Every story.</span></h1>
+              <div className="gv-feed-subtitle">Lifts, wins, and the work in between.</div>
+            </div>
             <button className="gv-icon-button" aria-label="Open profile" onClick={() => navigate("profile")}><div className="gv-avatar" style={{ width: 33, height: 33, fontSize: 10 }}>GC</div></button>
           </div>
-          <div className="gv-streak-card">
-            <div style={{ width: 39, height: 39, borderRadius: 13, display: "grid", placeItems: "center", background: "rgba(57,255,136,.12)", color: "#39FF88" }}><Flame size={21} /></div>
-            <div style={{ flex: 1 }}><div style={{ fontSize: 12, fontWeight: 700 }}>28-day streak</div><div className="gv-meta">Your consistency is showing.</div></div>
-            <div className="gv-streak-number">28<span style={{ font: "600 11px DM Sans", color: "#9CA3A0", marginLeft: 4 }}>DAYS</span></div>
+          <div className="gv-streak-card gv-feed-streak">
+            <div className="gv-feed-streak-icon"><Flame size={19} /></div>
+            <div className="gv-feed-streak-copy"><b>28-day streak</b><span>Your consistency is showing.</span></div>
+            <div className="gv-streak-number">28<span>DAYS</span></div>
           </div>
         </section>
-        <div style={{ marginTop: 22 }}>
+        <div className="gv-feed-tabs-wrap">
+          <div className="gv-feed-tabs-label">
+            <span>{activeTab === "For You" ? "YOUR GYMVERSE FEED" : activeTab.toUpperCase()}</span>
+            <b>{visiblePosts.length} {visiblePosts.length === 1 ? "post" : "posts"}</b>
+          </div>
           <div className="gv-tabs">
             {feedTabs.map((tab) => <button key={tab} className={`gv-tab ${activeTab === tab ? "active" : ""}`} onClick={() => setActiveTab(tab)}>{tab}</button>)}
           </div>
         </div>
         {visiblePosts.length ? visiblePosts.map((post) => (
-          <PostCard
-            key={post.id}
-            post={post}
-            liked={likedIds.includes(post.id)}
-            saved={savedIds.includes(post.id)}
-            followed={followedUsers.includes(post.username)}
-            onLike={() => setToggle(likedIds, setLikedIds, post.id)}
-            onSave={() => { setToggle(savedIds, setSavedIds, post.id); showToast(savedIds.includes(post.id) ? "Removed from saved posts." : "Saved to your training board."); }}
-            onFollow={() => { setToggle(followedUsers, setFollowedUsers, post.username); showToast(followedUsers.includes(post.username) ? `Unfollowed @${post.username}.` : `Following @${post.username}.`); }}
-            onComment={() => setCommentPost(post.id)}
-            onShare={() => showToast("Post link copied to your demo clipboard.")}
-          />
+          <Fragment key={post.id}>
+            <PostCard
+              post={post}
+              liked={likedIds.includes(post.id)}
+              saved={savedIds.includes(post.id)}
+              followed={followedUsers.includes(post.username)}
+              onLike={() => setToggle(likedIds, setLikedIds, post.id)}
+              onSave={() => { setToggle(savedIds, setSavedIds, post.id); showToast(savedIds.includes(post.id) ? "Removed from saved posts." : "Saved to your training board."); }}
+              onFollow={() => { setToggle(followedUsers, setFollowedUsers, post.username); showToast(followedUsers.includes(post.username) ? `Unfollowed @${post.username}.` : `Following @${post.username}.`); }}
+              onComment={() => setCommentPost((current) => current === post.id ? null : post.id)}
+              onShare={() => showToast("Post shared.")}
+              onMore={() => showToast("Post options are coming soon.")}
+            />
+            {commentPost === post.id && <div className="gv-comments gv-enter">
+              <div className="gv-comments-head"><b>Comments <span>{formatCount(post.comments)}</span></b><button className="gv-icon-button" style={{ width: 30, height: 30 }} aria-label="Close comments" onClick={() => setCommentPost(null)}>×</button></div>
+              <p><span>@liftwithlee</span> This is the kind of progress that keeps me going.</p>
+              <p><span>@maya_moves</span> One rep at a time. You earned it.</p>
+              <button className="gv-comment-reply" onClick={() => showToast("Comment added to the demo conversation.")}><Send size={14} /> Add a comment</button>
+            </div>}
+          </Fragment>
         )) : <div className="gv-empty gv-panel" style={{ margin: 18 }}>No posts in this lane yet. Try another feed.</div>}
-        {commentPost && <div className="gv-panel gv-enter" style={{ margin: "12px 16px", padding: 15 }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}><b style={{ fontSize: 13 }}>Community comments</b><button className="gv-icon-button" style={{ width: 30, height: 30 }} aria-label="Close comments" onClick={() => setCommentPost(null)}>×</button></div>
-          <p className="gv-body" style={{ margin: "11px 0" }}>“This is the kind of progress that keeps me going.” <span style={{ color: "#39FF88" }}>@liftwithlee</span></p>
-          <p className="gv-body" style={{ margin: 0 }}>“One rep at a time. You earned it.” <span style={{ color: "#39FF88" }}>@maya_moves</span></p>
-          <button className="gv-action" style={{ marginTop: 10, color: "#39FF88" }} onClick={() => showToast("Comment added to the demo conversation.")}><Send size={14} /> Add a comment</button>
-        </div>}
         <div style={{ height: 20 }} />
       </div>
     </>
@@ -424,20 +547,34 @@ export function GymverseApp() {
           <div className="gv-kicker">PUT YOUR WORK OUT THERE</div>
           <h1 className="gv-headline" style={{ margin: "5px 0 8px" }}>Progress looks<br />good on you.</h1>
           <p className="gv-body" style={{ margin: "0 0 18px" }}>Share a rep, a routine, or the day you almost skipped.</p>
-          <button type="button" className="gv-upload" onClick={() => { setDemoMedia((value) => !value); showToast(demoMedia ? "Demo media removed." : "Demo training clip selected."); }}>
-            <div style={{ display: "flex", gap: 10, color: "#39FF88" }}><ImagePlus size={23} /><Camera size={22} /></div>
-            <strong>{demoMedia ? "Demo training clip selected" : "Add a photo or video"}</strong>
-            <span style={{ fontSize: 11, marginTop: 5 }}>{demoMedia ? "Tap to remove · no upload needed" : "Choose a placeholder for this demo"}</span>
+          <div className="gv-field gv-type-field">
+            <label>POST TYPE</label>
+            <div className="gv-type-picker" role="group" aria-label="Choose post type">
+              {postTypes.map((type) => <button key={type} type="button" className={`gv-type-option ${postType === type ? "active" : ""}`} aria-pressed={postType === type} onClick={() => {
+                setPostType(type);
+                if (type === "Gym Edit") setPostCategory("Motivation");
+                else if (type === "Workout" || type === "Transformation" || type === "PR" || type === "Motivation") setPostCategory(type);
+              }}>{type}</button>)}
+            </div>
+          </div>
+          <button type="button" className={`gv-upload ${demoMedia ? "selected" : ""}`} onClick={() => { setDemoMedia((value) => !value); showToast(demoMedia ? "Demo media removed." : `${postType} placeholder selected.`); }}>
+            <div className={`gv-upload-preview gv-upload-preview-${getPostVisual(postType, postCategory)}`}>
+              <div className="gv-upload-preview-label"><ImagePlus size={14} /> GYMVERSE / MEDIA PREVIEW</div>
+              {postType === "Photo" ? <Camera size={28} /> : <Play size={27} fill="currentColor" />}
+              <strong>{demoMedia ? `${postType} placeholder ready` : `${postType} placeholder`}</strong>
+              <span>{demoMedia ? "Tap to remove" : "Tap to select demo media"}</span>
+            </div>
+            <span className="gv-upload-note">No real upload needed for this prototype.</span>
           </button>
           <div className="gv-field"><label htmlFor="gv-caption">CAPTION</label><textarea id="gv-caption" className="gv-textarea" value={caption} onChange={(event) => setCaption(event.target.value)} placeholder="What did you show up for today?" /></div>
           <div className="gv-field"><label htmlFor="gv-category">CATEGORY</label><select id="gv-category" className="gv-select" value={postCategory} onChange={(event) => setPostCategory(event.target.value)}>{postCategories.map((category) => <option key={category}>{category}</option>)}</select></div>
-          <div className="gv-field"><label htmlFor="gv-hashtag">HASHTAG</label><input id="gv-hashtag" className="gv-input" value={hashtag} onChange={(event) => setHashtag(event.target.value)} placeholder="#showup" /></div>
+          <div className="gv-field"><label htmlFor="gv-hashtag">HASHTAGS</label><input id="gv-hashtag" className="gv-input" value={hashtag} onChange={(event) => setHashtag(event.target.value)} placeholder="#BenchPR #Consistency" /></div>
           <div className="gv-toggle-row">
             <div><div style={{ fontSize: 12, fontWeight: 700 }}>Add to Progress Timeline</div><div className="gv-meta">Keep the moments that matter.</div></div>
             <button type="button" className={`gv-switch ${addToTimeline ? "on" : ""}`} aria-label="Toggle add to progress timeline" aria-pressed={addToTimeline} onClick={() => setAddToTimeline((value) => !value)}><span /></button>
           </div>
           <button className="gv-button" style={{ width: "100%", marginTop: 20, minHeight: 49 }} type="submit">Post to GYMVERSE <ArrowRight size={17} /></button>
-          <div style={{ color: "#626a65", fontSize: 10, textAlign: "center", marginTop: 11 }}>Your post is saved locally in this demo.</div>
+          <div style={{ color: "#626a65", fontSize: 10, textAlign: "center", marginTop: 11 }}>Your post is added to this demo feed on this device.</div>
         </form>
       </div>
     </>
