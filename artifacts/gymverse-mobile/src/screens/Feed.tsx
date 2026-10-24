@@ -4,7 +4,7 @@ import { Animated, Easing, FlatList, Pressable, ScrollView, StyleSheet, Text, Vi
 import type { ListViewToken } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Bell, Bookmark, Flame, Heart, MessageCircle, Music2, Play, Send, TrendingUp } from "lucide-react-native";
+import { Bell, Bookmark, Flame, Heart, MessageCircle, Music2, Play, Send, ShieldAlert, TrendingUp } from "lucide-react-native";
 import type { FeedTab, Post } from "../data";
 import { FEED_TABS, ME } from "../data";
 import { PostArt } from "../components/PostArt";
@@ -155,6 +155,7 @@ function Reel({ post, height, active, likedIds, savedIds, followed, onLike, onSa
         <Badge tone={post.badgeTone}>{post.badge}</Badge>
         {post.challenge ? <GlassChip icon={<Flame size={13} color={C.flame} />}>{post.challenge}</GlassChip> : null}
         {post.created ? <GlassChip icon={<TrendingUp size={13} color={C.flame} />}>{post.onTimeline ? "Added to timeline" : "Just posted"}</GlassChip> : null}
+        {post.moderation === "in_review" ? <GlassChip icon={<ShieldAlert size={13} color={C.gold} />}>In review · only you</GlassChip> : null}
       </View>
 
       <View style={[s.info, { bottom: navSpace + 22 }]} pointerEvents="box-none">

@@ -17,7 +17,8 @@ import { C, DIAG, F, GRAD, NAV_GAP, NAV_HEIGHT } from "../theme";
 const TYPE_ICONS: Record<PostType, LucideIcon> = { Video, Photo: Camera, "Gym Edit": Clapperboard, Workout: Dumbbell, Transformation: TrendingUp, PR: Trophy, Motivation: Flame };
 const CAPTION_LIMIT = 150;
 
-export function CreateScreen({ onPost, onClose, onToast }: { onPost: (draft: PostDraft) => void; onClose: () => void; onToast: (m: string) => void }) {
+/** `onPost` resolves to null when posted, or to a message when Guardian blocked the post. */
+export function CreateScreen({ onPost, onClose, onToast }: { onPost: (draft: PostDraft) => Promise<string | null>; onClose: () => void; onToast: (m: string) => void }) {
   const insets = useSafeAreaInsets();
   const [postType, setPostType] = useState<PostType>("Video");
   const [category, setCategory] = useState("Workout");
@@ -25,6 +26,7 @@ export function CreateScreen({ onPost, onClose, onToast }: { onPost: (draft: Pos
   const [hashtags, setHashtags] = useState("");
   const [addToTimeline, setAddToTimeline] = useState(false);
   const [hasMedia, setHasMedia] = useState(false);
+  const [busy, setBusy] = useState(false);
   const shake = useRef(new Animated.Value(0)).current;
   const [captionError, setCaptionError] = useState(false);
   const captionRef = useRef<TextInputInstance>(null);
@@ -39,7 +41,8 @@ export function CreateScreen({ onPost, onClose, onToast }: { onPost: (draft: Pos
     else if (type === "Workout" || type === "Transformation" || type === "PR" || type === "Motivation") setCategory(type);
   };
 
-  const submit = () => {
+  const submit = async () => {
+    if (busy) return;
     if (!caption.trim()) {
       setCaptionError(true);
       Animated.sequence([-8, 7, -5, 3, 0].map((v) => Animated.timing(shake, { toValue: v, duration: 70, useNativeDriver: true }))).start();
@@ -47,7 +50,12 @@ export function CreateScreen({ onPost, onClose, onToast }: { onPost: (draft: Pos
       onToast("Add a caption before you post.");
       return;
     }
-    onPost({ postType, category, caption, hashtags, addToTimeline });
+    setBusy(true);
+    const blocked = await onPost({ postType, category, caption, hashtags, addToTimeline });
+    if (blocked) {
+      setBusy(false);
+      onToast(`Guardian blocked this post. ${blocked}`);
+    }
   };
 
   return (
@@ -145,7 +153,7 @@ export function CreateScreen({ onPost, onClose, onToast }: { onPost: (draft: Pos
         </View>
 
         <View style={s.block}>
-          <Cta title="Post to GYMVERSE" onPress={submit} icon={<ArrowRight size={20} color="#fff" strokeWidth={2.6} />} />
+          <Cta title={busy ? "Checking with Guardian…" : "Post to GYMVERSE"} onPress={submit} icon={busy ? undefined : <ArrowRight size={20} color="#fff" strokeWidth={2.6} />} />
           <Text style={s.fine}>Demo only. Your post appears in this session’s feed.</Text>
         </View>
       </ScrollView>

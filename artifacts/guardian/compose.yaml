@@ -1,0 +1,33 @@
+# Future Linux GPU server layout (not deployed, not yet tested).
+# Guardian and Ollama share a private network; only Guardian's public API is published,
+# and only behind a TLS reverse proxy that you configure separately.
+services:
+  ollama:
+    image: ollama/ollama:latest
+    volumes:
+      - ollama-models:/root/.ollama
+    # Requires the NVIDIA Container Toolkit. Remove this block for CPU-only hosts.
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    restart: unless-stopped
+
+  guardian:
+    build: .
+    env_file: .env
+    environment:
+      GUARDIAN_MODEL_PROVIDER: ollama
+      OLLAMA_URL: http://ollama:11434
+    depends_on:
+      - ollama
+    # Bind to localhost; put a reverse proxy (TLS + auth for /admin and /v1/review) in front.
+    ports:
+      - "127.0.0.1:8787:8787"
+    restart: unless-stopped
+
+volumes:
+  ollama-models:

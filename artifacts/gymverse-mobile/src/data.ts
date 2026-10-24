@@ -65,9 +65,11 @@ export type Post = {
   art: PostArtData;
   created?: boolean;
   onTimeline?: boolean;
+  /** Set when GYMVERSE Guardian is holding the post for review (visible to the author only). */
+  moderation?: "in_review";
 };
 
-export type Comment = { id: string; user: string; text: string; time: string; likes: number };
+export type Comment = { id: string; user: string; text: string; time: string; likes: number; pending?: boolean };
 
 export type TimelineEntry = {
   id: string;

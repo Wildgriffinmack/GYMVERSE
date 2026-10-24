@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>GUARDIAN · GYMVERSE moderation</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Barlow+Condensed:wght@600;700;800&family=Inter:wght@400..800&display=swap" />
+    <link rel="stylesheet" href="/admin/app.css" />
+  </head>
+  <body>
+    <header class="top">
+      <div class="brand">
+        <span class="mark" aria-hidden="true"></span>
+        <div>
+          <div class="word">GUARDIAN</div>
+          <div class="sub">GYMVERSE moderation · local prototype</div>
+        </div>
+      </div>
+      <nav class="tabs" role="tablist">
+        <button class="tab is-active" data-view="queue" role="tab" aria-selected="true">Queue <span class="count" id="count-pending">0</span></button>
+        <button class="tab" data-view="history" role="tab" aria-selected="false">History</button>
+      </nav>
+      <div class="who" id="who"></div>
+    </header>
+
+    <section class="login" id="login" hidden>
+      <div class="login-card">
+        <h1>Moderator sign-in</h1>
+        <p>Paste the moderator token printed in the Guardian terminal. It stays in this browser tab only.</p>
+        <form id="login-form" autocomplete="off">
+          <input id="token" type="password" placeholder="Moderator token" aria-label="Moderator token" required />
+          <button class="cta" type="submit">Enter</button>
+        </form>
+        <p class="error" id="login-error" role="alert"></p>
+      </div>
+    </section>
+
+    <main id="app" hidden>
+      <section class="filters" id="filters">
+        <label>Status
+          <select id="f-status">
+            <option value="pending">Pending</option>
+            <option value="edit_requested">Edit requested</option>
+            <option value="approved">Approved</option>
+            <option value="rejected">Rejected</option>
+            <option value="all">All</option>
+          </select>
+        </label>
+        <label>Content
+          <select id="f-type">
+            <option value="">All types</option>
+            <option value="post">Posts</option>
+            <option value="comment">Comments</option>
+            <option value="profile_username">Usernames</option>
+            <option value="profile_bio">Bios</option>
+            <option value="direct_message">Direct messages</option>
+            <option value="image">Images</option>
+            <option value="video">Videos</option>
+            <option value="user_report">User reports</option>
+          </select>
+        </label>
+        <div class="sev" role="group" aria-label="Severity">
+          <button class="chip is-active" data-sev="">Any</button>
+          <button class="chip" data-sev="critical">Critical</button>
+          <button class="chip" data-sev="high">High</button>
+          <button class="chip" data-sev="medium">Medium</button>
+          <button class="chip" data-sev="low">Low</button>
+        </div>
+        <button class="ghost" id="refresh">Refresh</button>
+      </section>
+
+      <section id="queue-view">
+        <div class="list" id="queue"></div>
+      </section>
+
+      <section id="history-view" hidden>
+        <table class="history">
+          <thead><tr><th>When</th><th>Action</th><th>Actor</th><th>Content</th><th>Categories</th><th>Note</th></tr></thead>
+          <tbody id="history"></tbody>
+        </table>
+      </section>
+    </main>
+
+    <div class="toast" id="toast" role="status" hidden></div>
+    <script src="/admin/app.js" defer></script>
+  </body>
+</html>

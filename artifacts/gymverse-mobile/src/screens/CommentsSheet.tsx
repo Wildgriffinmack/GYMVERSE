@@ -10,9 +10,11 @@ import { Avatar, IconBtn, tap, thump } from "../components/ui";
 import { formatCount } from "../utils";
 import { C, DIAG, F, GRAD } from "../theme";
 
-export function CommentsSheet({ post, comments, onAdd, onClose }: { post: Post | null; comments: Comment[]; onAdd: (text: string) => void; onClose: () => void }) {
+/** `onAdd` resolves to false when Guardian blocked the comment, so the draft is kept for editing. */
+export function CommentsSheet({ post, comments, onAdd, onClose }: { post: Post | null; comments: Comment[]; onAdd: (text: string) => Promise<boolean>; onClose: () => void }) {
   const insets = useSafeAreaInsets();
   const [draft, setDraft] = useState("");
+  const [busy, setBusy] = useState(false);
   const [liked, setLiked] = useState<string[]>([]);
   const list = useRef<ScrollViewInstance>(null);
   const slide = useRef(new Animated.Value(0)).current;
@@ -27,10 +29,13 @@ export function CommentsSheet({ post, comments, onAdd, onClose }: { post: Post |
     }
   }, [open, slide]);
 
-  const submit = () => {
-    if (!draft.trim()) return;
+  const submit = async () => {
+    if (!draft.trim() || busy) return;
     thump();
-    onAdd(draft.trim());
+    setBusy(true);
+    const added = await onAdd(draft.trim());
+    setBusy(false);
+    if (!added) return;
     setDraft("");
     Keyboard.dismiss();
     requestAnimationFrame(() => list.current?.scrollTo({ y: 0, animated: true }));
@@ -55,6 +60,7 @@ export function CommentsSheet({ post, comments, onAdd, onClose }: { post: Post |
                   <View style={{ flex: 1 }}>
                     <Text style={s.meta}><Text style={{ color: C.white, fontWeight: "700" }}>@{c.user}</Text>   {c.time}</Text>
                     <Text style={s.body}>{c.text}</Text>
+                    {c.pending ? <Text style={s.pending}>In review · only you can see this</Text> : null}
                   </View>
                   <Pressable accessibilityRole="button" accessibilityLabel={on ? "Unlike comment" : "Like comment"} hitSlop={10} onPress={() => { tap(); setLiked((l) => (l.includes(c.id) ? l.filter((x) => x !== c.id) : [...l, c.id])); }} style={{ alignItems: "center", gap: 3, paddingTop: 2 }}>
                     <Heart size={16} color={on ? C.hot : C.ash} fill={on ? C.hot : "transparent"} />
@@ -76,7 +82,7 @@ export function CommentsSheet({ post, comments, onAdd, onClose }: { post: Post |
               onSubmitEditing={submit}
               accessibilityLabel="Write a comment"
             />
-            <Pressable accessibilityRole="button" accessibilityLabel="Post comment" disabled={!draft.trim()} onPress={submit} style={({ pressed }) => ({ opacity: draft.trim() ? 1 : 0.35, transform: [{ scale: pressed ? 0.9 : 1 }] })}>
+            <Pressable accessibilityRole="button" accessibilityLabel="Post comment" disabled={!draft.trim() || busy} onPress={submit} style={({ pressed }) => ({ opacity: draft.trim() && !busy ? 1 : 0.35, transform: [{ scale: pressed ? 0.9 : 1 }] })}>
               <LinearGradient colors={GRAD} start={DIAG.start} end={DIAG.end} style={s.send}><Send size={17} color="#fff" /></LinearGradient>
             </Pressable>
           </View>
@@ -96,6 +102,7 @@ const s = StyleSheet.create({
   comment: { flexDirection: "row", gap: 12, alignItems: "flex-start" },
   meta: { fontSize: 13, color: C.ash },
   body: { marginTop: 3, fontSize: 14, lineHeight: 20, color: "rgba(255,247,237,0.9)" },
+  pending: { marginTop: 4, fontFamily: F.label, fontSize: 11, letterSpacing: 1.2, textTransform: "uppercase", color: C.gold },
   form: { flexDirection: "row", alignItems: "center", gap: 10, paddingHorizontal: 14, paddingTop: 12, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: C.line },
   input: { flex: 1, height: 46, paddingHorizontal: 18, borderRadius: 23, fontSize: 14, color: C.white, backgroundColor: "rgba(255,247,237,0.07)" },
   send: { width: 46, height: 46, borderRadius: 23, alignItems: "center", justifyContent: "center" },

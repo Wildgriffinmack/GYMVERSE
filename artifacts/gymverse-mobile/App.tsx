@@ -21,6 +21,7 @@ import { ChallengesScreen } from "./src/screens/Challenges";
 import { ProfileScreen } from "./src/screens/Profile";
 import { ProgressScreen } from "./src/screens/Progress";
 import { CommentsSheet } from "./src/screens/CommentsSheet";
+import { moderate } from "./src/guardian";
 import { C, NAV_GAP, NAV_HEIGHT } from "./src/theme";
 
 const toggleIn = (list: string[], id: string) => (list.includes(id) ? list.filter((x) => x !== id) : [...list, id]);
@@ -102,18 +103,37 @@ function Gymverse() {
     showToast(joined.includes(id) ? `Left ${c.title}.` : `Joined ${c.title}. Day 1 starts now.`);
     setJoined((cur) => toggleIn(cur, id));
   };
-  const addComment = (postId: string, text: string) => {
-    const comment: Comment = { id: `c-${Date.now()}`, user: ME.username, text, time: "now", likes: 0 };
+  const addComment = async (postId: string, text: string): Promise<boolean> => {
+    const decision = await moderate("comment", text, ME.username);
+    if (decision?.status === "rejected") {
+      showToast(`Guardian blocked this comment. ${decision.reason}`);
+      return false;
+    }
+    const inReview = decision?.status === "needs_review";
+    const comment: Comment = { id: `c-${Date.now()}`, user: ME.username, text, time: "now", likes: 0, ...(inReview ? { pending: true } : {}) };
     setAddedComments((cur) => ({ ...cur, [postId]: [comment, ...(cur[postId] ?? [])] }));
-    setPosts((cur) => cur.map((p) => (p.id === postId ? { ...p, comments: p.comments + 1 } : p)));
+    if (!inReview) setPosts((cur) => cur.map((p) => (p.id === postId ? { ...p, comments: p.comments + 1 } : p)));
+    if (inReview) showToast("Comment sent to Guardian review. Only you can see it for now.");
+    return true;
   };
-  const createPost = (draft: PostDraft) => {
-    const post = buildPost(draft);
+  /** Resolves to null when posted, or to Guardian's reason when the post was blocked. */
+  const createPost = async (draft: PostDraft): Promise<string | null> => {
+    const decision = await moderate("post", [draft.caption, draft.hashtags].filter(Boolean).join("\n"), ME.username);
+    if (decision?.status === "rejected") return decision.reason;
+    const inReview = decision?.status === "needs_review";
+    const post: Post = { ...buildPost(draft), ...(inReview ? { moderation: "in_review" as const } : {}) };
     setPosts((cur) => [post, ...cur]);
-    if (draft.addToTimeline) setTimeline((cur) => [...cur, timelineEntryFrom(post)]);
+    if (draft.addToTimeline && !inReview) setTimeline((cur) => [...cur, timelineEntryFrom(post)]);
     setActiveTab("For You");
     navigate("home");
-    showToast(draft.addToTimeline ? "Posted — and added to your Progress Timeline." : "Post added to your GYMVERSE feed.");
+    showToast(
+      inReview
+        ? "Posted for review. Guardian is checking it — only you can see it for now."
+        : draft.addToTimeline
+          ? "Posted — and added to your Progress Timeline."
+          : "Post added to your GYMVERSE feed.",
+    );
+    return null;
   };
 
   const commentPost = posts.find((p) => p.id === commentPostId) ?? null;
@@ -169,7 +189,7 @@ function Gymverse() {
       <CommentsSheet
         post={commentPost}
         comments={commentPost ? [...(addedComments[commentPost.id] ?? []), ...seedComments(commentPost.id)] : []}
-        onAdd={(text) => commentPost && addComment(commentPost.id, text)}
+        onAdd={(text) => (commentPost ? addComment(commentPost.id, text) : Promise.resolve(false))}
         onClose={() => setCommentPostId(null)}
       />
       {toast ? <Toast key={toast.id} text={toast.text} bottom={insets.bottom + NAV_GAP + NAV_HEIGHT + 14} /> : null}
