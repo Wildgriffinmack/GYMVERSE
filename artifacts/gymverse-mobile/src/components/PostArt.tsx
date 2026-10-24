@@ -298,7 +298,8 @@ function Barbell({ width }: { width: number }) {
   );
 }
 
-function Physique({ build, width }: { build: "before" | "after"; width: number }) {
+/** Neutral silhouette illustration (also used by the Pro transformation comparison). */
+export function Physique({ build, width }: { build: "before" | "after"; width: number }) {
   const torso =
     build === "after"
       ? "M28 124 Q36 103 68 98 L88 95 Q100 104 112 95 L132 98 Q164 103 172 124 L178 182 Q174 196 160 197 L152 160 L148 204 Q142 240 134 260 L66 260 Q58 240 52 204 L48 160 L40 197 Q26 196 22 182 Z"

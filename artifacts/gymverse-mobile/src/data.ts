@@ -17,8 +17,8 @@ import {
   Zap,
 } from "lucide-react-native";
 
-export type Screen = "welcome" | "home" | "explore" | "create" | "challenges" | "profile" | "progress";
-export const SCREENS: Screen[] = ["welcome", "home", "explore", "create", "challenges", "profile", "progress"];
+export type Screen = "welcome" | "home" | "explore" | "create" | "challenges" | "profile" | "progress" | "premium" | "pro_progress" | "creator_studio" | "coach_center" | "pro_deals" | "premium_challenge" | "founders";
+export const SCREENS: Screen[] = ["welcome", "home", "explore", "create", "challenges", "profile", "progress", "premium", "pro_progress", "creator_studio", "coach_center", "pro_deals", "premium_challenge", "founders"];
 
 export type FeedTab = "For You" | "Motivation" | "Workouts" | "Transformations" | "Beginner" | "PRs";
 export const FEED_TABS: FeedTab[] = ["For You", "Motivation", "Workouts", "Transformations", "Beginner", "PRs"];

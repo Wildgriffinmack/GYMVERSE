@@ -138,7 +138,7 @@ export function CreateScreen({ onPost, onClose, onToast }: { onPost: (draft: Pos
         </View>
 
         <View style={s.block}>
-          <Pressable accessibilityRole="switch" accessibilityState={{ checked: addToTimeline }} onPress={() => { tap(); setAddToTimeline((v) => !v); }} style={[s.toggle, addToTimeline && s.toggleOn]}>
+          <Pressable accessibilityRole="switch" accessibilityState={{ checked: addToTimeline }} aria-checked={addToTimeline} onPress={() => { tap(); setAddToTimeline((v) => !v); }} style={[s.toggle, addToTimeline && s.toggleOn]}>
             {addToTimeline ? (
               <LinearGradient colors={GRAD} start={DIAG.start} end={DIAG.end} style={s.toggleIcon}><TrendingUp size={18} color="#fff" /></LinearGradient>
             ) : (
@@ -169,7 +169,7 @@ function Pill({ on, solid, icon, onPress, children }: { on: boolean; solid?: boo
     </>
   );
   return (
-    <Pressable accessibilityRole="button" accessibilityState={{ selected: on }} onPress={onPress} style={({ pressed }) => ({ transform: [{ scale: pressed ? 0.95 : 1 }] })}>
+    <Pressable accessibilityRole="button" accessibilityState={{ selected: on }} aria-selected={on} onPress={onPress} style={({ pressed }) => ({ transform: [{ scale: pressed ? 0.95 : 1 }] })}>
       {on && solid ? (
         <LinearGradient colors={GRAD} start={DIAG.start} end={DIAG.end} style={s.pill}>{content}</LinearGradient>
       ) : (

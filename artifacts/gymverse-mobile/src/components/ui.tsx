@@ -140,13 +140,14 @@ export function PageHeader({ kicker, title, leading, trailing, top }: { kicker?:
   );
 }
 
-export function IconBtn({ onPress, label, children, size = 40, style }: { onPress: () => void; label: string; children: ReactNode; size?: number; style?: StyleProp<ViewStyle> }) {
+export function IconBtn({ onPress, onLongPress, label, children, size = 40, style }: { onPress: () => void; onLongPress?: () => void; label: string; children: ReactNode; size?: number; style?: StyleProp<ViewStyle> }) {
   return (
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={label}
       hitSlop={6}
       onPress={() => { tap(); onPress(); }}
+      onLongPress={onLongPress ? () => { thump(); onLongPress(); } : undefined}
       style={({ pressed }) => [{ width: size, height: size, borderRadius: size / 2, alignItems: "center", justifyContent: "center", backgroundColor: "rgba(255,247,237,0.08)", transform: [{ scale: pressed ? 0.9 : 1 }] }, style]}
     >
       {children}
@@ -183,11 +184,11 @@ const NAV: { screen: Screen; label: string; Icon: typeof House }[] = [
 ];
 
 export function BottomNav({ active, onNavigate, bottom }: { active: Screen; onNavigate: (s: Screen) => void; bottom: number }) {
-  const isActive = (sc: Screen) => active === sc || (sc === "profile" && active === "progress");
+  const isActive = (sc: Screen) => active === sc || (sc === "challenges" && active === "premium_challenge") || (sc === "profile" && (active === "progress" || active === "premium" || active === "pro_progress" || active === "creator_studio" || active === "coach_center" || active === "pro_deals" || active === "founders"));
   const item = ({ screen, label, Icon }: (typeof NAV)[number]) => {
     const on = isActive(screen);
     return (
-      <Pressable key={screen} accessibilityRole="tab" accessibilityLabel={label} accessibilityState={{ selected: on }} onPress={() => { tap(); onNavigate(screen); }} style={s.navItem}>
+      <Pressable key={screen} accessibilityRole="tab" accessibilityLabel={label} accessibilityState={{ selected: on }} aria-selected={on} onPress={() => { tap(); onNavigate(screen); }} style={s.navItem}>
         {on ? <View style={s.navGlow} /> : null}
         <Icon size={22} color={on ? C.flame : "rgba(255,247,237,0.5)"} strokeWidth={on ? 2.4 : 2} />
         <Text style={[s.navLabel, on && { color: C.white }]}>{label}</Text>

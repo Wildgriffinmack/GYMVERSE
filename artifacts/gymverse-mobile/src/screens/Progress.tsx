@@ -8,6 +8,7 @@ import { ME } from "../data";
 import { PostArt } from "../components/PostArt";
 import { Badge, GradText, IconBtn, Label, PageHeader, tap } from "../components/ui";
 import { Rise } from "./Welcome";
+import { AdvancedProgressPromo } from "../pro/ProgressPromo";
 import { C, F, NAV_GAP, NAV_HEIGHT } from "../theme";
 
 const SUMMARY = [
@@ -17,7 +18,7 @@ const SUMMARY = [
   { Icon: Target, value: "92%", label: "Consistency" },
 ];
 
-export function ProgressScreen({ timeline, onBack }: { timeline: TimelineEntry[]; onBack: () => void }) {
+export function ProgressScreen({ timeline, onBack, onAdvanced }: { timeline: TimelineEntry[]; onBack: () => void; onAdvanced?: () => void }) {
   const insets = useSafeAreaInsets();
   const grow = useRef(new Animated.Value(0)).current;
   useEffect(() => {
@@ -55,6 +56,8 @@ export function ProgressScreen({ timeline, onBack }: { timeline: TimelineEntry[]
           </LinearGradient>
         ))}
       </View>
+
+      {onAdvanced ? <AdvancedProgressPromo onPress={onAdvanced} /> : null}
 
       <View style={s.timeline}>
         <LinearGradient colors={[C.hot, C.flame, C.gold]} style={s.line} />

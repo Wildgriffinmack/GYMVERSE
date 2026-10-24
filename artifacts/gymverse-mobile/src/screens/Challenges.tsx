@@ -7,10 +7,21 @@ import { Avatar, Badge, Label, PageHeader, ProgressRing, thump } from "../compon
 import { Pulse, Rise } from "./Welcome";
 import { C, F, NAV_GAP, NAV_HEIGHT } from "../theme";
 import { LinearGradient } from "expo-linear-gradient";
+import { PremiumChallengesSection } from "../challenges/PremiumChallengesSection";
+import type { DemoChallengeProgress } from "../challenges/premiumChallengeData";
 
 const FACES = ["maya_moves", "iron_jay", "coach_elena"];
 
-export function ChallengesScreen({ joined, onToggle }: { joined: string[]; onToggle: (id: string) => void }) {
+type Props = {
+  joined: string[];
+  onToggle: (id: string) => void;
+  /** Phase 7 premium previews; omitted → section hidden. Demo progress is separate from `joined`. */
+  onExplorePremium?: (id: string) => void;
+  onFounders?: () => void;
+  premiumProgress?: DemoChallengeProgress;
+};
+
+export function ChallengesScreen({ joined, onToggle, onExplorePremium, onFounders, premiumProgress }: Props) {
   const insets = useSafeAreaInsets();
   const active = CHALLENGES.find((c) => c.id === ME.challengeId)!;
   const pct = Math.round((ME.challengeDay / active.totalDays) * 100);
@@ -77,7 +88,7 @@ export function ChallengesScreen({ joined, onToggle }: { joined: string[]; onTog
                   )}
                   <Pressable
                     accessibilityRole="button"
-                    accessibilityState={{ selected: isJoined }}
+                    accessibilityState={{ selected: isJoined }} aria-selected={isJoined}
                     accessibilityLabel={isJoined ? `Joined ${c.title}` : `Join ${c.title}`}
                     onPress={() => { thump(); onToggle(c.id); }}
                     style={({ pressed }) => [s.join, isJoined && s.joined, { transform: [{ scale: pressed ? 0.94 : 1 }] }]}
@@ -92,6 +103,12 @@ export function ChallengesScreen({ joined, onToggle }: { joined: string[]; onTog
           );
         })}
       </View>
+      {/* Phase 7: premium challenge previews (with Phase 6 sponsor labels) and the Founders concept, below the free challenges, which stay unchanged. */}
+      {onExplorePremium ? (
+        <View style={{ paddingHorizontal: 16, marginTop: 28 }}>
+          <PremiumChallengesSection progress={premiumProgress ?? {}} onExplore={onExplorePremium} onFounders={onFounders} />
+        </View>
+      ) : null}
     </ScrollView>
   );
 }

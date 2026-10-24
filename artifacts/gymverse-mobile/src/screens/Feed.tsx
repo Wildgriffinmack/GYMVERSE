@@ -11,6 +11,9 @@ import { PostArt } from "../components/PostArt";
 import { Avatar, Badge, GlassChip, IconBtn, Verified, Wordmark, tap, thump } from "../components/ui";
 import { formatCount } from "../utils";
 import { C, DIAG, F, GRAD, NAV_GAP, NAV_HEIGHT } from "../theme";
+import type { FeedItem, SponsoredPlacement } from "../sponsors/sponsorData";
+import { composeFeed } from "../sponsors/sponsorData";
+import { SponsoredReel } from "../sponsors/SponsoredReel";
 
 export type FeedProps = {
   tab: FeedTab;
@@ -27,37 +30,53 @@ export type FeedProps = {
   onComment: (id: string) => void;
   onShare: (post: Post) => void;
   onToast: (message: string) => void;
+  /** Deterministic organic gap before each sponsored slot; null shows no sponsored posts. */
+  sponsorGapAt?: ((slot: number) => number) | null;
+  hiddenSponsorCampaigns?: string[];
+  onSponsorExplore?: (p: SponsoredPlacement) => void;
+  onSponsorOptions?: (p: SponsoredPlacement) => void;
 };
 
+const NO_HIDDEN: string[] = [];
+const noop = () => {};
+
 export function FeedScreen(props: FeedProps) {
-  const { tab, onTab, posts, focusPostId, onFocusHandled } = props;
+  const { tab, onTab, posts, focusPostId, onFocusHandled, sponsorGapAt = null, hiddenSponsorCampaigns = NO_HIDDEN } = props;
   const insets = useSafeAreaInsets();
   const [height, setHeight] = useState(0);
   const [activeId, setActiveId] = useState<string | null>(null);
-  const list = useRef<FlatList<Post>>(null);
+  const list = useRef<FlatList<FeedItem<Post>>>(null);
   const visible = useMemo(() => (tab === "For You" ? posts : posts.filter((p) => p.feeds.includes(tab))), [tab, posts]);
+  // Organic order is preserved; sponsored items are interleaved into a separate render list.
+  const items = useMemo(() => composeFeed(visible, sponsorGapAt, hiddenSponsorCampaigns), [visible, sponsorGapAt, hiddenSponsorCampaigns]);
 
   useEffect(() => {
     if (!focusPostId || !height) return;
-    const index = visible.findIndex((p) => p.id === focusPostId);
+    const index = items.findIndex((i) => i.kind === "organic" && i.post.id === focusPostId);
     if (index >= 0) requestAnimationFrame(() => list.current?.scrollToOffset({ offset: index * height, animated: false }));
     onFocusHandled();
-  }, [focusPostId, height, visible, onFocusHandled]);
+  }, [focusPostId, height, items, onFocusHandled]);
 
   const onViewable = useRef(({ viewableItems }: { viewableItems: ListViewToken[] }) => {
     const first = viewableItems.find((v) => v.isViewable);
-    if (first) setActiveId((first.item as Post).id);
+    if (first) setActiveId((first.item as FeedItem<Post>).key);
   }).current;
 
   return (
     <View style={{ flex: 1, backgroundColor: "#000" }} onLayout={(e) => setHeight(e.nativeEvent.layout.height)}>
-      {height > 0 && visible.length > 0 ? (
+      {height > 0 && items.length > 0 ? (
         <FlatList
           key={tab}
           ref={list}
-          data={visible}
-          keyExtractor={(p) => p.id}
-          renderItem={({ item }) => <Reel post={item} height={height} active={item.id === (activeId ?? visible[0]?.id)} {...props} />}
+          data={items}
+          keyExtractor={(i) => i.key}
+          renderItem={({ item }) =>
+            item.kind === "sponsored" ? (
+              <SponsoredReel placement={item.placement} height={height} onExplore={props.onSponsorExplore ?? noop} onOptions={props.onSponsorOptions ?? noop} />
+            ) : (
+              <Reel post={item.post} height={height} active={item.key === (activeId ?? items[0]?.key)} {...props} />
+            )
+          }
           pagingEnabled
           snapToInterval={height}
           decelerationRate="fast"
@@ -70,7 +89,7 @@ export function FeedScreen(props: FeedProps) {
           maxToRenderPerBatch={2}
         />
       ) : null}
-      {height > 0 && visible.length === 0 ? (
+      {height > 0 && items.length === 0 ? (
         <View style={s.empty}>
           <Flame size={34} color={C.flame} />
           <Text style={s.emptyTitle}>Nothing here yet</Text>
@@ -97,7 +116,7 @@ export function FeedScreen(props: FeedProps) {
           {FEED_TABS.map((item) => {
             const on = tab === item;
             return (
-              <Pressable key={item} accessibilityRole="tab" accessibilityState={{ selected: on }} onPress={() => { tap(); onTab(item); }} style={s.tab}>
+              <Pressable key={item} accessibilityRole="tab" accessibilityState={{ selected: on }} aria-selected={on} onPress={() => { tap(); onTab(item); }} style={s.tab}>
                 <Text style={[s.tabText, on && { color: C.white }]}>{item}</Text>
                 {on ? <LinearGradient colors={GRAD} start={DIAG.start} end={DIAG.end} style={s.tabLine} /> : <View style={[s.tabLine, { backgroundColor: "transparent", shadowOpacity: 0 }]} />}
               </Pressable>
@@ -169,7 +188,7 @@ function Reel({ post, height, active, likedIds, savedIds, followed, onLike, onSa
             <Text style={s.authorMeta}>{post.name} · {post.time}</Text>
           </View>
           {!isMine ? (
-            <Pressable accessibilityRole="button" accessibilityState={{ selected: isFollowing }} onPress={() => { tap(); onFollow(post.username); }} style={({ pressed }) => [s.follow, isFollowing && s.following, { transform: [{ scale: pressed ? 0.94 : 1 }] }]}>
+            <Pressable accessibilityRole="button" accessibilityState={{ selected: isFollowing }} aria-selected={isFollowing} onPress={() => { tap(); onFollow(post.username); }} style={({ pressed }) => [s.follow, isFollowing && s.following, { transform: [{ scale: pressed ? 0.94 : 1 }] }]}>
               <Text style={[s.followText, isFollowing && { color: C.muted }]}>{isFollowing ? "Following" : "Follow"}</Text>
             </Pressable>
           ) : null}
@@ -218,7 +237,7 @@ function RailButton({ label, a11y, active = false, onPress, children }: { label:
     prev.current = active;
   }, [active, pop]);
   return (
-    <Pressable accessibilityRole="button" accessibilityLabel={`${a11y}, ${label}`} accessibilityState={{ selected: active }} onPress={onPress} style={({ pressed }) => ({ alignItems: "center", gap: 3, transform: [{ scale: pressed ? 0.88 : 1 }] })}>
+    <Pressable accessibilityRole="button" accessibilityLabel={`${a11y}, ${label}`} accessibilityState={{ selected: active }} aria-selected={active} onPress={onPress} style={({ pressed }) => ({ alignItems: "center", gap: 3, transform: [{ scale: pressed ? 0.88 : 1 }] })}>
       <Animated.View style={[s.railIcon, { transform: [{ scale: pop }] }]}>{children}</Animated.View>
       <Text style={s.railCount}>{label}</Text>
     </Pressable>
