@@ -36,6 +36,8 @@ minimumReleaseAgeExclude:
 
 packages:
   - artifacts/*
+  # Standalone Expo app (npm-managed) for Expo Go testing; kept out of the pnpm workspace.
+  - '!artifacts/gymverse-mobile'
   - lib/*
   - lib/integrations/*
   - scripts
