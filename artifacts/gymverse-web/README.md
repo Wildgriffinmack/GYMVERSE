@@ -14,7 +14,7 @@ A mobile-first, one-page landing page that turns traffic from TikTok, Instagram 
 
 ## Run it
 
-Requires Node 22.18+ (tests run TypeScript directly).
+Requires Node 22.18+ (tests run TypeScript directly). The Cloudflare build uses the version in `.node-version`.
 
 ```powershell
 cd "artifacts\gymverse-web"
@@ -146,10 +146,39 @@ Replace `activeAdapter` with one that sends the already-validated, normalized su
 - [ ] Connect a real waitlist backend (above). Until then, signups are lost.
 - [ ] Publish Privacy and Terms pages; link them, plus Community Guidelines and Contact, in [`lib/site.ts`](lib/site.ts).
 - [ ] Add the real TikTok, Instagram, YouTube and Discord URLs in `lib/site.ts` (empty links show as "coming soon").
-- [ ] Set `NEXT_PUBLIC_SITE_URL` to the real domain so link previews use absolute URLs.
+- [x] Production URL defaults to `https://gymx.life` ([`lib/site.ts`](lib/site.ts)); `NEXT_PUBLIC_SITE_URL` overrides it.
 - [ ] Decide on analytics tools and add consent handling if pixels are used.
 - [ ] Review the minors flow (13+ confirmation) with whoever handles legal/privacy.
-- [ ] Choose hosting that runs Next.js server rendering (the page renders per request for the A/B headline).
+- [x] Hosting: Cloudflare Workers via vinext (see [Deploy to Cloudflare Workers](#deploy-to-cloudflare-workers)).
+
+## Deploy to Cloudflare Workers
+
+The site deploys to Cloudflare Workers (Free plan) with [vinext](https://github.com/cloudflare/vinext), Cloudflare's recommended Next.js-on-Workers path. vinext is in beta; this project uses its stable Wrangler setup (`vinext init --legacy-wrangler-cloudflare-init`). `next dev` / `next build` keep working for local development.
+
+| Cloudflare Workers Builds setting | Value |
+| --- | --- |
+| Root directory | `artifacts/gymverse-web` |
+| Build command | `npm run build:vinext` |
+| Deploy command | `npx vinext-cloudflare deploy --config dist/server/wrangler.json --skip-build` |
+| Worker name | `gymx-web` (must match [`wrangler.jsonc`](wrangler.jsonc)) |
+| Node.js | from [`.node-version`](.node-version) |
+| Build watch paths | `artifacts/gymverse-web/*` |
+
+- [`wrangler.jsonc`](wrangler.jsonc): Worker name, `nodejs_compat`, static assets binding only (no KV, D1, R2, secrets or paid services).
+- [`vite.config.ts`](vite.config.ts): vinext + Cloudflare Vite plugin; Tailwind runs through `@tailwindcss/vite` here (PostCSS is used by `next build`).
+- `package.json` `overrides` pin patched `undici` and `fflate` versions inside build tooling.
+
+Local checks before deploying:
+
+```powershell
+npm.cmd run build:vinext   # production Worker build into dist/
+npm.cmd run start:vinext   # run the built Worker locally (Cloudflare workerd runtime)
+npx.cmd vinext-cloudflare deploy --config dist/server/wrangler.json --skip-build --dry-run
+```
+
+If you run both `next build` and `build:vinext` in the same checkout, delete `.next/` before `npm run typecheck` (vinext and Next write different route types there).
+
+The custom domain (`gymx.life`) is attached in the Cloudflare dashboard (Workers → gymx-web → Domains & Routes), not in this repo.
 
 ## Brand rules enforced by tests
 

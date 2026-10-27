@@ -85,7 +85,7 @@ describe("brand voice", () => {
       assert.doesNotMatch(text, /\bGym[Xx]\b/, `mixed-case brand in ${file}`);
     }
     const lowercase = ALL_SOURCE.flatMap((f) => [...read(f).matchAll(/[^\n]*\bgymx\b[^\n]*/g)].map((m) => m[0].trim()));
-    for (const line of lowercase) assert.match(line, /gymx: \{|\{ traditional, gymx \}|gymx\.(title|items)/, `lowercase gymx outside an identifier: ${line}`);
+    for (const line of lowercase) assert.match(line, /gymx: \{|\{ traditional, gymx \}|gymx\.(title|items)|https:\/\/gymx\.life/, `lowercase gymx outside an identifier: ${line}`);
   });
   it("logo and share image read GYM + X", () => {
     assert.match(read("components/ui/Logo.tsx"), /text-warm">GYM<\/span>\s*<span className="text-gradient">X<\/span>/);

@@ -3,7 +3,7 @@
  * "coming soon" placeholders instead of dead links.
  */
 
-export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3100";
+export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://gymx.life";
 
 export interface SiteLink {
   label: string;
