@@ -39,6 +39,7 @@ packages:
   # Standalone apps (npm-managed) kept out of the pnpm workspace.
   - '!artifacts/gymverse-mobile'
   - '!artifacts/guardian'
+  - '!artifacts/gymverse-web'
   - lib/*
   - lib/integrations/*
   - scripts
