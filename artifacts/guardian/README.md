@@ -1,13 +1,13 @@
-# GYMVERSE Guardian
+# GYMX Guardian
 
-Self-hosted moderation for GYMVERSE. Runs on a laptop today and moves to a Linux GPU server later. No paid moderation APIs and no external AI calls.
+Self-hosted moderation for GYMX. Runs on a laptop today and moves to a Linux GPU server later. No paid moderation APIs and no external AI calls.
 
 > **Status: Stage 1 prototype.** Rule-based moderation, the human-review queue, the moderator dashboard and the Stage 2 model plumbing are implemented and tested. The review store is in memory (resets on restart). Image and video moderation are **not implemented**; media always goes to human review. This is not production-ready security; see [Before production](#before-production).
 
 ## Architecture
 
 ```
-GYMVERSE app (Expo)  ──POST /v1/moderate──▶  Guardian API (Node 24, no runtime deps)
+GYMX app (Expo)      ──POST /v1/moderate──▶  Guardian API (Node 24, no runtime deps)
                                                ├─ normalize text (NFKC, zero-width, leetspeak)
                                                ├─ policy rules + context (negation, disclosure, recovery, risk)
                                                ├─ decision policy (block only high-confidence severe hits)

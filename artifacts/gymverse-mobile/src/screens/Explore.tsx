@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { ArrowUpRight, Search, X } from "lucide-react-native";
+import { ArrowUpRight, ChevronRight, Search, Trophy, X } from "lucide-react-native";
 import type { CategoryTile, FeedTab } from "../data";
 import { CATEGORIES, TRENDS } from "../data";
 import { TONES, ToneFill } from "../components/Tone";
@@ -13,7 +13,7 @@ const GAP = 10;
 const ROW = 120;
 const byName = (name: string) => CATEGORIES.find((c) => c.name === name)!;
 
-export function ExploreScreen({ onOpenFeed }: { onOpenFeed: (tab: FeedTab, label: string) => void }) {
+export function ExploreScreen({ onOpenFeed, onChallenges }: { onOpenFeed: (tab: FeedTab, label: string) => void; onChallenges?: () => void }) {
   const insets = useSafeAreaInsets();
   const [query, setQuery] = useState("");
   const q = query.trim().toLowerCase();
@@ -40,6 +40,17 @@ export function ExploreScreen({ onOpenFeed }: { onOpenFeed: (tab: FeedTab, label
             </Pressable>
           ))}
         </ScrollView>
+      ) : null}
+
+      {!q && onChallenges ? (
+        <Pressable accessibilityRole="button" accessibilityLabel="Challenges, join a challenge" onPress={() => { tap(); onChallenges(); }} style={({ pressed }) => [s.challenges, pressed && { backgroundColor: "rgba(255,90,31,0.12)" }]}>
+          <View style={s.challengesIcon}><Trophy size={19} color={C.flame} /></View>
+          <View style={{ flex: 1 }}>
+            <Text style={s.challengesTitle}>Challenges</Text>
+            <Text style={s.challengesSub}>Join a challenge. Build the habit together.</Text>
+          </View>
+          <ChevronRight size={20} color={C.ash} />
+        </Pressable>
       ) : null}
 
       <View style={s.sectionLabel}>
@@ -105,6 +116,10 @@ const s = StyleSheet.create({
   trend: { flexDirection: "row", alignItems: "center", gap: 7, height: 38, paddingHorizontal: 14, borderRadius: 19, backgroundColor: "rgba(255,247,237,0.05)" },
   trendTag: { color: C.white, fontSize: 14, fontWeight: "700" },
   trendCount: { fontFamily: F.label, fontSize: 12, letterSpacing: 0.7, color: C.ash },
+  challenges: { flexDirection: "row", alignItems: "center", gap: 12, marginHorizontal: 16, marginTop: 14, padding: 12, borderRadius: 16, backgroundColor: "rgba(255,247,237,0.05)" },
+  challengesIcon: { width: 40, height: 40, borderRadius: 12, alignItems: "center", justifyContent: "center", backgroundColor: "rgba(255,90,31,0.14)" },
+  challengesTitle: { fontFamily: F.labelHeavy, fontSize: 17, letterSpacing: 0.8, textTransform: "uppercase", color: C.white },
+  challengesSub: { marginTop: 1, fontSize: 13, color: C.ash },
   sectionLabel: { flexDirection: "row", justifyContent: "space-between", paddingHorizontal: 20, paddingTop: 24, paddingBottom: 12 },
   grid: { flexDirection: "row", flexWrap: "wrap", justifyContent: "space-between", rowGap: GAP, paddingHorizontal: 16 },
   row: { flexDirection: "row", gap: GAP },

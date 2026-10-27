@@ -76,7 +76,7 @@ export const TIER_FEATURES: Record<MembershipTier, readonly PremiumFeature[]> = 
   COACH_PRO: COACH_FEATURES,
 };
 
-/** Inheritance. Prototype rule: Creator Pro and Coach Pro include all common GYMVERSE Pro benefits. */
+/** Inheritance. Prototype rule: Creator Pro and Coach Pro include all common GYMX Pro benefits. */
 export const TIER_INHERITS: Record<MembershipTier, readonly MembershipTier[]> = {
   FREE: [],
   GYMVERSE_PRO: [],

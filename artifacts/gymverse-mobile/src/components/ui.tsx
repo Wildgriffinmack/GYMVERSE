@@ -7,10 +7,12 @@ import type { ComponentType } from "react";
 import { LinearGradient } from "expo-linear-gradient";
 import * as Haptics from "expo-haptics";
 import Svg, { Circle, Defs, LinearGradient as SvgGradient, Stop } from "react-native-svg";
-import { BadgeCheck, Check, Compass, House, Plus, Trophy, UserRound } from "lucide-react-native";
+import { BadgeCheck, Check, Search, SquarePlay, SquarePlus, User } from "lucide-react-native";
 import type { BadgeTone, Screen } from "../data";
+import { NAV_TABS, navTabFor } from "../nav";
 import { avatarTone, initialsOf } from "../utils";
-import { C, DIAG, F, GRAD, GRAD_GOLD, NAV_GAP, NAV_HEIGHT } from "../theme";
+import { C, DIAG, F, GRAD, GRAD_GOLD, NAV_HEIGHT } from "../theme";
+import { HomeIcon } from "./GymIcons";
 
 export const tap = () => void Haptics.selectionAsync().catch(() => {});
 export const thump = () => void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {});
@@ -29,12 +31,14 @@ export function GradText({ children, style, colors = GRAD, vertical = false }: {
   );
 }
 
-export function Wordmark({ size = 22 }: { size?: number }) {
+/** `split` = white GYM + gradient X (default); `accent` = solid Inferno wordmark used in the Home Feed header. */
+export function Wordmark({ size = 22, tone = "split" }: { size?: number; tone?: "split" | "accent" }) {
   const style = { fontFamily: F.display, fontSize: size, lineHeight: size * 1.15, letterSpacing: size * 0.02, color: C.white };
+  if (tone === "accent") return <Text style={[style, { color: C.flame }]} accessibilityRole="header">GYMX</Text>;
   return (
     <View style={{ flexDirection: "row" }}>
       <Text style={style}>GYM</Text>
-      <GradText style={style}>VERSE</GradText>
+      <GradText style={style}>X</GradText>
     </View>
   );
 }
@@ -176,34 +180,33 @@ export function Cta({ title, onPress, icon, style }: { title: string; onPress: (
   );
 }
 
-const NAV: { screen: Screen; label: string; Icon: typeof House }[] = [
-  { screen: "home", label: "Home", Icon: House },
-  { screen: "explore", label: "Explore", Icon: Compass },
-  { screen: "challenges", label: "Challenges", Icon: Trophy },
-  { screen: "profile", label: "Profile", Icon: UserRound },
-];
+const NAV_ICONS: Partial<Record<Screen, typeof Search>> = { explore: Search, create: SquarePlus, clips: SquarePlay, profile: User };
+const NAV_IDLE = "rgba(255,247,237,0.66)";
 
+/** Docked bottom navigation: Home, Explore, Create, Clips, Profile. */
 export function BottomNav({ active, onNavigate, bottom }: { active: Screen; onNavigate: (s: Screen) => void; bottom: number }) {
-  const isActive = (sc: Screen) => active === sc || (sc === "challenges" && active === "premium_challenge") || (sc === "profile" && (active === "progress" || active === "premium" || active === "pro_progress" || active === "creator_studio" || active === "coach_center" || active === "pro_deals" || active === "founders"));
-  const item = ({ screen, label, Icon }: (typeof NAV)[number]) => {
-    const on = isActive(screen);
-    return (
-      <Pressable key={screen} accessibilityRole="tab" accessibilityLabel={label} accessibilityState={{ selected: on }} aria-selected={on} onPress={() => { tap(); onNavigate(screen); }} style={s.navItem}>
-        {on ? <View style={s.navGlow} /> : null}
-        <Icon size={22} color={on ? C.flame : "rgba(255,247,237,0.5)"} strokeWidth={on ? 2.4 : 2} />
-        <Text style={[s.navLabel, on && { color: C.white }]}>{label}</Text>
-      </Pressable>
-    );
-  };
+  const current = navTabFor(active);
   return (
-    <View style={[s.nav, { bottom: bottom + NAV_GAP }]}>
-      {NAV.slice(0, 2).map(item)}
-      <Pressable accessibilityRole="button" accessibilityLabel="Create post" onPress={() => { thump(); onNavigate("create"); }} style={({ pressed }) => [{ alignItems: "center", flex: 1, transform: [{ scale: pressed ? 0.92 : 1 }] }]}>
-        <LinearGradient colors={GRAD} start={DIAG.start} end={DIAG.end} style={[s.navCreate, active === "create" && { borderWidth: 2, borderColor: "rgba(255,209,102,0.7)" }]}>
-          <Plus size={24} color="#fff" strokeWidth={2.8} style={{ transform: [{ rotate: active === "create" ? "45deg" : "0deg" }] }} />
-        </LinearGradient>
-      </Pressable>
-      {NAV.slice(2).map(item)}
+    <View style={[s.nav, { height: NAV_HEIGHT + bottom, paddingBottom: bottom }]}>
+      {NAV_TABS.map(({ screen, label }) => {
+        const on = current === screen;
+        const color = on ? C.flame : NAV_IDLE;
+        const Icon = NAV_ICONS[screen];
+        return (
+          <Pressable
+            key={screen}
+            accessibilityRole="tab"
+            accessibilityLabel={screen === "create" ? "Create post" : label}
+            accessibilityState={{ selected: on }}
+            aria-selected={on}
+            onPress={() => { if (screen === "create") thump(); else tap(); onNavigate(screen); }}
+            style={({ pressed }) => [s.navItem, { opacity: pressed ? 0.6 : 1 }]}
+          >
+            {Icon ? <Icon size={24} color={color} strokeWidth={on ? 2.1 : 1.7} /> : <HomeIcon size={24} color={color} active={on} strokeWidth={on ? 2.1 : 1.7} />}
+            <Text style={[s.navLabel, { color }]}>{label}</Text>
+          </Pressable>
+        );
+      })}
     </View>
   );
 }
@@ -240,26 +243,18 @@ const s = StyleSheet.create({
   ctaText: { fontFamily: F.labelHeavy, fontSize: 19, letterSpacing: 1.9, textTransform: "uppercase", color: "#fff" },
   nav: {
     position: "absolute",
-    left: 12,
-    right: 12,
-    height: NAV_HEIGHT,
+    left: 0,
+    right: 0,
+    bottom: 0,
     flexDirection: "row",
-    alignItems: "center",
+    alignItems: "flex-start",
     paddingHorizontal: 4,
-    borderRadius: 26,
-    backgroundColor: "rgba(17,17,17,0.92)",
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: "rgba(255,247,237,0.1)",
-    shadowColor: "#000",
-    shadowOpacity: 0.6,
-    shadowRadius: 20,
-    shadowOffset: { width: 0, height: 14 },
-    elevation: 16,
+    backgroundColor: C.bg,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: "rgba(255,247,237,0.08)",
   },
-  navItem: { flex: 1, height: "100%", alignItems: "center", justifyContent: "center", gap: 4 },
-  navGlow: { position: "absolute", top: 6, width: 42, height: 34, borderRadius: 21, backgroundColor: "rgba(255,90,31,0.18)" },
-  navLabel: { fontFamily: F.label, fontSize: 11, letterSpacing: 1, textTransform: "uppercase", color: "rgba(255,247,237,0.5)" },
-  navCreate: { width: 54, height: 44, borderRadius: 16, alignItems: "center", justifyContent: "center", shadowColor: C.hot, shadowOpacity: 0.55, shadowRadius: 12, shadowOffset: { width: 0, height: 6 }, elevation: 8 },
+  navItem: { flex: 1, height: NAV_HEIGHT, alignItems: "center", justifyContent: "center", gap: 3, paddingTop: 2 },
+  navLabel: { fontSize: 11, fontWeight: "500", letterSpacing: 0.1 },
   toast: {
     position: "absolute",
     alignSelf: "center",

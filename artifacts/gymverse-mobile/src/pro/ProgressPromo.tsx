@@ -12,7 +12,7 @@ export function AdvancedProgressPromo({ onPress }: { onPress: () => void }) {
   const { can } = useMembership();
   const unlocked = can("advanced_progress_tracking");
   return (
-    <Pressable accessibilityRole="button" accessibilityLabel="Advanced progress, GYMVERSE Pro, coming soon" onPress={() => { tap(); onPress(); }} style={({ pressed }) => [{ marginHorizontal: 16, marginTop: 16, transform: [{ scale: pressed ? 0.98 : 1 }] }]}>
+    <Pressable accessibilityRole="button" accessibilityLabel="Advanced progress, GYMX Pro, coming soon" onPress={() => { tap(); onPress(); }} style={({ pressed }) => [{ marginHorizontal: 16, marginTop: 16, transform: [{ scale: pressed ? 0.98 : 1 }] }]}>
       <LinearGradient colors={["rgba(255,209,102,0.75)", "rgba(255,90,31,0.4)", "rgba(255,247,237,0.06)"]} start={DIAG.start} end={DIAG.end} style={s.border}>
         <View style={s.card}>
           <Glows glows={[{ color: C.gold, cx: "100%", cy: "0%", rx: "70%", ry: "80%", opacity: 0.18 }]} />

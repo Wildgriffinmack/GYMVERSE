@@ -137,6 +137,8 @@ describe("scams and false claims", () => {
 describe("copyright and usernames", () => {
   it("reviews reposted content", () => expectCase("post", "Not my video, credit to the owner", { status: "needs_review", category: "copyright_concern" }));
   it("reviews impersonating usernames", () => expectCase("profile_username", "gymverse_official", { status: "needs_review", category: "needs_human_review" }));
+  it("reviews usernames impersonating the GYMX brand", () => expectCase("profile_username", "gymx_official", { status: "needs_review", category: "needs_human_review" }));
+  it("reviews GYMX impersonation regardless of case or separators", () => expectCase("profile_username", "GymX.Support", { status: "needs_review", category: "needs_human_review" }));
   it("rejects abusive usernames", () => expectCase("profile_username", "fat_pig_hater", { status: "rejected", category: "body_shaming" }));
   it("allows normal usernames", () => expectCase("profile_username", "griffin_lifts", { status: "approved" }));
 });

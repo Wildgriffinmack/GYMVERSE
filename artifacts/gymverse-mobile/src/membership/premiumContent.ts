@@ -1,5 +1,5 @@
 /**
- * GYMVERSE Premium — Coming Soon content (Phase 2).
+ * GYMX Premium — Coming Soon content (Phase 2).
  *
  * Informational copy only. There are intentionally no prices, billing periods, discounts or
  * purchase actions. Every listed feature links to a Phase 1 entitlement so copy and access
@@ -32,8 +32,8 @@ export interface PremiumPlan {
 }
 
 export const PREMIUM_COPY = {
-  kicker: "GYMVERSE Premium",
-  heading: "UNLOCK YOUR GYMVERSE POTENTIAL",
+  kicker: "GYMX Premium",
+  heading: "UNLOCK YOUR GYMX POTENTIAL",
   subtitle: "More tools. More progress. More opportunities.",
   banner: "MEMBERSHIPS COMING SOON",
   freeNote: "Posting, comments, challenges, progress tracking and every safety tool stay free for everyone.",
@@ -44,7 +44,7 @@ export const PREMIUM_COPY = {
   comparisonGuide: "If you mainly post content, choose Creator Pro. If you sell coaching or training services, choose Coach Pro.",
   sponsorHeadline: "Fewer interruptions. Better fitness offers.",
   sponsorBody:
-    "GYMVERSE Pro reduces repetitive sponsored posts while still showing relevant fitness deals, challenge sponsors, and brand opportunities that support the community.",
+    "GYMX Pro reduces repetitive sponsored posts while still showing relevant fitness deals, challenge sponsors, and brand opportunities that support the community.",
   sponsorFootnote: "Sponsored posts still appear on every plan, just less often on premium plans.",
 } as const;
 
@@ -57,11 +57,11 @@ const REDUCED_SPONSORS: PlanFeature = {
 export const PREMIUM_PLANS: PremiumPlan[] = [
   {
     id: "GYMVERSE_PRO",
-    name: "GYMVERSE PRO",
+    name: "GYMX PRO",
     availability: "COMING SOON",
     tagline: "Train harder. Track deeper. Stay consistent.",
     audience: "Everyday lifters, beginners, and serious fitness enthusiasts.",
-    ctaLabel: "Explore GYMVERSE Pro",
+    ctaLabel: "Explore GYMX Pro",
     theme: "gold",
     icon: "Zap",
     features: [
@@ -130,7 +130,7 @@ export interface ComparisonRow {
 }
 
 export const PLAN_COMPARISON: ComparisonRow[] = [
-  { plan: "GYMVERSE_PRO", name: "GYMVERSE Pro", goal: "Improve fitness progress", bestFor: "Everyday lifters", mainTools: "Progress tracking, PR charts, premium challenges" },
+  { plan: "GYMVERSE_PRO", name: "GYMX Pro", goal: "Improve fitness progress", bestFor: "Everyday lifters", mainTools: "Progress tracking, PR charts, premium challenges" },
   { plan: "CREATOR_PRO", name: "Creator Pro", goal: "Grow an audience organically", bestFor: "Fitness creators", mainTools: "Analytics, content strategy, brand campaign previews" },
   { plan: "COACH_PRO", name: "Coach Pro", goal: "Attract and manage potential clients", bestFor: "Trainers and fitness businesses", mainTools: "Leads, inquiries, booking, testimonials" },
 ];

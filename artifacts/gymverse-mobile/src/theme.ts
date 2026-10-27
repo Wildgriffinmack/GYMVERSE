@@ -25,6 +25,7 @@ export const F = {
   labelHeavy: "BarlowCondensed_800ExtraBold",
 } as const;
 
-/** Bottom space reserved for the floating nav bar (excluding the safe-area inset). */
-export const NAV_HEIGHT = 66;
-export const NAV_GAP = 12;
+/** Height of the docked bottom nav above the safe-area inset. */
+export const NAV_HEIGHT = 56;
+/** The nav is docked to the bottom edge, so there is no floating gap. */
+export const NAV_GAP = 0;

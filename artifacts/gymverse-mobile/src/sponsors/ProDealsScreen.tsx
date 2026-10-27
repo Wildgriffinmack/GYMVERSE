@@ -24,7 +24,7 @@ type Props = {
   onRestoreDeals: () => void;
 };
 
-/** GYMVERSE Pro Deals — fictional offer catalog preview. No prices, codes, savings or purchases. */
+/** GYMX Pro Deals — fictional offer catalog preview. No prices, codes, savings or purchases. */
 export function ProDealsScreen({ onBack, onOpenPremium, onToast, hiddenDeals, onHideDeal, onRestoreDeals }: Props) {
   const insets = useSafeAreaInsets();
   const membership = useMembership();
@@ -38,7 +38,7 @@ export function ProDealsScreen({ onBack, onOpenPremium, onToast, hiddenDeals, on
   return (
     <View style={{ flex: 1, backgroundColor: C.bg }}>
       <ScrollView contentContainerStyle={{ paddingBottom: insets.bottom + NAV_GAP + NAV_HEIGHT + 28 }} showsVerticalScrollIndicator={false}>
-        <PageHeader top={insets.top} kicker="GYMVERSE Pro" title="Deals" leading={<IconBtn label="Back" onPress={onBack}><ArrowLeft size={20} color={C.white} /></IconBtn>} />
+        <PageHeader top={insets.top} kicker="GYMX Pro" title="Deals" leading={<IconBtn label="Back" onPress={onBack}><ArrowLeft size={20} color={C.white} /></IconBtn>} />
         <LinearGradient colors={["#3a1306", "#161010", "#0d0d0d"]} start={DIAG.start} end={DIAG.end} style={s.hero}>
           <Glows glows={[{ color: C.gold, cx: "100%", cy: "0%", rx: "80%", ry: "90%", opacity: 0.25 }, { color: C.flame, cx: "0%", cy: "100%", rx: "70%", ry: "70%", opacity: 0.25 }]} />
           <Text style={s.heroTitle}>{SPONSOR_COPY.dealsTitle}</Text>
@@ -105,7 +105,7 @@ export function ProDealsScreen({ onBack, onOpenPremium, onToast, hiddenDeals, on
             <Text style={ss.noteText}>Fewer interruptions. Better fitness offers. Premium plans still show clearly labelled sponsored posts — just less often.</Text>
           </View>
           {!unlocked ? (
-            <Pressable accessibilityRole="button" onPress={() => { tap(); onOpenPremium(); }} style={[ss.btn, { marginTop: 12 }]}><Text style={ss.btnText}>See GYMVERSE Premium</Text></Pressable>
+            <Pressable accessibilityRole="button" onPress={() => { tap(); onOpenPremium(); }} style={[ss.btn, { marginTop: 12 }]}><Text style={ss.btnText}>See GYMX Premium</Text></Pressable>
           ) : null}
         </View>
       </ScrollView>

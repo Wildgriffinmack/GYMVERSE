@@ -28,7 +28,7 @@
     "android": "expo start --go --android",
     "ios": "expo start --go --ios",
     "typecheck": "tsc --noEmit",
-    "test:membership": "node --test tests/membership.test.mjs tests/pro.test.mjs tests/creator.test.mjs tests/coach.test.mjs tests/sponsor.test.mjs tests/challenge.test.mjs tests/phase8.test.mjs"
+    "test:membership": "node --test tests/membership.test.mjs tests/pro.test.mjs tests/creator.test.mjs tests/coach.test.mjs tests/sponsor.test.mjs tests/challenge.test.mjs tests/phase8.test.mjs tests/rebrand.test.mjs tests/home.test.mjs"
   },
   "private": true
 }

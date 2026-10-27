@@ -2,7 +2,7 @@
   "name": "gymverse-guardian",
   "version": "0.1.0",
   "private": true,
-  "description": "GYMVERSE Guardian: self-hosted moderation service (rules + optional local model).",
+  "description": "GYMX Guardian: self-hosted moderation service (rules + optional local model).",
   "type": "module",
   "engines": {
     "node": ">=24"

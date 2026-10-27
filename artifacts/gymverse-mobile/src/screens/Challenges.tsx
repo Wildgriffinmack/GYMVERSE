@@ -1,9 +1,9 @@
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { ArrowRight, Check, Users } from "lucide-react-native";
+import { ArrowLeft, ArrowRight, Check, Users } from "lucide-react-native";
 import { CHALLENGES, ME } from "../data";
 import { TONES, ToneFill, Glows } from "../components/Tone";
-import { Avatar, Badge, Label, PageHeader, ProgressRing, thump } from "../components/ui";
+import { Avatar, Badge, IconBtn, Label, PageHeader, ProgressRing, thump } from "../components/ui";
 import { Pulse, Rise } from "./Welcome";
 import { C, F, NAV_GAP, NAV_HEIGHT } from "../theme";
 import { LinearGradient } from "expo-linear-gradient";
@@ -19,15 +19,17 @@ type Props = {
   onExplorePremium?: (id: string) => void;
   onFounders?: () => void;
   premiumProgress?: DemoChallengeProgress;
+  /** Challenges is reached from Explore or Profile; shows a Back button when provided. */
+  onBack?: () => void;
 };
 
-export function ChallengesScreen({ joined, onToggle, onExplorePremium, onFounders, premiumProgress }: Props) {
+export function ChallengesScreen({ joined, onToggle, onExplorePremium, onFounders, premiumProgress, onBack }: Props) {
   const insets = useSafeAreaInsets();
   const active = CHALLENGES.find((c) => c.id === ME.challengeId)!;
   const pct = Math.round((ME.challengeDay / active.totalDays) * 100);
   return (
     <ScrollView style={{ flex: 1, backgroundColor: C.bg }} contentContainerStyle={{ paddingBottom: insets.bottom + NAV_GAP + NAV_HEIGHT + 24 }} showsVerticalScrollIndicator={false}>
-      <PageHeader top={insets.top} kicker="Better together" title="Challenges" trailing={<View style={s.live}><Pulse /><Text style={s.liveText}>{CHALLENGES.length} live</Text></View>} />
+      <PageHeader top={insets.top} kicker="Better together" title="Challenges" leading={onBack ? <IconBtn label="Back" onPress={onBack}><ArrowLeft size={20} color={C.white} /></IconBtn> : undefined} trailing={<View style={s.live}><Pulse /><Text style={s.liveText}>{CHALLENGES.length} live</Text></View>} />
 
       <View style={s.hero}>
         <View style={[StyleSheet.absoluteFill, { backgroundColor: "#121212" }]} />

@@ -1,4 +1,4 @@
-// Mock content for the GYMVERSE mobile prototype.
+// Mock content for the GYMX mobile prototype.
 // Mirrors artifacts/mockup-sandbox/src/components/mockups/gymverse/_parts/data.ts; keep both in sync.
 import type { LucideIcon } from "lucide-react-native";
 import {
@@ -17,8 +17,8 @@ import {
   Zap,
 } from "lucide-react-native";
 
-export type Screen = "welcome" | "home" | "explore" | "create" | "challenges" | "profile" | "progress" | "premium" | "pro_progress" | "creator_studio" | "coach_center" | "pro_deals" | "premium_challenge" | "founders";
-export const SCREENS: Screen[] = ["welcome", "home", "explore", "create", "challenges", "profile", "progress", "premium", "pro_progress", "creator_studio", "coach_center", "pro_deals", "premium_challenge", "founders"];
+export type Screen = "welcome" | "home" | "clips" | "explore" | "create" | "challenges" | "profile" | "progress" | "premium" | "pro_progress" | "creator_studio" | "coach_center" | "pro_deals" | "premium_challenge" | "founders";
+export const SCREENS: Screen[] = ["welcome", "home", "clips", "explore", "create", "challenges", "profile", "progress", "premium", "pro_progress", "creator_studio", "coach_center", "pro_deals", "premium_challenge", "founders"];
 
 export type FeedTab = "For You" | "Motivation" | "Workouts" | "Transformations" | "Beginner" | "PRs";
 export const FEED_TABS: FeedTab[] = ["For You", "Motivation", "Workouts", "Transformations", "Beginner", "PRs"];
@@ -33,6 +33,14 @@ export type PostVisual = "pr" | "routine" | "transformation" | "edit" | "form" |
 export type BadgeTone = "flame" | "hot" | "gold" | "ash";
 
 export type ArtLine = { label: string; detail: string };
+
+/**
+ * Native Home Feed media. Posts without `media` are short-form clips: they play in Clips
+ * and appear on Home as compact previews. Photo ids refer to src/home/photos.ts.
+ */
+export type PostMedia =
+  | { kind: "photos"; layout: "single" | "carousel" | "gallery"; photos: string[] }
+  | { kind: "milestone"; lift: string; value: string; unit: string; detail: string; delta: string; deltaLabel: string };
 
 /** Everything the generated "media" needs. No hardcoded copy lives in the art components. */
 export type PostArtData = {
@@ -65,8 +73,10 @@ export type Post = {
   art: PostArtData;
   created?: boolean;
   onTimeline?: boolean;
-  /** Set when GYMVERSE Guardian is holding the post for review (visible to the author only). */
+  /** Set when GYMX Guardian is holding the post for review (visible to the author only). */
   moderation?: "in_review";
+  /** Home Feed photo / milestone content; absent for clips. */
+  media?: PostMedia;
 };
 
 export type Comment = { id: string; user: string; text: string; time: string; likes: number; pending?: boolean };
@@ -159,7 +169,7 @@ export const STARTER_POSTS: Post[] = [
     saves: 2100,
     badge: "WORKOUT",
     badgeTone: "flame",
-    audio: "Push Day Mix · GYMVERSE Radio",
+    audio: "Push Day Mix · GYMX Radio",
     verified: true,
     art: {
       visual: "routine",

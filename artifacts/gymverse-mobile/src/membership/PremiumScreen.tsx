@@ -24,7 +24,7 @@ const PREVIEW_COUNT = 5;
 /** Plans with an interactive demo screen. */
 const PREVIEW_LABELS: Partial<Record<PremiumPlanId, string>> = { GYMVERSE_PRO: "Preview Pro progress tools", CREATOR_PRO: "Preview Creator Studio", COACH_PRO: "Preview Coach Command Center" };
 
-/** GYMVERSE Premium discovery screen. Informational only: every plan is Coming Soon and nothing can be purchased. */
+/** GYMX Premium discovery screen. Informational only: every plan is Coming Soon and nothing can be purchased. */
 export function PremiumScreen({ onBack, onExplore, onDeals, onFounders }: { onBack: () => void; onExplore: (plan: PremiumPlanId) => void; onDeals?: () => void; onFounders?: () => void }) {
   const insets = useSafeAreaInsets();
   return (
@@ -41,7 +41,7 @@ export function PremiumScreen({ onBack, onExplore, onDeals, onFounders }: { onBa
         <Rise delay={40}><ComingSoonPill label={PREMIUM_COPY.banner} large /></Rise>
         <Rise delay={110}>
           <Text style={s.heading}>UNLOCK YOUR</Text>
-          <GradText style={s.heading}>GYMVERSE POTENTIAL</GradText>
+          <GradText style={s.heading}>GYMX POTENTIAL</GradText>
         </Rise>
         <Rise delay={170}><Text style={s.subtitle}>{PREMIUM_COPY.subtitle}</Text></Rise>
         <Rise delay={230} style={s.freeNote}>

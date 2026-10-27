@@ -1,4 +1,4 @@
-// Phase 3 — GYMVERSE Pro progress demonstrations. Run: npm run test:membership
+// Phase 3 — GYMX Pro progress demonstrations. Run: npm run test:membership
 import assert from "node:assert/strict";
 import { readFileSync, readdirSync } from "node:fs";
 import { describe, it } from "node:test";
@@ -72,7 +72,7 @@ describe("PR history and streak data", () => {
 
 describe("AI weekly check-in (scripted)", () => {
   it("uses the required title, banner and example feedback", () => {
-    assert.equal(CHECKIN_TITLE, "YOUR WEEK IN GYMVERSE");
+    assert.equal(CHECKIN_TITLE, "YOUR WEEK IN GYMX");
     assert.equal(CHECKIN_BANNER, "AI Weekly Check-In — Coming Soon");
     assert.equal(
       CHECKIN_WEEKS[0].feedback,
@@ -166,6 +166,6 @@ describe("Phase 3 source guarantees", () => {
   }
   it("labels Coming Soon on every gated surface", () => {
     const all = proSources.map(([, s]) => s).join("\n");
-    for (const needle of ["DEMO · COMING SOON", "GYMVERSE Pro · Coming Soon", "Coming Soon"]) assert.ok(all.includes(needle), needle);
+    for (const needle of ["DEMO · COMING SOON", "GYMX Pro · Coming Soon", "Coming Soon"]) assert.ok(all.includes(needle), needle);
   });
 });

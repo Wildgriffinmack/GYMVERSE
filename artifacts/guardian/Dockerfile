@@ -1,4 +1,4 @@
-# GYMVERSE Guardian — container image (untested until Docker is available on a build machine).
+# GYMX Guardian — container image (untested until Docker is available on a build machine).
 # Zero runtime dependencies: Node 24 runs the TypeScript sources directly.
 FROM node:24-alpine
 WORKDIR /app

@@ -10,7 +10,7 @@ import { C, DIAG, F, NAV_GAP, NAV_HEIGHT } from "../theme";
 import { FounderMedallion } from "./FounderBadge";
 import { FIRST_1000, FOUNDER_BENEFITS, FOUNDER_COMBINATIONS, FOUNDER_COPY } from "./foundersData";
 
-/** GYMVERSE Founders recognition concept. Reads the membership only to describe it — never changes it. */
+/** GYMX Founders recognition concept. Reads the membership only to describe it — never changes it. */
 export function FoundersScreen({ onBack, founderPreview }: { onBack: () => void; founderPreview: boolean }) {
   const insets = useSafeAreaInsets();
   const { plan, tier } = useMembership();

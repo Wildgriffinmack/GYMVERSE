@@ -8,6 +8,7 @@ import { ArrowRight, BarChart3, Bookmark, Briefcase, ChevronRight, Clapperboard,
 import type { BadgeTone, Post, PostArtData } from "../data";
 import { CHALLENGES, ME, PERSONAL_RECORDS, PROFILE_EXTRA_TILES } from "../data";
 import { PostArt } from "../components/PostArt";
+import { PostThumb } from "../home/HomePost";
 import { Glows } from "../components/Tone";
 import { Avatar, Badge, GradText, IconBtn, Label, ProgressRing, Verified, tap, thump } from "../components/ui";
 import { PINNED_ART } from "../pro/ProfileStudio";
@@ -24,7 +25,7 @@ type Props = {
   onToast: (m: string) => void;
   /** Development builds only: long-press Settings to open developer tools. */
   onDevTools?: () => void;
-  /** Opens the GYMVERSE Premium (Coming Soon) screen. */
+  /** Opens the GYMX Premium (Coming Soon) screen. */
   onPremium?: () => void;
   /** Opens Profile Studio (premium customization preview). */
   onStudio?: () => void;
@@ -38,7 +39,7 @@ type Props = {
   onCoachCenter?: () => void;
   /** Session-only coach look from the Command Center; independent of Profile Studio and the creator look. */
   coach?: CoachLook | null;
-  /** Opens the GYMVERSE Founders recognition concept. */
+  /** Opens the GYMX Founders recognition concept. */
   onFounders?: () => void;
   /** Founder recognition preview (developer toggle). Independent of membership; never a primary badge. */
   founder?: boolean;
@@ -171,12 +172,12 @@ export function ProfileScreen({ myPosts, savedPosts, onOpenPost, onTimeline, onC
         </Pressable>
 
         {onPremium ? (
-          <Pressable accessibilityRole="button" accessibilityLabel="GYMVERSE Premium, memberships coming soon" onPress={() => { tap(); onPremium(); }} style={({ pressed }) => [{ marginTop: 12, borderRadius: 20, transform: [{ scale: pressed ? 0.98 : 1 }] }]}>
+          <Pressable accessibilityRole="button" accessibilityLabel="GYMX Premium, memberships coming soon" onPress={() => { tap(); onPremium(); }} style={({ pressed }) => [{ marginTop: 12, borderRadius: 20, transform: [{ scale: pressed ? 0.98 : 1 }] }]}>
             <LinearGradient colors={["rgba(255,209,102,0.7)", "rgba(255,90,31,0.35)", "rgba(255,247,237,0.06)"]} start={DIAG.start} end={DIAG.end} style={s.premiumBorder}>
               <View style={s.premiumRow}>
                 <LinearGradient colors={GRAD_GOLD} start={DIAG.start} end={DIAG.end} style={s.premiumIcon}><Crown size={20} color="#1c0f00" /></LinearGradient>
                 <View style={{ flex: 1, gap: 3 }}>
-                  <Text style={s.premiumTitle}>GYMVERSE Premium</Text>
+                  <Text style={s.premiumTitle}>GYMX Premium</Text>
                   <Text style={s.premiumSub}>Memberships coming soon</Text>
                 </View>
                 <ChevronRight size={20} color={C.gold} />
@@ -186,7 +187,7 @@ export function ProfileScreen({ myPosts, savedPosts, onOpenPost, onTimeline, onC
         ) : null}
 
         {onStudio ? (
-          <Pressable accessibilityRole="button" accessibilityLabel="Profile Studio, GYMVERSE Pro preview, coming soon" onPress={() => { tap(); onStudio(); }} style={({ pressed }) => [s.studioRow, { transform: [{ scale: pressed ? 0.98 : 1 }] }]}>
+          <Pressable accessibilityRole="button" accessibilityLabel="Profile Studio, GYMX Pro preview, coming soon" onPress={() => { tap(); onStudio(); }} style={({ pressed }) => [s.studioRow, { transform: [{ scale: pressed ? 0.98 : 1 }] }]}>
             <View style={s.studioIcon}><Palette size={18} color={C.gold} /></View>
             <View style={{ flex: 1, gap: 2 }}>
               <Text style={s.studioTitle}>Profile Studio</Text>
@@ -222,10 +223,10 @@ export function ProfileScreen({ myPosts, savedPosts, onOpenPost, onTimeline, onC
         ) : null}
 
         {onFounders ? (
-          <Pressable accessibilityRole="button" accessibilityLabel="GYMVERSE Founders, recognition concept" onPress={() => { tap(); onFounders(); }} style={({ pressed }) => [s.studioRow, founder && s.founderRow, { transform: [{ scale: pressed ? 0.98 : 1 }] }]}>
+          <Pressable accessibilityRole="button" accessibilityLabel="GYMX Founders, recognition concept" onPress={() => { tap(); onFounders(); }} style={({ pressed }) => [s.studioRow, founder && s.founderRow, { transform: [{ scale: pressed ? 0.98 : 1 }] }]}>
             <View style={[s.studioIcon, { backgroundColor: "#1a1208" }]}><Shield size={18} color={C.gold} /></View>
             <View style={{ flex: 1, gap: 2 }}>
-              <Text style={s.studioTitle}>GYMVERSE Founders</Text>
+              <Text style={s.studioTitle}>GYMX Founders</Text>
               <Text style={s.studioSub}>{founder ? "Founder recognition preview on · this session" : "Recognition concept · not a membership"}</Text>
             </View>
             <ChevronRight size={18} color={C.ash} />
@@ -328,7 +329,7 @@ export function ProfileScreen({ myPosts, savedPosts, onOpenPost, onTimeline, onC
         <View style={s.grid}>
           {myPosts.map((p) => (
             <GridTile key={p.id} w={tileW} onPress={() => { tap(); onOpenPost(p.id); }} label={`Open post: ${p.caption}`}>
-              <PostArt art={p.art} variant="thumb" />
+              <PostThumb post={p} />
               {p.created ? <LinearGradient colors={GRAD_GOLD} start={DIAG.start} end={DIAG.end} style={s.newTag}><Text style={s.newText}>New</Text></LinearGradient> : null}
               <View style={s.views}><Play size={11} color={C.white} fill={C.white} /><Text style={s.viewsText}>{formatCount(p.likes * 4 || 1)}</Text></View>
             </GridTile>
@@ -344,7 +345,7 @@ export function ProfileScreen({ myPosts, savedPosts, onOpenPost, onTimeline, onC
         <View style={s.grid}>
           {savedPosts.map((p) => (
             <GridTile key={p.id} w={tileW} onPress={() => { tap(); onOpenPost(p.id); }} label={`Open saved post by @${p.username}`}>
-              <PostArt art={p.art} variant="thumb" />
+              <PostThumb post={p} />
               <View style={s.views}><Bookmark size={11} color={C.gold} fill={C.gold} /><Text style={s.viewsText}>@{p.username}</Text></View>
             </GridTile>
           ))}

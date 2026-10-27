@@ -58,7 +58,7 @@ type Props = {
   onAddPrivateNote: (entry: PrivateEntry) => void;
 };
 
-/** GYMVERSE Pro advanced progress preview. All content is demo data; everything is Coming Soon. */
+/** GYMX Pro advanced progress preview. All content is demo data; everything is Coming Soon. */
 export function AdvancedProgressScreen({ onBack, onOpenPremium, privateNotes, onAddPrivateNote }: Props) {
   const insets = useSafeAreaInsets();
   const membership = useMembership();
@@ -69,7 +69,7 @@ export function AdvancedProgressScreen({ onBack, onOpenPremium, privateNotes, on
   return (
     <View style={{ flex: 1, backgroundColor: C.bg }}>
       <ScrollView contentContainerStyle={{ paddingBottom: insets.bottom + NAV_GAP + NAV_HEIGHT + 28 }} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled" stickyHeaderIndices={[2]}>
-        <PageHeader top={insets.top} kicker="GYMVERSE Pro" title="Advanced" leading={<IconBtn label="Back" onPress={onBack}><ArrowLeft size={20} color={C.white} /></IconBtn>} />
+        <PageHeader top={insets.top} kicker="GYMX Pro" title="Advanced" leading={<IconBtn label="Back" onPress={onBack}><ArrowLeft size={20} color={C.white} /></IconBtn>} />
 
         <View style={s.intro}>
           <Glows glows={[{ color: C.gold, cx: "100%", cy: "0%", rx: "70%", ry: "80%", opacity: 0.18 }]} />
@@ -80,12 +80,12 @@ export function AdvancedProgressScreen({ onBack, onOpenPremium, privateNotes, on
           <Text style={s.introText}>
             {anyUnlocked
               ? `Previewing as ${membership.plan.displayName} (developer demo). These features are still in development — nothing here is a real membership.`
-              : "A preview of advanced progress tools coming with GYMVERSE Pro. Your progress timeline and personal records stay free."}
+              : "A preview of advanced progress tools coming with GYMX Pro. Your progress timeline and personal records stay free."}
           </Text>
           {!anyUnlocked ? (
             <Pressable accessibilityRole="button" onPress={() => { tap(); onOpenPremium(); }} style={s.introLink}>
               <Crown size={15} color={C.gold} />
-              <Text style={s.introLinkText}>See GYMVERSE Premium</Text>
+              <Text style={s.introLinkText}>See GYMX Premium</Text>
               <ArrowRight size={15} color={C.gold} />
             </Pressable>
           ) : null}

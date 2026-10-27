@@ -99,7 +99,7 @@ export function CoachCommandCenter({ onBack, onOpenPremium, onToast, state, onCh
           {!unlocked ? (
             <Pressable accessibilityRole="button" onPress={() => { tap(); onOpenPremium(); }} style={s.heroLink}>
               <Crown size={15} color={C.gold} />
-              <Text style={s.heroLinkText}>See GYMVERSE Premium</Text>
+              <Text style={s.heroLinkText}>See GYMX Premium</Text>
               <ArrowRight size={15} color={C.gold} />
             </Pressable>
           ) : null}

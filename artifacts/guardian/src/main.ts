@@ -67,7 +67,7 @@ async function main(): Promise<void> {
   server.listen(config.port, config.host, async () => {
     const lines = [
       "",
-      "  GYMVERSE Guardian (prototype) is running",
+      "  GYMX Guardian (prototype) is running",
       `  Local API:      http://127.0.0.1:${config.port}/v1/moderate`,
       ...(config.host === "0.0.0.0" ? lanAddresses().map((a) => `  Phones (LAN):   http://${a}:${config.port}   ← use this in Expo Go`) : ["  Phones:         not reachable (start with --lan to allow your Wi-Fi)"]),
       `  Moderator UI:   http://127.0.0.1:${config.port}/admin   (this computer only)`,

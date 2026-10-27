@@ -1,7 +1,7 @@
 /**
  * Creator Pro — DEMONSTRATION DATA (Phase 4).
  *
- * Fictional, fixed data for a Coming Soon preview. Nothing is collected from the GYMVERSE feed,
+ * Fictional, fixed data for a Coming Soon preview. Nothing is collected from the GYMX feed,
  * nothing is tracked, and nothing here changes how posts are ranked. Every aggregate on the
  * Creator Studio screen is derived from DEMO_POSTS below, so totals, charts, categories and
  * post-level figures always agree. Pure module (type-only imports) for plain-Node tests.
@@ -15,14 +15,14 @@ export const STUDIO_COPY = {
   tagline: "Grow your fitness audience.",
   supporting: "Create smarter. Understand your audience. Grow organically.",
   pill: "CREATOR PRO · COMING SOON",
-  demoNote: "Demo data — fictional example numbers, not collected from the GYMVERSE feed.",
+  demoNote: "Demo data — fictional example numbers, not collected from the GYMX feed.",
   organicNote: "Creator Pro never boosts your posts. Feed reach stays organic: no paid ranking and no guaranteed followers, views, likes, saves or shares.",
   erFormula: "Engagement rate = (likes + comments + saves + shares) ÷ views. Period totals count posts published in that period.",
   schedulingBanner: "Scheduling Preview — Coming Soon",
   marketplace: "Discover potential opportunities to collaborate with fitness brands.",
   campaignTag: "DEMO OPPORTUNITY · NOT A LIVE CAMPAIGN",
   campaignDisclaimer:
-    "Fictional example for demonstration. There is no real brand, application, contract, payment or sponsorship, and GYMVERSE has no partnership with any brand shown. No sponsorship is guaranteed.",
+    "Fictional example for demonstration. There is no real brand, application, contract, payment or sponsorship, and GYMX has no partnership with any brand shown. No sponsorship is guaranteed.",
   badgeCreatorPro: "CREATOR PRO",
   badgeIdentity: "CONTENT CREATOR",
   badgeNote: "Badges show a demo membership and a creator identity. They are not professional verification and say nothing about audience size.",

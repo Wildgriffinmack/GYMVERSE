@@ -153,7 +153,7 @@ export function CreateScreen({ onPost, onClose, onToast }: { onPost: (draft: Pos
         </View>
 
         <View style={s.block}>
-          <Cta title={busy ? "Checking with Guardian…" : "Post to GYMVERSE"} onPress={submit} icon={busy ? undefined : <ArrowRight size={20} color="#fff" strokeWidth={2.6} />} />
+          <Cta title={busy ? "Checking with Guardian…" : "Post to GYMX"} onPress={submit} icon={busy ? undefined : <ArrowRight size={20} color="#fff" strokeWidth={2.6} />} />
           <Text style={s.fine}>Demo only. Your post appears in this session’s feed.</Text>
         </View>
       </ScrollView>

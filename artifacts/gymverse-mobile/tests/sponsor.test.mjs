@@ -168,7 +168,7 @@ describe("disclosure, explanations and reports", () => {
   it("explains why an ad appears without claiming personal targeting", () => {
     const free = whyAmISeeingThis(false);
     const premium = whyAmISeeingThis(true);
-    assert.equal(free[0], "This is a fictional sponsored post shown as part of the GYMVERSE advertising demo. Your membership determines the approximate number of sponsored posts you see.");
+    assert.equal(free[0], "This is a fictional sponsored post shown as part of the GYMX advertising demo. Your membership determines the approximate number of sponsored posts you see.");
     assert.ok(premium.includes("Premium memberships reduce repetitive sponsored feed placements while keeping relevant fitness offers available."));
     assert.ok(!free.includes(SPONSOR_COPY.whyPremium));
     assert.match(SPONSOR_COPY.noTargeting, /isn't based on your interests/);
@@ -201,7 +201,7 @@ describe("Pro Deals", () => {
     assert.match(src("src/sponsors/ProDealsScreen.tsx"), /<ProSection feature="pro_deals_preview"/);
   });
   it("has the required title and subtitle", () => {
-    assert.equal(SPONSOR_COPY.dealsTitle, "GYMVERSE PRO DEALS");
+    assert.equal(SPONSOR_COPY.dealsTitle, "GYMX PRO DEALS");
     assert.equal(SPONSOR_COPY.dealsSubtitle, "Fitness offers worth checking out.");
   });
 });

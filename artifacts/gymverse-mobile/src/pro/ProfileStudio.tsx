@@ -110,11 +110,11 @@ export function ProfileStudio({ visible, value, onChange, onClose, onOpenPremium
           ) : (
             <View style={s.locked}>
               <View style={s.lockedIcon}><Lock size={18} color="#1c0f00" /></View>
-              <Text style={s.lockedText}>Premium styles, the glow ring, the PRO badge and pinned transformations are coming with GYMVERSE Pro. Your profile stays exactly as it is.</Text>
+              <Text style={s.lockedText}>Premium styles, the glow ring, the PRO badge and pinned transformations are coming with GYMX Pro. Your profile stays exactly as it is.</Text>
               <Pressable accessibilityRole="button" onPress={() => { tap(); onClose(); onOpenPremium(); }} style={({ pressed }) => [{ alignSelf: "stretch", transform: [{ scale: pressed ? 0.97 : 1 }] }]}>
                 <LinearGradient colors={GRAD_GOLD} start={DIAG.start} end={DIAG.end} style={s.cta}>
                   <Crown size={17} color="#1c0f00" />
-                  <Text style={s.ctaText}>See GYMVERSE Premium</Text>
+                  <Text style={s.ctaText}>See GYMX Premium</Text>
                 </LinearGradient>
               </Pressable>
             </View>

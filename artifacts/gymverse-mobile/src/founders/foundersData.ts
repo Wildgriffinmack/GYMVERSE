@@ -1,5 +1,5 @@
 /**
- * GYMVERSE Founders — RECOGNITION CONCEPT (Phase 7).
+ * GYMX Founders — RECOGNITION CONCEPT (Phase 7).
  *
  * Founder recognition is deliberately NOT a membership tier and NOT an entitlement. It is a
  * separate, session-only preview flag. It grants no features, no premium access, no moderation
@@ -7,11 +7,11 @@
  * Pure module for plain-Node tests.
  */
 export const FOUNDER_COPY = {
-  title: "GYMVERSE FOUNDERS",
+  title: "GYMX FOUNDERS",
   tagline: "Built from day one. Remembered forever.",
-  description: "A recognition concept for the earliest members who help shape the GYMVERSE community.",
+  description: "A recognition concept for the earliest members who help shape the GYMX community.",
   pill: "CONCEPT · NOT FINALIZED",
-  badge: "GYMVERSE FOUNDER",
+  badge: "GYMX FOUNDER",
   separation: "Founder recognition is separate from memberships. It isn't bought, and it never comes with a paid plan.",
   notFinal: "Founder eligibility, timing and benefits are not decided. Nobody is being enrolled and no spots are being assigned.",
   rules: "Founders follow the same community guidelines and Guardian moderation as everyone else. Recognition grants no moderation powers.",
@@ -31,14 +31,14 @@ export const FOUNDER_BENEFITS: { title: string; body: string }[] = [
 /** How Founder recognition combines with each plan (it never changes the plan's features). */
 export const FOUNDER_COMBINATIONS = [
   { label: "Free Founder", detail: "All free features, plus Founder recognition." },
-  { label: "GYMVERSE Pro Founder", detail: "GYMVERSE Pro tools, plus Founder recognition." },
+  { label: "GYMX Pro Founder", detail: "GYMX Pro tools, plus Founder recognition." },
   { label: "Creator Pro Founder", detail: "Creator Pro tools, plus Founder recognition." },
   { label: "Coach Pro Founder", detail: "Coach Pro tools, plus Founder recognition." },
 ];
 
 export const FIRST_1000 = {
   title: "THE FIRST 1000",
-  tagline: "The first community. The foundation of GYMVERSE.",
+  tagline: "The first community. The foundation of GYMX.",
   concept: "A future recognition challenge celebrating early participation and community contributions.",
   milestones: ["Join the founding community", "Complete a first workout challenge", "Encourage another community member", "Share constructive product feedback"],
   disclaimer: "Concept only. These example milestones don't award Founder status, and no spots are being assigned.",

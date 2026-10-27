@@ -1,5 +1,5 @@
 /**
- * GYMVERSE Guardian — shared moderation contract.
+ * GYMX Guardian — shared moderation contract.
  *
  * Types only (no runtime code), so the Expo app can `import type` this file
  * without bundling anything from the service.

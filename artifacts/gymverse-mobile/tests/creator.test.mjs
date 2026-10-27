@@ -39,7 +39,7 @@ describe("creator entitlements", () => {
       for (const tier of ["FREE", "GYMVERSE_PRO", "COACH_PRO"]) assert.equal(hasEntitlement(tier, f), false, `${tier} ${f}`);
     }
   });
-  it("Creator Pro still inherits GYMVERSE Pro benefits", () => {
+  it("Creator Pro still inherits GYMX Pro benefits", () => {
     for (const f of PRO_FEATURES) assert.equal(hasEntitlement("CREATOR_PRO", f), true, f);
   });
   it("every creator feature has a locked explanation", () => {

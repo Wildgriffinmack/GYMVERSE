@@ -38,7 +38,7 @@ export function FounderMedallion({ size = 132 }: { size?: number }) {
         <View style={[s.medal, { borderRadius: size / 2 }]}>
           <Emblem size={size * 0.44} />
           <Text style={[s.medalText, { fontSize: size * 0.11 }]}>FOUNDER</Text>
-          <Text style={[s.medalSub, { fontSize: size * 0.056 }]}>GYMVERSE · DAY ONE</Text>
+          <Text style={[s.medalSub, { fontSize: size * 0.056 }]}>GYMX · DAY ONE</Text>
         </View>
       </LinearGradient>
       <FounderBadge />

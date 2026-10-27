@@ -155,7 +155,7 @@ export const STARTER_POSTS: Post[] = [
     saves: 2100,
     badge: "WORKOUT",
     badgeTone: "flame",
-    audio: "Push Day Mix · GYMVERSE Radio",
+    audio: "Push Day Mix · GYMX Radio",
     verified: true,
     art: {
       visual: "routine",

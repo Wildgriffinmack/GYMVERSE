@@ -33,7 +33,7 @@ export function WelcomeScreen({ onEnter }: { onEnter: () => void }) {
       <div className="gv-welcome-body">
         <span className="gv-label gv-rise" style={{ "--delay": ".1s" } as CSSProperties}>The fitness-only social app</span>
         <h1 className="gv-brand gv-rise" style={{ "--delay": ".18s" } as CSSProperties}>
-          GYM<span className="gv-grad-text">VERSE</span>
+          GYM<span className="gv-grad-text">X</span>
         </h1>
         <p className="gv-welcome-tagline gv-rise" style={{ "--delay": ".26s" } as CSSProperties}>Your gym feed. Nothing else.</p>
         <p className="gv-welcome-support gv-rise" style={{ "--delay": ".32s" } as CSSProperties}>
@@ -41,7 +41,7 @@ export function WelcomeScreen({ onEnter }: { onEnter: () => void }) {
         </p>
         <div className="gv-welcome-actions gv-rise" style={{ "--delay": ".4s" } as CSSProperties}>
           <button type="button" className="gv-cta is-block" onClick={onEnter}>
-            Enter GYMVERSE <ArrowRight size={20} strokeWidth={2.6} />
+            Enter GYMX <ArrowRight size={20} strokeWidth={2.6} />
           </button>
           <button type="button" className="gv-text-link" onClick={onEnter}>Explore demo</button>
         </div>

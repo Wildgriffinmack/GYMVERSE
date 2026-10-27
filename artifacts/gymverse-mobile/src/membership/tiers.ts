@@ -1,5 +1,5 @@
 /**
- * GYMVERSE membership tiers — PROTOTYPE CONFIGURATION ONLY.
+ * GYMX membership tiers — PROTOTYPE CONFIGURATION ONLY.
  *
  * No tier can be purchased. There are deliberately no price, currency, trial or billing
  * fields: pricing is undecided and nothing here may imply a real subscription.
@@ -42,11 +42,11 @@ export interface TierDefinition {
 export const TIERS: Record<MembershipTier, TierDefinition> = {
   FREE: {
     id: "FREE",
-    displayName: "GYMVERSE",
+    displayName: "GYMX",
     availability: "included",
     availabilityLabel: "Your plan",
     tagline: "Your gym feed. Nothing else.",
-    description: "The full GYMVERSE community: posting, comments, follows, challenges, progress timeline and every safety tool. Always free.",
+    description: "The full GYMX community: posting, comments, follows, challenges, progress timeline and every safety tool. Always free.",
     badge: { label: null, icon: null, tone: "ash" },
     styleId: "tier-free",
     sponsorProfile: "standard",
@@ -54,7 +54,7 @@ export const TIERS: Record<MembershipTier, TierDefinition> = {
   },
   GYMVERSE_PRO: {
     id: "GYMVERSE_PRO",
-    displayName: "GYMVERSE Pro",
+    displayName: "GYMX Pro",
     availability: "coming_soon",
     availabilityLabel: "Coming Soon",
     tagline: "Train harder. Track deeper. Stay consistent.",
@@ -70,7 +70,7 @@ export const TIERS: Record<MembershipTier, TierDefinition> = {
     availability: "coming_soon",
     availabilityLabel: "Coming Soon",
     tagline: "Grow your fitness audience.",
-    description: "Everything in GYMVERSE Pro, plus creator analytics, audience insights, post performance, scheduled and pinned posts, and brand campaigns.",
+    description: "Everything in GYMX Pro, plus creator analytics, audience insights, post performance, scheduled and pinned posts, and brand campaigns.",
     badge: { label: "CREATOR PRO", icon: "Sparkles", tone: "flame" },
     styleId: "tier-creator",
     sponsorProfile: "reduced",
@@ -82,7 +82,7 @@ export const TIERS: Record<MembershipTier, TierDefinition> = {
     availability: "coming_soon",
     availabilityLabel: "Coming Soon",
     tagline: "Turn your content into clients.",
-    description: "Everything in GYMVERSE Pro, plus a coach business dashboard, client inquiries, booking and lead previews, testimonials and partnerships.",
+    description: "Everything in GYMX Pro, plus a coach business dashboard, client inquiries, booking and lead previews, testimonials and partnerships.",
     badge: { label: "COACH PRO", icon: "Medal", tone: "ash" },
     styleId: "tier-coach",
     sponsorProfile: "reduced",

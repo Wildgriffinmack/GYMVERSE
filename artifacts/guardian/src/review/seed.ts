@@ -13,7 +13,7 @@ const SAMPLES: { content_type: "post" | "comment" | "profile_bio" | "profile_use
   { content_type: "post", text: "Take this dosage for the first 4 weeks and thank me later.", author_id: "coach_unknown" },
   { content_type: "comment", text: "Caught this random guy curling in the squat rack 😂", author_id: "gym_cam" },
   { content_type: "post", text: "Eat under 600 calories a day for a month to get shredded.", author_id: "cutcutcut" },
-  { content_type: "profile_username", text: "gymverse_official_support", author_id: "new_user_19" },
+  { content_type: "profile_username", text: "gymx_official_support", author_id: "new_user_19" },
   { content_type: "direct_message", text: "hey bro dm me for gear, tested and legit", author_id: "dm_seller" },
   { content_type: "direct_message", text: "send nudes or I'm unfollowing", author_id: "dm_creep" },
   { content_type: "direct_message", text: "bro you should hop on, I'll walk you through it", author_id: "dm_coach" },

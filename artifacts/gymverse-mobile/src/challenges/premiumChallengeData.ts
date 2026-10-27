@@ -9,7 +9,7 @@
 import type { PremiumFeature } from "../membership/entitlements";
 
 export const PREMIUM_CHALLENGE_COPY = {
-  title: "GYMVERSE PRO CHALLENGES",
+  title: "GYMX PRO CHALLENGES",
   subtitle: "Build strength. Stay accountable. Earn your progress.",
   pill: "PRO CHALLENGES · COMING SOON",
   freeNote: "Community challenges above stay free for everyone, always.",
@@ -160,5 +160,5 @@ export function milestonesForWeek(c: PremiumChallenge, week: number): Milestone[
 export type DemoChallengeProgress = Record<string, string[]>;
 
 export const CHALLENGE_FEATURE_INFO: Partial<Record<PremiumFeature, { title: string; body: string }>> = {
-  premium_challenges: { title: "GYMVERSE Pro challenges", body: "Structured challenge programs with milestones, progress tracking and completion recaps. Community challenges stay free for everyone." },
+  premium_challenges: { title: "GYMX Pro challenges", body: "Structured challenge programs with milestones, progress tracking and completion recaps. Community challenges stay free for everyone." },
 };

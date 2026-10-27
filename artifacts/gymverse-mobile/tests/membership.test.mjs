@@ -69,7 +69,7 @@ describe("entitlements", () => {
     for (const required of ["posting", "comments", "follows", "challenges", "reporting", "blocking", "guardian_safety"]) assert.ok(FREE_FEATURES.includes(required), required);
   });
 
-  it("GYMVERSE Pro has exactly the Pro features", () => {
+  it("GYMX Pro has exactly the Pro features", () => {
     assert.deepEqual(new Set(resolveEntitlements("GYMVERSE_PRO")), new Set(PRO_FEATURES));
     assert.equal(hasEntitlement("GYMVERSE_PRO", "creator_analytics"), false);
     assert.equal(hasEntitlement("GYMVERSE_PRO", "coach_business_dashboard"), false);
@@ -149,7 +149,7 @@ describe("sponsor configuration", () => {
 
 describe("Phase 2: Premium Coming Soon content", () => {
   it("uses the required headings and banner", () => {
-    assert.equal(PREMIUM_COPY.heading, "UNLOCK YOUR GYMVERSE POTENTIAL");
+    assert.equal(PREMIUM_COPY.heading, "UNLOCK YOUR GYMX POTENTIAL");
     assert.equal(PREMIUM_COPY.subtitle, "More tools. More progress. More opportunities.");
     assert.equal(PREMIUM_COPY.banner, "MEMBERSHIPS COMING SOON");
     assert.equal(PREMIUM_COPY.inDevelopment, "Coming Soon — Features in Development");
@@ -157,12 +157,12 @@ describe("Phase 2: Premium Coming Soon content", () => {
     assert.equal(PREMIUM_COPY.comparisonSummary, "Creator Pro helps you grow attention. Coach Pro helps you turn attention into clients.");
     assert.equal(PREMIUM_COPY.comparisonGuide, "If you mainly post content, choose Creator Pro. If you sell coaching or training services, choose Coach Pro.");
     assert.equal(PREMIUM_COPY.sponsorHeadline, "Fewer interruptions. Better fitness offers.");
-    assert.equal(PREMIUM_COPY.sponsorBody, "GYMVERSE Pro reduces repetitive sponsored posts while still showing relevant fitness deals, challenge sponsors, and brand opportunities that support the community.");
+    assert.equal(PREMIUM_COPY.sponsorBody, "GYMX Pro reduces repetitive sponsored posts while still showing relevant fitness deals, challenge sponsors, and brand opportunities that support the community.");
   });
 
   it("shows the three plans, in order, each Coming Soon with the exact copy", () => {
     assert.deepEqual(PREMIUM_PLANS.map((p) => [p.name, p.availability, p.ctaLabel, p.tagline]), [
-      ["GYMVERSE PRO", "COMING SOON", "Explore GYMVERSE Pro", "Train harder. Track deeper. Stay consistent."],
+      ["GYMX PRO", "COMING SOON", "Explore GYMX Pro", "Train harder. Track deeper. Stay consistent."],
       ["CREATOR PRO", "COMING SOON", "Explore Creator Pro", "Grow your fitness audience."],
       ["COACH PRO", "COMING SOON", "Explore Coach Pro", "Turn your content into clients."],
     ]);
@@ -182,7 +182,7 @@ describe("Phase 2: Premium Coming Soon content", () => {
 
   it("keeps the comparison table as specified", () => {
     assert.deepEqual(PLAN_COMPARISON.map((r) => [r.name, r.goal, r.bestFor, r.mainTools]), [
-      ["GYMVERSE Pro", "Improve fitness progress", "Everyday lifters", "Progress tracking, PR charts, premium challenges"],
+      ["GYMX Pro", "Improve fitness progress", "Everyday lifters", "Progress tracking, PR charts, premium challenges"],
       ["Creator Pro", "Grow an audience organically", "Fitness creators", "Analytics, content strategy, brand campaign previews"],
       ["Coach Pro", "Attract and manage potential clients", "Trainers and fitness businesses", "Leads, inquiries, booking, testimonials"],
     ]);
@@ -190,7 +190,7 @@ describe("Phase 2: Premium Coming Soon content", () => {
 
   it("makes no forbidden promises", () => {
     const all = JSON.stringify({ PREMIUM_COPY, PREMIUM_PLANS, PLAN_COMPARISON }).toLowerCase();
-    for (const bad of ["ad-free", "no ads", "no sponsored", "eliminat", "guaranteed followers", "guaranteed views", "boosted reach", "verified coach", "certified by gymverse"]) assert.ok(!all.includes(bad), bad);
+    for (const bad of ["ad-free", "no ads", "no sponsored", "eliminat", "guaranteed followers", "guaranteed views", "boosted reach", "verified coach", "certified by gymverse", "certified by gymx"]) assert.ok(!all.includes(bad), bad);
     const creator = PREMIUM_PLANS.find((p) => p.id === "CREATOR_PRO");
     assert.match(creator.note, /does not boost/i);
     assert.match(creator.note, /guarantee followers or views/i);

@@ -152,7 +152,7 @@ export function CreateScreen({ onPost, onClose, onToast }: { onPost: (draft: Pos
 
       <div className="gv-form-block">
         <button type="submit" className="gv-cta is-block">
-          Post to GYMVERSE <ArrowRight size={20} strokeWidth={2.6} />
+          Post to GYMX <ArrowRight size={20} strokeWidth={2.6} />
         </button>
         <p className="gv-fine-print">Demo only. Your post appears in this session’s feed.</p>
       </div>

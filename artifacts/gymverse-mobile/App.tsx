@@ -37,10 +37,14 @@ import { PremiumChallengeScreen } from "./src/challenges";
 import type { DemoChallengeProgress } from "./src/challenges";
 import { FounderDevToggle, FoundersScreen } from "./src/founders";
 import type { PremiumPlanId } from "./src/membership";
+import { HomeFeedScreen, INITIAL_FOLLOWING, clipPosts, mergeHomePosts } from "./src/home";
+import type { HomeTab } from "./src/home";
 import { C, NAV_GAP, NAV_HEIGHT } from "./src/theme";
 
 /** Development-only placeholder posts for the extended sponsor demo feed (never part of `posts`). */
 const DEMO_FILLER = demoFillerPosts(STARTER_POSTS);
+/** Home photo / PR demo posts merged with the existing clips; Clips still shows only the clips. */
+const INITIAL_POSTS = mergeHomePosts(STARTER_POSTS);
 
 const toggleIn = (list: string[], id: string) => (list.includes(id) ? list.filter((x) => x !== id) : [...list, id]);
 
@@ -60,10 +64,11 @@ function Gymverse() {
   const insets = useSafeAreaInsets();
   const [screen, setScreen] = useState<Screen>("welcome");
   const [activeTab, setActiveTab] = useState<FeedTab>("For You");
-  const [posts, setPosts] = useState<Post[]>(STARTER_POSTS);
+  const [homeTab, setHomeTab] = useState<HomeTab>("Following");
+  const [posts, setPosts] = useState<Post[]>(INITIAL_POSTS);
   const [likedIds, setLikedIds] = useState<string[]>([]);
   const [savedIds, setSavedIds] = useState<string[]>([]);
-  const [followed, setFollowed] = useState<string[]>([]);
+  const [followed, setFollowed] = useState<string[]>(INITIAL_FOLLOWING);
   const [joined, setJoined] = useState<string[]>([]);
   const [timeline, setTimeline] = useState<TimelineEntry[]>(INITIAL_TIMELINE);
   const [addedComments, setAddedComments] = useState<Record<string, Comment[]>>({});
@@ -99,6 +104,8 @@ function Gymverse() {
   const [challengeFrom, setChallengeFrom] = useState<Screen>("challenges");
   const [founderPreview, setFounderPreview] = useState(false);
   const [foundersFrom, setFoundersFrom] = useState<Screen>("profile");
+  /** Challenges is no longer a tab; Back returns to Explore or Profile, whichever opened it. */
+  const [challengesFrom, setChallengesFrom] = useState<Screen>("explore");
   const toastTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   const showToast = useCallback((text: string) => {
@@ -128,11 +135,12 @@ function Gymverse() {
       if (screen === "pro_deals") { navigate(dealsFrom); return true; }
       if (screen === "premium_challenge") { navigate(challengeFrom); return true; }
       if (screen === "founders") { navigate(foundersFrom); return true; }
+      if (screen === "challenges") { navigate(challengesFrom); return true; }
       if (screen !== "home" && screen !== "welcome") { navigate("home"); return true; }
       return false;
     });
     return () => sub.remove();
-  }, [screen, commentPostId, sponsorSheet, navigate, premiumFrom, proFrom, creatorFrom, coachFrom, dealsFrom, challengeFrom, foundersFrom]);
+  }, [screen, commentPostId, sponsorSheet, navigate, premiumFrom, proFrom, creatorFrom, coachFrom, dealsFrom, challengeFrom, foundersFrom, challengesFrom]);
 
   /** Where each preview screen's Back button goes. */
   const backTargets: Partial<Record<Screen, Screen>> = { creator_studio: creatorFrom, pro_progress: proFrom, coach_center: coachFrom, pro_deals: dealsFrom, premium_challenge: challengeFrom, founders: foundersFrom };
@@ -172,10 +180,16 @@ function Gymverse() {
     setFoundersFrom(from === "founders" ? "profile" : from);
     navigate("founders");
   };
+  const openChallenges = (from: Screen) => {
+    setChallengesFrom(from);
+    navigate("challenges");
+  };
   const sponsorProfile = SPONSOR_PROFILES[membership.plan.sponsorProfile];
   /** Gap before each sponsored slot, from the central Phase 1 frequency config. Stable per profile so the feed doesn't recompose on unrelated renders. */
   const sponsorGapAt = useMemo(() => (slot: number) => sponsorGap(sponsorProfile, slot), [sponsorProfile]);
   const feedPosts = useMemo(() => (__DEV__ && extendedDemoFeed ? [...posts, ...DEMO_FILLER] : posts), [posts, extendedDemoFeed]);
+  /** The Clips tab (existing short-form experience) shows only clips; Home photo / PR posts stay on Home. */
+  const clipFeed = useMemo(() => clipPosts(feedPosts), [feedPosts]);
   const openSponsorExplore = useCallback((p: SponsoredPlacement) => setSponsorSheet({ mode: "detail", placement: p }), []);
   const openSponsorOptions = useCallback((p: SponsoredPlacement) => setSponsorSheet({ mode: "options", placement: p }), []);
   const hideSponsored = (p: SponsoredPlacement) => {
@@ -236,11 +250,19 @@ function Gymverse() {
 
   const openFeed = (tab: FeedTab, label?: string) => {
     setActiveTab(tab);
-    navigate("home");
+    navigate("clips");
     if (label) showToast(`Showing ${label}`);
   };
-  const openPost = (id: string) => {
+  /** Clips open in the existing short-form viewer, focused on that clip. */
+  const openClip = useCallback((id: string) => {
     setActiveTab("For You");
+    setFocusPostId(id);
+    navigate("clips");
+  }, [navigate]);
+  /** Profile grid: photo / PR posts open on Home, clips open in Clips. */
+  const openPost = (id: string) => {
+    if (!posts.find((p) => p.id === id)?.media) { openClip(id); return; }
+    setHomeTab("For You");
     setFocusPostId(id);
     navigate("home");
   };
@@ -291,7 +313,7 @@ function Gymverse() {
         ? "Posted for review. Guardian is checking it — only you can see it for now."
         : draft.addToTimeline
           ? "Posted — and added to your Progress Timeline."
-          : "Post added to your GYMVERSE feed.",
+          : "Post added to your GYMX feed.",
     );
     return null;
   };
@@ -307,10 +329,31 @@ function Gymverse() {
       break;
     case "home":
       content = (
+        <HomeFeedScreen
+          tab={homeTab}
+          onTab={setHomeTab}
+          posts={posts}
+          likedIds={likedIds}
+          savedIds={savedIds}
+          followed={followed}
+          focusPostId={focusPostId}
+          onFocusHandled={clearFocus}
+          onLike={likePost}
+          onSave={savePost}
+          onFollow={followUser}
+          onComment={setCommentPostId}
+          onShare={sharePost}
+          onOpenClip={openClip}
+          onToast={showToast}
+        />
+      );
+      break;
+    case "clips":
+      content = (
         <FeedScreen
           tab={activeTab}
           onTab={setActiveTab}
-          posts={feedPosts}
+          posts={clipFeed}
           likedIds={likedIds}
           savedIds={savedIds}
           followed={followed}
@@ -330,13 +373,13 @@ function Gymverse() {
       );
       break;
     case "explore":
-      content = <ExploreScreen onOpenFeed={openFeed} />;
+      content = <ExploreScreen onOpenFeed={openFeed} onChallenges={() => openChallenges("explore")} />;
       break;
     case "create":
       content = <CreateScreen onPost={createPost} onClose={() => navigate("home")} onToast={showToast} />;
       break;
     case "challenges":
-      content = <ChallengesScreen joined={joined} onToggle={toggleChallenge} onExplorePremium={(id) => openPremiumChallenge(id, "challenges")} onFounders={() => openFounders("challenges")} premiumProgress={premiumProgress} />;
+      content = <ChallengesScreen joined={joined} onToggle={toggleChallenge} onExplorePremium={(id) => openPremiumChallenge(id, "challenges")} onFounders={() => openFounders("challenges")} premiumProgress={premiumProgress} onBack={() => navigate(challengesFrom)} />;
       break;
     case "premium_challenge":
       content = (
@@ -354,7 +397,7 @@ function Gymverse() {
       content = <FoundersScreen onBack={() => navigate(foundersFrom)} founderPreview={founderPreview} />;
       break;
     case "profile":
-      content = <ProfileScreen myPosts={myPosts} savedPosts={savedPosts} onOpenPost={openPost} onTimeline={() => navigate("progress")} onChallenges={() => navigate("challenges")} onToast={showToast} onDevTools={__DEV__ ? () => setDevToolsOpen(true) : undefined} onPremium={() => openPremium("profile")} onStudio={() => setStudioOpen(true)} look={profileLook} onCreatorStudio={() => openCreator("profile")} creator={creatorLook} onCoachCenter={() => openCoach("profile")} coach={coachLook} onFounders={() => openFounders("profile")} founder={founderPreview} />;
+      content = <ProfileScreen myPosts={myPosts} savedPosts={savedPosts} onOpenPost={openPost} onTimeline={() => navigate("progress")} onChallenges={() => openChallenges("profile")} onToast={showToast} onDevTools={__DEV__ ? () => setDevToolsOpen(true) : undefined} onPremium={() => openPremium("profile")} onStudio={() => setStudioOpen(true)} look={profileLook} onCreatorStudio={() => openCreator("profile")} creator={creatorLook} onCoachCenter={() => openCoach("profile")} coach={coachLook} onFounders={() => openFounders("profile")} founder={founderPreview} />;
       break;
     case "premium":
       content = <PremiumScreen onBack={() => navigate(premiumFrom)} onExplore={setPlanDetail} onDeals={() => openDeals("premium")} onFounders={() => openFounders("premium")} />;
@@ -429,7 +472,7 @@ function Gymverse() {
             <SponsorDevPanel
               frequency={sponsorProfile.description}
               gapAt={sponsorGapAt}
-              organicCount={feedPosts.length}
+              organicCount={clipFeed.length}
               extendedFeed={extendedDemoFeed}
               onExtendedFeed={setExtendedDemoFeed}
               hiddenCampaignIds={hiddenSponsorCampaigns}

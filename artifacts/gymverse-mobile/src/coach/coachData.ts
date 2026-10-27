@@ -16,7 +16,7 @@ export const COACH_COPY = {
   pill: "COACH PRO · COMING SOON",
   distinction: "Creator Pro helps you grow attention. Coach Pro helps you turn attention into clients.",
   noGuarantee: "Coach Pro doesn't guarantee leads, clients, bookings or income, and it doesn't verify coaching credentials.",
-  demoNote: "Demo data — fictional people and numbers. No real GYMVERSE users, messages or analytics are used.",
+  demoNote: "Demo data — fictional people and numbers. No real GYMX users, messages or analytics are used.",
   inquirySent: "Demo inquiry created — no message was sent.",
   bookingCreated: "Demo booking created — no real appointment has been scheduled.",
   leadPrivacy: "Fictional leads only. Nothing here contacts anyone, and no lead data leaves this device.",
@@ -24,7 +24,7 @@ export const COACH_COPY = {
   showcaseTag: "FICTIONAL EXAMPLE · RESULTS VARY",
   partnershipTag: "DEMO OPPORTUNITY · NOT A LIVE PARTNERSHIP",
   partnershipDisclaimer:
-    "Fictional example for demonstration. There is no real brand or gym, no application, contract or agreement, and GYMVERSE has no partnership with any organisation shown.",
+    "Fictional example for demonstration. There is no real brand or gym, no application, contract or agreement, and GYMX has no partnership with any organisation shown.",
   badgeCoachPro: "COACH PRO",
   verificationPreview: "VERIFICATION PREVIEW — NOT VERIFIED",
   verificationNote:
@@ -331,7 +331,7 @@ export const EXPERIENCE_LEVELS: { id: Experience; label: string }[] = [
 export type ContactMethod = "in_app" | "email" | "phone";
 /** Only the preferred method is chosen — the demo never asks for an address or number. */
 export const CONTACT_METHODS: { id: ContactMethod; label: string }[] = [
-  { id: "in_app", label: "GYMVERSE message" },
+  { id: "in_app", label: "GYMX message" },
   { id: "email", label: "Email" },
   { id: "phone", label: "Phone call" },
 ];
@@ -619,7 +619,7 @@ export const PARTNERSHIPS: Partnership[] = [
   {
     id: "pt1", title: "Featured Coach Challenge Sponsor", orgLabel: "Fictional fitness brand", type: "Community challenge collaboration",
     description: "A mock fitness brand collaboration involving a community training challenge.",
-    eligibility: "Example: coaches who run community challenges on GYMVERSE.",
+    eligibility: "Example: coaches who run community challenges on GYMX.",
     concept: "A coach hosts a free 30-day community training challenge featuring a fictional brand.",
     activities: ["Design the challenge workouts", "Post weekly check-in videos", "Clear #ad disclosure would be required on anything real"], fictional: true,
   },

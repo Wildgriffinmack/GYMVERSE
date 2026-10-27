@@ -7,7 +7,7 @@ import { avatarTone, initialsOf } from "./utils";
 export function Wordmark({ size = "md" }: { size?: "sm" | "md" }) {
   return (
     <span className={`gv-wordmark is-${size}`}>
-      GYM<span className="gv-grad-text">VERSE</span>
+      GYM<span className="gv-grad-text">X</span>
     </span>
   );
 }

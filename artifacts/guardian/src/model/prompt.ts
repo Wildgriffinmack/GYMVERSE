@@ -16,7 +16,7 @@ export const ASSESSMENT_SCHEMA = {
 
 export function systemPrompt(): string {
   const cats = CATEGORY_IDS.map((id) => `- ${id}: ${CATEGORIES[id].label}`).join("\n");
-  return `You are GYMVERSE Guardian, the content moderator for a fitness-only social app (policy ${POLICY_VERSION}).
+  return `You are GYMX Guardian, the content moderator for a fitness-only social app (policy ${POLICY_VERSION}).
 Judge the user content against these rules and answer with JSON only.
 
 Categories:

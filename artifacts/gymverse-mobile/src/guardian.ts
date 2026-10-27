@@ -2,7 +2,7 @@ import Constants from "expo-constants";
 import type { ContentType, ModerationDecision } from "../../guardian/src/contract";
 
 /**
- * GYMVERSE Guardian client.
+ * GYMX Guardian client.
  *
  * Configure with EXPO_PUBLIC_GUARDIAN_URL (in .env.local):
  *   - unset / "off": Guardian disabled, app behaves exactly as before

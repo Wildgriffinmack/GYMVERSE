@@ -13,16 +13,16 @@ export const DEMO_BRAND_LABEL = "FICTIONAL DEMO BRAND";
 
 export const SPONSOR_COPY = {
   disclaimer:
-    "Fictional sponsor for demonstration. This brand doesn't exist, isn't a GYMVERSE partner, and nothing can be bought, claimed or ordered here.",
-  why: "This is a fictional sponsored post shown as part of the GYMVERSE advertising demo. Your membership determines the approximate number of sponsored posts you see.",
+    "Fictional sponsor for demonstration. This brand doesn't exist, isn't a GYMX partner, and nothing can be bought, claimed or ordered here.",
+  why: "This is a fictional sponsored post shown as part of the GYMX advertising demo. Your membership determines the approximate number of sponsored posts you see.",
   whyPremium: "Premium memberships reduce repetitive sponsored feed placements while keeping relevant fitness offers available.",
   noTargeting: "It isn't based on your interests, activity, browsing history, location or any advertising identifier.",
   hidden: "Sponsored post hidden for this session. It won't be replaced right away.",
-  reportSaved: "Demo report saved on this device only. Nothing was sent to GYMVERSE, Guardian or the brand.",
+  reportSaved: "Demo report saved on this device only. Nothing was sent to GYMX, Guardian or the brand.",
   reportNote: "Reports on sponsored posts keep the sponsored label so reviewers know it's an ad. In this prototype nothing leaves your device.",
   challengeRewards: "Premium challenge rewards may be sponsored by fitness brands.",
   challengeNote: "Fictional preview. There are no real prizes, winners, eligibility checks or shipping in this prototype, and free challenges stay free.",
-  dealsTitle: "GYMVERSE PRO DEALS",
+  dealsTitle: "GYMX PRO DEALS",
   dealsSubtitle: "Fitness offers worth checking out.",
   dealsDisclaimer: "Fictional prototype offers. No prices, discounts, promo codes, expiry dates or savings claims — and nothing can be bought.",
   seenIsNotEligible: "Seeing sponsored posts never makes you eligible for brand campaigns or partnerships.",
@@ -244,6 +244,6 @@ export function demoFillerPosts<P extends { id: string; username: string; name: 
   if (!templates.length) return [];
   return Array.from({ length: count }, (_, i) => {
     const t = templates[i % templates.length];
-    return { ...t, id: `${DEMO_FILLER_PREFIX}${i + 1}`, username: "gymverse_demo_feed", name: "Demo feed filler", caption: `Extended demo feed · placeholder post ${i + 1} (development only)`, hashtags: ["#DemoFeed"], verified: false, created: false, onTimeline: false, moderation: undefined };
+    return { ...t, id: `${DEMO_FILLER_PREFIX}${i + 1}`, username: "gymx_demo_feed", name: "Demo feed filler", caption: `Extended demo feed · placeholder post ${i + 1} (development only)`, hashtags: ["#DemoFeed"], verified: false, created: false, onTimeline: false, moderation: undefined };
   });
 }

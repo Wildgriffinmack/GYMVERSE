@@ -1,4 +1,4 @@
-// Phase 7 — premium challenges & GYMVERSE Founders. Run: npm run test:membership
+// Phase 7 — premium challenges & GYMX Founders. Run: npm run test:membership
 import assert from "node:assert/strict";
 import { readFileSync, readdirSync } from "node:fs";
 import { describe, it } from "node:test";
@@ -67,7 +67,7 @@ describe("premium challenge data", () => {
     assert.match(JSON.stringify(challengeById("pc-discipline")), /rest days/i);
   });
   it("copy has the required title, subtitle and Coming Soon", () => {
-    assert.equal(PREMIUM_CHALLENGE_COPY.title, "GYMVERSE PRO CHALLENGES");
+    assert.equal(PREMIUM_CHALLENGE_COPY.title, "GYMX PRO CHALLENGES");
     assert.equal(PREMIUM_CHALLENGE_COPY.subtitle, "Build strength. Stay accountable. Earn your progress.");
     assert.match(PREMIUM_CHALLENGE_COPY.pill, /COMING SOON/);
     assert.match(src("src/challenges/PremiumChallengesSection.tsx"), /<ComingSoonPill label="COMING SOON" \/>/);
@@ -111,7 +111,7 @@ describe("progress model", () => {
 });
 
 describe("membership access", () => {
-  it("Free is locked; GYMVERSE Pro, Creator Pro and Coach Pro can use the demos", () => {
+  it("Free is locked; GYMX Pro, Creator Pro and Coach Pro can use the demos", () => {
     assert.ok(PRO_FEATURES.includes("premium_challenges"));
     assert.equal(hasEntitlement("FREE", "premium_challenges"), false);
     for (const t of ["GYMVERSE_PRO", "CREATOR_PRO", "COACH_PRO"]) assert.equal(hasEntitlement(t, "premium_challenges"), true, t);
@@ -156,7 +156,7 @@ describe("sponsor reuse", () => {
   });
 });
 
-describe("GYMVERSE Founders", () => {
+describe("GYMX Founders", () => {
   it("is not a membership tier or an entitlement", () => {
     assert.deepEqual(MEMBERSHIP_TIERS, ["FREE", "GYMVERSE_PRO", "CREATOR_PRO", "COACH_PRO"]);
     assert.ok(!Object.keys(TIERS).some((k) => /founder/i.test(k)));
@@ -180,23 +180,23 @@ describe("GYMVERSE Founders", () => {
     assert.match(profile, /One primary membership badge at a time/, "membership badge logic untouched");
   });
   it("combines with every plan without changing it", () => {
-    assert.deepEqual(FOUNDER_COMBINATIONS.map((c) => c.label), ["Free Founder", "GYMVERSE Pro Founder", "Creator Pro Founder", "Coach Pro Founder"]);
+    assert.deepEqual(FOUNDER_COMBINATIONS.map((c) => c.label), ["Free Founder", "GYMX Pro Founder", "Creator Pro Founder", "Coach Pro Founder"]);
     assert.equal(hasEntitlement("FREE", "posting"), true);
     for (const f of CREATOR_FEATURES) assert.equal(hasEntitlement("CREATOR_PRO", f), true, f);
     for (const f of COACH_FEATURES) assert.equal(hasEntitlement("COACH_PRO", f), true, f);
   });
   it("badge is distinct from Verified Coach and membership badges", () => {
     const badge = src("src/founders/FounderBadge.tsx");
-    assert.equal(FOUNDER_COPY.badge, "GYMVERSE FOUNDER");
+    assert.equal(FOUNDER_COPY.badge, "GYMX FOUNDER");
     assert.doesNotMatch(badge, /<Verified|BadgeCheck|<Badge /);
     assert.match(badge, /Shield/);
     for (const t of MEMBERSHIP_TIERS) assert.notEqual(TIERS[t].badge.label, FOUNDER_COPY.badge);
     assert.match(FOUNDER_COPY.notCredential, /isn't identity verification or a coaching credential/);
   });
   it("is a concept with no promises, enrollment or moderation powers", () => {
-    assert.equal(FOUNDER_COPY.title, "GYMVERSE FOUNDERS");
+    assert.equal(FOUNDER_COPY.title, "GYMX FOUNDERS");
     assert.equal(FOUNDER_COPY.tagline, "Built from day one. Remembered forever.");
-    assert.equal(FOUNDER_COPY.description, "A recognition concept for the earliest members who help shape the GYMVERSE community.");
+    assert.equal(FOUNDER_COPY.description, "A recognition concept for the earliest members who help shape the GYMX community.");
     assert.match(FOUNDER_COPY.notFinal, /not decided/);
     assert.match(FOUNDER_COPY.rules, /no moderation powers/);
     assert.equal(FOUNDER_BENEFITS.length, 6);
@@ -222,7 +222,7 @@ describe("navigation and integration", () => {
     assert.match(premium, /Explore Founders/);
     assert.match(premium, /PREMIUM_PLANS\.map/);
     assert.match(premium, /<SponsorBenefits onDeals=\{onDeals\} \/>/);
-    assert.match(src("src/screens/Profile.tsx"), /GYMVERSE Founders/);
+    assert.match(src("src/screens/Profile.tsx"), /GYMX Founders/);
     assert.match(src("App.tsx"), /onFounders=\{\(\) => openFounders\("challenges"\)\}/);
   });
   it("introduces no payments, network calls or external services", () => {

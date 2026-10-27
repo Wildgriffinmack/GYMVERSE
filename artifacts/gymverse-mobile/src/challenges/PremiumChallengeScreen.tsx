@@ -138,7 +138,7 @@ export function PremiumChallengeScreen({ challengeId, completedIds, onChange, on
           <View style={[s.note, { marginTop: 18 }]}><HeartPulse size={16} color={C.gold} /><Text style={s.noteText}>{PREMIUM_CHALLENGE_COPY.rest} {PREMIUM_CHALLENGE_COPY.safety}</Text></View>
           <View style={[s.note, { marginTop: 8 }]}><ShieldCheck size={16} color={C.gold} /><Text style={s.noteText}>{SPONSOR_COPY.challengeNote}</Text></View>
           {!unlocked ? (
-            <Pressable accessibilityRole="button" onPress={() => { tap(); onOpenPremium(); }} style={[s.reset, { borderColor: "rgba(255,209,102,0.5)" }]}><Crown size={15} color={C.gold} /><Text style={[s.resetText, { color: C.gold }]}>See GYMVERSE Premium</Text></Pressable>
+            <Pressable accessibilityRole="button" onPress={() => { tap(); onOpenPremium(); }} style={[s.reset, { borderColor: "rgba(255,209,102,0.5)" }]}><Crown size={15} color={C.gold} /><Text style={[s.resetText, { color: C.gold }]}>See GYMX Premium</Text></Pressable>
           ) : null}
           <View style={[s.note, { marginTop: 8 }]}><Info size={16} color={C.gold} /><Text style={s.noteText}>Preview only: nothing here enrolls you, and community challenges stay free.</Text></View>
         </View>

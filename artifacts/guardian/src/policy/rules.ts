@@ -1,7 +1,7 @@
 import type { CategoryId, ContentType, Severity } from "../contract.ts";
 
 /**
- * GYMVERSE Community Guidelines expressed as reviewable rules.
+ * GYMX Community Guidelines expressed as reviewable rules.
  *
  * Principles:
  * - Rules flag; they do not judge intent on their own. Only high-confidence rules in
@@ -427,8 +427,8 @@ export const RULES: Rule[] = [
     category: "needs_human_review",
     confidence: "medium",
     only: ["profile_username"],
-    pattern: /\b(?:official|admin|administrator|moderator|mod team|support|staff|gymverse|verified)\b/,
-    note: "Username may impersonate GYMVERSE staff or a verified account.",
+    pattern: /\b(?:official|admin|administrator|moderator|mod team|support|staff|gymx|gymverse|verified)\b/,
+    note: "Username may impersonate GYMX staff or a verified account.",
   },
 ];
 

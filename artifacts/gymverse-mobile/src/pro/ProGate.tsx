@@ -17,7 +17,7 @@ import { CHALLENGE_FEATURE_INFO } from "../challenges/premiumChallengeData";
 /** Which membership a locked section belongs to (controls lock copy only; access always comes from entitlements). */
 export type GatePlan = "pro" | "creator" | "coach";
 const PLAN_LOCK: Record<GatePlan, { title: string; chip: string; sheetBadge: string }> = {
-  pro: { title: "GYMVERSE Pro · Coming Soon", chip: "PRO", sheetBadge: "GYMVERSE PRO" },
+  pro: { title: "GYMX Pro · Coming Soon", chip: "PRO", sheetBadge: "GYMX PRO" },
   creator: { title: "Creator Pro · Coming Soon", chip: "CREATOR", sheetBadge: "CREATOR PRO" },
   coach: { title: "Coach Pro · Coming Soon", chip: "COACH", sheetBadge: "COACH PRO" },
 };
@@ -93,7 +93,7 @@ export function LockedFeatureSheet({ feature, onClose, onOpenPremium }: { featur
           <Pressable accessibilityRole="button" onPress={() => { tap(); onClose(); onOpenPremium(); }} style={({ pressed }) => [{ marginTop: 18, transform: [{ scale: pressed ? 0.97 : 1 }] }]}>
             <LinearGradient colors={GRAD_GOLD} start={DIAG.start} end={DIAG.end} style={s.sheetCta}>
               <Crown size={18} color="#1c0f00" />
-              <Text style={s.sheetCtaText}>See GYMVERSE Premium</Text>
+              <Text style={s.sheetCtaText}>See GYMX Premium</Text>
             </LinearGradient>
           </Pressable>
           <Pressable accessibilityRole="button" onPress={() => { tap(); onClose(); }} style={s.notNow}><Text style={s.notNowText}>Not now</Text></Pressable>

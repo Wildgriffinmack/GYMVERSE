@@ -1,5 +1,5 @@
 /**
- * GYMVERSE Pro progress — DEMONSTRATION DATA (Phase 3).
+ * GYMX Pro progress — DEMONSTRATION DATA (Phase 3).
  *
  * Every number here is fabricated example data for a Coming Soon preview. Nothing is read from
  * a backend, nothing is sent anywhere, and no AI model is involved. Pure module (type-only
@@ -8,7 +8,7 @@
 import type { PremiumFeature } from "../membership/entitlements";
 
 export const DEMO_NOTE = "Demo data — example numbers, not your real training.";
-export const MEMBER_NOTE = "Fictional example member. Not a real GYMVERSE member's results.";
+export const MEMBER_NOTE = "Fictional example member. Not a real GYMX member's results.";
 
 // ── PR history ──────────────────────────────────────────────────────────────
 export type LiftId = "bench" | "squat" | "deadlift";
@@ -112,7 +112,7 @@ export function volumeTrendPct(volume: number[] = WEEKLY_VOLUME_LBS): number {
 }
 
 // ── AI weekly check-in (SCRIPTED) ───────────────────────────────────────────
-export const CHECKIN_TITLE = "YOUR WEEK IN GYMVERSE";
+export const CHECKIN_TITLE = "YOUR WEEK IN GYMX";
 export const CHECKIN_BANNER = "AI Weekly Check-In — Coming Soon";
 export const CHECKIN_SCRIPT_NOTE = "Scripted demonstration. This report is written in advance — no AI model generated it.";
 

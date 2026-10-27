@@ -100,7 +100,7 @@ export function GymverseApp() {
     if (draft.addToTimeline) setTimeline((current) => [...current, timelineEntryFrom(post)]);
     setActiveTab("For You");
     navigate("home");
-    showToast(draft.addToTimeline ? "Posted — and added to your Progress Timeline." : "Post added to your GYMVERSE feed.");
+    showToast(draft.addToTimeline ? "Posted — and added to your Progress Timeline." : "Post added to your GYMX feed.");
   };
 
   const commentPost = posts.find((post) => post.id === commentPostId);

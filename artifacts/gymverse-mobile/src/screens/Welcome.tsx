@@ -44,7 +44,7 @@ export function WelcomeScreen({ onEnter }: { onEnter: () => void }) {
         <Rise delay={100}><Label>The fitness-only social app</Label></Rise>
         <Rise delay={180} style={{ flexDirection: "row", marginTop: 8 }}>
           <Text style={[s.brand, { fontSize: brandSize, lineHeight: brandSize * 1.08 }]}>GYM</Text>
-          <GradText style={[s.brand, { fontSize: brandSize, lineHeight: brandSize * 1.08 }]}>VERSE</GradText>
+          <GradText style={[s.brand, { fontSize: brandSize, lineHeight: brandSize * 1.08 }]}>X</GradText>
         </Rise>
         <Rise delay={260}><Text style={s.tagline}>Your gym feed. Nothing else.</Text></Rise>
         <Rise delay={320}>
@@ -53,7 +53,7 @@ export function WelcomeScreen({ onEnter }: { onEnter: () => void }) {
           </Text>
         </Rise>
         <Rise delay={400} style={{ marginTop: 28, gap: 6, alignItems: "center" }}>
-          <Cta title="Enter GYMVERSE" onPress={onEnter} icon={<ArrowRight size={20} color="#fff" strokeWidth={2.6} />} style={{ alignSelf: "stretch" }} />
+          <Cta title="Enter GYMX" onPress={onEnter} icon={<ArrowRight size={20} color="#fff" strokeWidth={2.6} />} style={{ alignSelf: "stretch" }} />
           <Pressable accessibilityRole="button" onPress={() => { tap(); onEnter(); }} hitSlop={8} style={({ pressed }) => ({ padding: 10, opacity: pressed ? 0.6 : 1 })}>
             <Text style={s.link}>Explore demo</Text>
           </Pressable>

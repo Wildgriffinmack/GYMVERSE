@@ -53,11 +53,11 @@ describe("coach entitlements", () => {
     assert.equal(COACH_FEATURES.length, 11);
     for (const f of COACH_FEATURES) assert.ok(COACH_FEATURE_INFO[f]?.body, f);
   });
-  it("Coach Pro unlocks every coach tool and inherits GYMVERSE Pro", () => {
+  it("Coach Pro unlocks every coach tool and inherits GYMX Pro", () => {
     for (const f of [...COACH_FEATURES, ...PRO_FEATURES]) assert.equal(hasEntitlement("COACH_PRO", f), true, f);
     assert.deepEqual(TIER_INHERITS.COACH_PRO, ["GYMVERSE_PRO"]);
   });
-  it("Free, GYMVERSE Pro and Creator Pro cannot use coach tools", () => {
+  it("Free, GYMX Pro and Creator Pro cannot use coach tools", () => {
     for (const tier of ["FREE", "GYMVERSE_PRO", "CREATOR_PRO"]) for (const f of COACH_FEATURES) assert.equal(hasEntitlement(tier, f), false, `${tier} ${f}`);
   });
   it("Coach Pro does not get Creator Pro-only tools", () => {
