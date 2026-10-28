@@ -156,9 +156,9 @@ If more than one is configured, the first in this table wins.
 
 **Gmail setup:** the account in `GMAIL_USER` needs 2-Step Verification and an [app password](https://myaccount.google.com/apppasswords). The Worker signs in to `smtp.gmail.com:465` over TLS (`cloudflare:sockets`) and sends from `GMAIL_USER`, keeping the display name from `NOTIFY_FROM` (for example "GYMX Waitlist"). Add both values in Cloudflare → Workers & Pages → `gymx-web` → Settings → Variables and Secrets as type **Secret**; never put them in `wrangler.jsonc`. A wrong password shows up as `notify_error = SMTP_535: Gmail: login rejected…`.
 
-Variables: `NOTIFY_TO` (default `team@gymx.life`), `NOTIFY_FROM` (must be on your verified sending domain), `CONFIRMATION_EMAILS_ENABLED` (`false`), `CONFIRMATION_FROM`. Secrets: `RESEND_API_KEY`, `GMAIL_USER`, `GMAIL_APP_PASSWORD`, `WAITLIST_HASH_SALT`.
+Variables: `NOTIFY_TO` (default `team@gymx.life`), `NOTIFY_TIMEZONE` (default `America/Los_Angeles`; times in team emails), `NOTIFY_FROM` (must be on your verified sending domain), `CONFIRMATION_EMAILS_ENABLED` (`true`), `CONFIRMATION_FROM`. Secrets: `RESEND_API_KEY`, `GMAIL_USER`, `GMAIL_APP_PASSWORD`, `WAITLIST_HASH_SALT`.
 
-Member confirmation emails ("You're on the GYMX Waitlist!") are built in [`lib/server/email.ts`](lib/server/email.ts) and stay **off** until `CONFIRMATION_EMAILS_ENABLED` is `true` and a sending domain is verified.
+Member confirmation emails ("You're on the GYMX Waitlist!") are built in [`lib/server/email.ts`](lib/server/email.ts). They are **on** (`CONFIRMATION_EMAILS_ENABLED` is `true` in `wrangler.jsonc`) and go out once per new email address, from "The GYMX Team" via the configured provider; set it to `false` to stop them. `confirmation_status` on each row records `sent` / `failed` / `disabled`.
 
 ### View and export registrations
 

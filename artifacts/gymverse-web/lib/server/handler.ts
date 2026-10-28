@@ -126,7 +126,7 @@ export async function afterSignup(env: WaitlistEnv, s: WaitlistSubmission, id: s
 
   try {
     const totals = await countSignups(db).catch(() => null);
-    const message = buildTeamNotification({ kind: s.kind, email: s.email, createdAt: s.submittedAt, totals }, env.NOTIFY_TO?.trim() || DEFAULT_NOTIFY_TO, env.NOTIFY_FROM?.trim() || DEFAULT_NOTIFY_FROM);
+    const message = buildTeamNotification({ kind: s.kind, email: s.email, createdAt: s.submittedAt, totals, timeZone: env.NOTIFY_TIMEZONE?.trim() || undefined }, env.NOTIFY_TO?.trim() || DEFAULT_NOTIFY_TO, env.NOTIFY_FROM?.trim() || DEFAULT_NOTIFY_FROM);
     await mailer.send(message, `${id}:team`);
     await recordNotification(db, id, { status: "sent" }, at);
   } catch (e) {

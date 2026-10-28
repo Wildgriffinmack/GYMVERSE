@@ -26,10 +26,12 @@
       "migrations_dir": "migrations"
     }
   ],
-  // Non-secret settings. Email provider credentials (RESEND_API_KEY) and WAITLIST_HASH_SALT are
-  // secrets: set them in the Cloudflare dashboard or with `wrangler secret put`, never here.
+  // Non-secret settings. Email provider credentials (GMAIL_USER + GMAIL_APP_PASSWORD, or RESEND_API_KEY)
+  // and WAITLIST_HASH_SALT are secrets: set them in the Worker's Settings → Variables and Secrets
+  // (not the Build section) or with `wrangler secret put`, never here.
   "vars": {
     "NOTIFY_TO": "team@gymx.life",
-    "CONFIRMATION_EMAILS_ENABLED": "false"
+    "NOTIFY_TIMEZONE": "America/Los_Angeles",
+    "CONFIRMATION_EMAILS_ENABLED": "true"
   }
 }

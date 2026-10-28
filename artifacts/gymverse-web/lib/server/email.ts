@@ -82,9 +82,20 @@ export function getMailer(env: WaitlistEnv, fetchImpl: typeof fetch = fetch, con
 
 const escapeHtml = (s: string) => s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!);
 
-function formatUtc(iso: string): string {
+export const DEFAULT_NOTIFY_TIMEZONE = "America/Los_Angeles";
+
+/** "Tue, Oct 27, 2026, 10:58 PM PDT" in the team's time zone; falls back to UTC if the zone name is invalid. */
+export function formatSignupTime(iso: string, timeZone = DEFAULT_NOTIFY_TIMEZONE): string {
   const d = new Date(iso);
-  return `${d.toUTCString().replace("GMT", "UTC")}`;
+  const opts: Intl.DateTimeFormatOptions = { weekday: "short", year: "numeric", month: "short", day: "numeric", hour: "numeric", minute: "2-digit", timeZoneName: "short" };
+  let text: string;
+  try {
+    text = new Intl.DateTimeFormat("en-US", { ...opts, timeZone }).format(d);
+  } catch {
+    text = new Intl.DateTimeFormat("en-US", { ...opts, timeZone: "UTC" }).format(d);
+  }
+  // Newer ICU puts a narrow no-break space before AM/PM, which some mail clients render oddly.
+  return text.replace(/[\u202f\u00a0]/g, " ");
 }
 
 function shell(title: string, body: string): string {
@@ -100,12 +111,14 @@ export interface TeamNotificationInput {
   email: string;
   createdAt: string;
   totals: { members: number; coaches: number } | null;
+  /** IANA zone for the "Registered" time, e.g. "America/Los_Angeles". */
+  timeZone?: string;
 }
 
 /** Team-only notification: new signup, email, time, and totals. */
 export function buildTeamNotification(n: TeamNotificationInput, to: string, from: string): EmailMessageInput {
   const label = n.kind === "coach" ? "founding coach application" : "waitlist signup";
-  const when = formatUtc(n.createdAt);
+  const when = formatSignupTime(n.createdAt, n.timeZone);
   const total = n.totals ? n.totals.members + n.totals.coaches : null;
   const lines = [
     `New GYMX ${label}`,

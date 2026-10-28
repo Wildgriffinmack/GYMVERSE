@@ -56,6 +56,8 @@ export interface WaitlistEnv {
   GMAIL_APP_PASSWORD?: string;
   /** Team inbox for signup notifications. */
   NOTIFY_TO?: string;
+  /** IANA time zone for times in team notifications (default "America/Los_Angeles"). */
+  NOTIFY_TIMEZONE?: string;
   /** Sender for team notifications, e.g. "GYMX Waitlist <waitlist@gymx.life>". Must be on a verified sending domain. */
   NOTIFY_FROM?: string;
   /** "true" turns on confirmation emails to new members. Off by default. */

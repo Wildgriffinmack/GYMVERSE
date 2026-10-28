@@ -10,7 +10,7 @@ import { fileURLToPath } from "node:url";
 import { afterSignup, handleWaitlistPost, sanitizeContext } from "../lib/server/handler.ts";
 import { RATE_LIMIT_MAX, resetSchemaCache } from "../lib/server/store.ts";
 import { SCHEMA_STATEMENTS } from "../lib/server/schema.ts";
-import { CONFIRMATION_SUBJECT, buildTeamNotification, getMailer } from "../lib/server/email.ts";
+import { CONFIRMATION_SUBJECT, buildTeamNotification, formatSignupTime, getMailer } from "../lib/server/email.ts";
 import { buildMimeMessage, encodeHeader, sendViaSmtp } from "../lib/server/smtp.ts";
 import { createApiAdapter } from "../lib/submit.ts";
 import { EMPTY_MEMBER, prepareMember } from "../lib/waitlist.ts";
@@ -275,7 +275,7 @@ describe("team notifications", () => {
     assert.equal(m.to, "team@gymx.life");
     assert.equal(m.subject, "New GYMX waitlist signup");
     assert.match(m.text, /Email: maya@example\.com/);
-    assert.match(m.text, /Registered: Wed, 28 Oct 2026 12:00:00 UTC/);
+    assert.match(m.text, /Registered: Wed, Oct 28, 2026, 5:00 AM PDT/);
     assert.match(m.text, /Total registrations: 2 \(1 waitlist, 1 coach applications\)/);
     assert.equal(mail.sent[0].subject, "New GYMX founding coach application");
     assert.deepEqual(rows(db).map((r) => r.notify_status), ["sent", "sent"]);
@@ -336,6 +336,12 @@ describe("team notifications", () => {
     assert.equal(mail.sent[1].subject, CONFIRMATION_SUBJECT);
     assert.match(mail.sent[1].text, /You're officially on the waitlist/);
     assert.equal(rows(db)[0].confirmation_status, "sent");
+  });
+  it("shows signup times in Pacific time by default, with a configurable zone and a safe UTC fallback", () => {
+    assert.equal(formatSignupTime("2026-10-28T05:58:01Z"), "Tue, Oct 27, 2026, 10:58 PM PDT");
+    assert.equal(formatSignupTime("2026-12-01T20:00:00Z"), "Tue, Dec 1, 2026, 12:00 PM PST");
+    assert.equal(formatSignupTime("2026-10-28T05:58:01Z", "America/New_York"), "Wed, Oct 28, 2026, 1:58 AM EDT");
+    assert.equal(formatSignupTime("2026-10-28T05:58:01Z", "Not/AZone"), "Wed, Oct 28, 2026, 5:58 AM UTC");
   });
   it("escapes user-provided text in HTML emails", () => {
     const m = buildTeamNotification({ kind: "member", email: "<b>x</b>@example.com", createdAt: NOW.toISOString(), totals: null }, "t@x.co", "f@x.co");
@@ -440,6 +446,17 @@ describe("Gmail (Google Workspace SMTP) provider", () => {
     assert.ok(errors.some((e) => e.includes('"provider":"gmail"')));
     assert.ok(!errors.join(" ").includes("@"), "no email addresses logged");
     assert.ok(smtp.closed);
+  });
+  it("sends the welcome email to the new member from \"The GYMX Team\" when confirmations are on", async () => {
+    const smtp = fakeSmtp();
+    await call({ ...gmailEnv(), CONFIRMATION_EMAILS_ENABLED: "true" }, { kind: "member", values: memberValues, context }, undefined, { connect: smtp.connect });
+    assert.deepEqual(smtp.commands.filter((c) => c.startsWith("RCPT TO")), ["RCPT TO:<team@gymx.life>", "RCPT TO:<maya@example.com>"]);
+    assert.match(smtp.data, /^From: "The GYMX Team" <sender@gymx\.life>\r$/m);
+    assert.match(smtp.data, /^Subject: You're on the GYMX Waitlist!\r$/m);
+    assert.match(decodeParts(smtp.data)[0], /You're officially on the waitlist/);
+    const [row] = rows(db);
+    assert.equal(row.notify_status, "sent");
+    assert.equal(row.confirmation_status, "sent");
   });
   it("only sends once per new email", async () => {
     const smtp = fakeSmtp();
