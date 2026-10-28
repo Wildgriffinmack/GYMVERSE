@@ -3,7 +3,7 @@ import type { Channel } from "../attribution.ts";
 import { EMPTY_COACH, EMPTY_MEMBER, prepareCoach, prepareMember } from "../waitlist.ts";
 import type { CoachFormValues, MemberFormValues, SubmissionContext, WaitlistSubmission } from "../waitlist.ts";
 import { DEFAULT_CONFIRMATION_FROM, DEFAULT_NOTIFY_FROM, DEFAULT_NOTIFY_TO, buildConfirmationEmail, buildTeamNotification, confirmationsEnabled, describeMailError, getMailer } from "./email.ts";
-import type { WaitlistEnv } from "./env.ts";
+import type { ConnectFn, WaitlistEnv } from "./env.ts";
 import { RATE_LIMIT_WINDOW_MS, consumeRateLimit, countSignups, ensureSchema, hashClientKey, insertSignup, recordConfirmation, recordNotification } from "./store.ts";
 
 export const MAX_BODY_BYTES = 8 * 1024;
@@ -20,6 +20,8 @@ interface HandlerOptions {
   now?: () => Date;
   newId?: () => string;
   fetchImpl?: typeof fetch;
+  /** `connect` from `cloudflare:sockets`; needed only for the Gmail SMTP provider. */
+  connect?: ConnectFn;
 }
 
 function json(body: ApiResponseBody, status: number, headers: Record<string, string> = {}): Response {
@@ -103,7 +105,7 @@ export async function handleWaitlistPost(request: Request, env: WaitlistEnv, wai
 
     const id = opts.newId?.() ?? crypto.randomUUID();
     const inserted = await insertSignup(db, prepared.submission, id);
-    if (inserted.created) waitUntil(afterSignup(env, prepared.submission, id, opts.fetchImpl));
+    if (inserted.created) waitUntil(afterSignup(env, prepared.submission, id, opts.fetchImpl, opts.connect));
     return json({ ok: true }, 200);
   } catch (e) {
     console.error(JSON.stringify({ event: "waitlist_error", message: (e as Error)?.message?.slice(0, 200) ?? "unknown" }));
@@ -112,10 +114,10 @@ export async function handleWaitlistPost(request: Request, env: WaitlistEnv, wai
 }
 
 /** Runs after the response: team notification, then optional confirmation. Failures never touch the saved signup. */
-export async function afterSignup(env: WaitlistEnv, s: WaitlistSubmission, id: string, fetchImpl?: typeof fetch): Promise<void> {
+export async function afterSignup(env: WaitlistEnv, s: WaitlistSubmission, id: string, fetchImpl?: typeof fetch, connect?: ConnectFn): Promise<void> {
   const db = env.DB!;
   const at = new Date().toISOString();
-  const mailer = getMailer(env, fetchImpl);
+  const mailer = getMailer(env, fetchImpl, connect);
   if (!mailer) {
     await recordNotification(db, id, { status: "skipped", error: "no email provider configured" }, at);
     console.warn(JSON.stringify({ event: "waitlist_notify_skipped", id, reason: "no email provider configured" }));

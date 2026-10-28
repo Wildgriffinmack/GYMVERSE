@@ -11,6 +11,7 @@ import { afterSignup, handleWaitlistPost, sanitizeContext } from "../lib/server/
 import { RATE_LIMIT_MAX, resetSchemaCache } from "../lib/server/store.ts";
 import { SCHEMA_STATEMENTS } from "../lib/server/schema.ts";
 import { CONFIRMATION_SUBJECT, buildTeamNotification, getMailer } from "../lib/server/email.ts";
+import { buildMimeMessage, encodeHeader, sendViaSmtp } from "../lib/server/smtp.ts";
 import { createApiAdapter } from "../lib/submit.ts";
 import { EMPTY_MEMBER, prepareMember } from "../lib/waitlist.ts";
 
@@ -82,9 +83,9 @@ function req(body, { ip = "203.0.113.7", origin = "https://gymx.life", type = "a
   return new Request("https://gymx.life/api/waitlist", { method: "POST", headers, body: raw ?? JSON.stringify(body) });
 }
 
-async function call(env, body, opts) {
+async function call(env, body, opts, handlerOpts = {}) {
   const pending = [];
-  const res = await handleWaitlistPost(req(body, opts), env, (p) => pending.push(p), { now: () => NOW });
+  const res = await handleWaitlistPost(req(body, opts), env, (p) => pending.push(p), { now: () => NOW, ...handlerOpts });
   await Promise.all(pending);
   return { res, body: await res.json(), background: pending.length };
 }
@@ -340,6 +341,132 @@ describe("team notifications", () => {
     const m = buildTeamNotification({ kind: "member", email: "<b>x</b>@example.com", createdAt: NOW.toISOString(), totals: null }, "t@x.co", "f@x.co");
     assert.ok(!m.html.includes("<b>x</b>"));
     assert.ok(m.html.includes("&lt;b&gt;"));
+  });
+});
+
+/** In-memory SMTP server speaking just enough of Gmail's dialogue, exposed as a `cloudflare:sockets` connect(). */
+function fakeSmtp({ authOk = true, silent = false } = {}) {
+  const enc = new TextEncoder();
+  const dec = new TextDecoder();
+  const state = { commands: [], data: "", address: null, options: null, closed: false };
+  state.connect = (address, options) => {
+    state.address = address;
+    state.options = options;
+    let ctrl;
+    let buf = "";
+    let inData = false;
+    const reply = (s) => ctrl.enqueue(enc.encode(`${s}\r\n`));
+    const readable = new ReadableStream({
+      start(c) {
+        ctrl = c;
+        if (!silent) reply("220 smtp.gmail.com ESMTP ready");
+      },
+    });
+    const writable = new WritableStream({
+      write(chunk) {
+        buf += dec.decode(chunk);
+        for (;;) {
+          if (inData) {
+            const end = buf.indexOf("\r\n.\r\n");
+            if (end < 0) return;
+            state.data = buf.slice(0, end);
+            buf = buf.slice(end + 5);
+            inData = false;
+            reply("250 2.0.0 OK queued");
+            continue;
+          }
+          const i = buf.indexOf("\r\n");
+          if (i < 0) return;
+          const line = buf.slice(0, i);
+          buf = buf.slice(i + 2);
+          state.commands.push(line);
+          if (line.startsWith("EHLO")) reply("250-smtp.gmail.com at your service\r\n250-AUTH LOGIN PLAIN\r\n250 SMTPUTF8");
+          else if (line.startsWith("AUTH")) reply(authOk ? "235 2.7.0 Accepted" : "535-5.7.8 Username and Password not accepted for sender@gymx.life\r\n535 5.7.8 https://support.google.com/mail");
+          else if (line.startsWith("MAIL FROM") || line.startsWith("RCPT TO")) reply("250 2.1.0 OK");
+          else if (line === "DATA") {
+            inData = true;
+            reply("354 Go ahead");
+          } else if (line === "QUIT") reply("221 2.0.0 closing connection");
+        }
+      },
+    });
+    return { readable, writable, close: async () => void (state.closed = true) };
+  };
+  return state;
+}
+
+const decodeParts = (data) => [...data.matchAll(/base64\r\n\r\n([A-Za-z0-9+/=\r\n]+?)\r\n--/g)].map((m) => Buffer.from(m[1].replace(/\r\n/g, ""), "base64").toString("utf8"));
+
+describe("Gmail (Google Workspace SMTP) provider", () => {
+  const errors = [];
+  const origError = console.error;
+  beforeEach(() => {
+    errors.length = 0;
+    console.error = (...a) => errors.push(a.join(" "));
+  });
+  after(() => {
+    console.error = origError;
+  });
+  const gmailEnv = () => ({ DB: db, NOTIFY_TO: "team@gymx.life", GMAIL_USER: "sender@gymx.life", GMAIL_APP_PASSWORD: "abcd efgh ijkl mnop" });
+
+  it("signs in with the app password over TLS on port 465 and delivers the notification to the team inbox", async () => {
+    const smtp = fakeSmtp();
+    const { res } = await call(gmailEnv(), { kind: "member", values: memberValues, context }, undefined, { connect: smtp.connect });
+    assert.equal(res.status, 200);
+    assert.deepEqual(smtp.address, { hostname: "smtp.gmail.com", port: 465 });
+    assert.equal(smtp.options.secureTransport, "on");
+    assert.equal(smtp.commands[0], "EHLO gymx.life");
+    assert.equal(Buffer.from(smtp.commands[1].replace("AUTH PLAIN ", ""), "base64").toString(), "\0sender@gymx.life\0abcdefghijklmnop");
+    assert.equal(smtp.commands[2], "MAIL FROM:<sender@gymx.life>");
+    assert.equal(smtp.commands[3], "RCPT TO:<team@gymx.life>");
+    assert.match(smtp.data, /^From: "GYMX Waitlist" <sender@gymx\.life>\r\n/m);
+    assert.match(smtp.data, /^To: <team@gymx\.life>\r$/m);
+    assert.match(smtp.data, /^Subject: New GYMX waitlist signup\r$/m);
+    const [text, html] = decodeParts(smtp.data);
+    assert.match(text, /Email: maya@example\.com/);
+    assert.match(text, /Total registrations: 1/);
+    assert.match(html, /maya@example\.com/);
+    assert.ok(smtp.closed, "socket closed");
+    assert.equal(rows(db)[0].notify_status, "sent");
+  });
+  it("a rejected login marks the notification failed without losing the signup or logging addresses", async () => {
+    const smtp = fakeSmtp({ authOk: false });
+    await call(gmailEnv(), { kind: "member", values: memberValues, context }, undefined, { connect: smtp.connect });
+    const [row] = rows(db);
+    assert.equal(row.email, "maya@example.com");
+    assert.equal(row.notify_status, "failed");
+    assert.match(row.notify_error, /^SMTP_535: Gmail: login rejected/);
+    assert.ok(!row.notify_error.includes("sender@gymx.life"));
+    assert.ok(errors.some((e) => e.includes('"provider":"gmail"')));
+    assert.ok(!errors.join(" ").includes("@"), "no email addresses logged");
+    assert.ok(smtp.closed);
+  });
+  it("only sends once per new email", async () => {
+    const smtp = fakeSmtp();
+    await call(gmailEnv(), { kind: "member", values: memberValues, context }, undefined, { connect: smtp.connect });
+    smtp.commands.length = 0;
+    await call(gmailEnv(), { kind: "member", values: memberValues, context }, undefined, { connect: smtp.connect });
+    assert.equal(smtp.commands.length, 0);
+  });
+  it("times out instead of hanging when the server never answers", async () => {
+    const smtp = fakeSmtp({ silent: true });
+    await assert.rejects(sendViaSmtp({ connect: smtp.connect, user: "a@b.co", password: "p", message: { to: "t@x.co", from: "f@x.co", subject: "s", text: "t", html: "h" }, messageId: "m", timeoutMs: 50 }), /timed out/);
+    assert.ok(smtp.closed);
+  });
+  it("is used only when both secrets and sockets are available, after Cloudflare and Resend", () => {
+    const smtp = fakeSmtp();
+    assert.equal(getMailer({ GMAIL_USER: "a@b.co", GMAIL_APP_PASSWORD: "p" }), null, "no sockets → no Gmail");
+    assert.equal(getMailer({ GMAIL_USER: "a@b.co" }, fetch, smtp.connect), null);
+    assert.equal(getMailer({ GMAIL_USER: "a@b.co", GMAIL_APP_PASSWORD: "p" }, fetch, smtp.connect).provider, "gmail");
+    assert.equal(getMailer({ RESEND_API_KEY: "k", GMAIL_USER: "a@b.co", GMAIL_APP_PASSWORD: "p" }, fetch, smtp.connect).provider, "resend");
+  });
+  it("keeps headers on one line and encodes non-ASCII", () => {
+    assert.equal(encodeHeader("Hi\r\nBcc: x@y.co"), "Hi Bcc: x@y.co");
+    assert.equal(encodeHeader("Café"), "=?UTF-8?B?Q2Fmw6k=?=");
+    const mime = buildMimeMessage({ to: "t@x.co", from: "f@x.co", subject: "a\r\nb", text: "t", html: "h" }, { name: "", address: "f@x.co" }, "id:team", NOW);
+    assert.match(mime, /^Subject: a b\r$/m);
+    assert.match(mime, /^Message-ID: <idteam@gymx\.life>\r$/m);
+    assert.ok(!/[^\r]\n/.test(mime), "CRLF line endings only");
   });
 });
 

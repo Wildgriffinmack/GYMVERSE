@@ -1,4 +1,5 @@
-import type { EmailMessageInput, WaitlistEnv } from "./env.ts";
+import type { ConnectFn, EmailMessageInput, WaitlistEnv } from "./env.ts";
+import { SmtpError, sendViaSmtp } from "./smtp.ts";
 
 export const DEFAULT_NOTIFY_TO = "team@gymx.life";
 export const DEFAULT_NOTIFY_FROM = "GYMX Waitlist <waitlist@gymx.life>";
@@ -6,7 +7,7 @@ export const DEFAULT_CONFIRMATION_FROM = "The GYMX Team <hello@gymx.life>";
 const SEND_TIMEOUT_MS = 8000;
 
 export interface Mailer {
-  readonly provider: "cloudflare" | "resend";
+  readonly provider: "cloudflare" | "resend" | "gmail";
   send(message: EmailMessageInput, idempotencyKey: string): Promise<void>;
 }
 
@@ -18,8 +19,13 @@ export class MailError extends Error {
   }
 }
 
-/** Picks the configured provider: Cloudflare Email Service binding first, then Resend. Null when neither is set up. */
-export function getMailer(env: WaitlistEnv, fetchImpl: typeof fetch = fetch): Mailer | null {
+const SIMPLE_EMAIL = /^[^\s@<>"]+@[^\s@<>"]+\.[^\s@<>"]+$/;
+
+/**
+ * Picks the configured provider: Cloudflare Email Service binding, then Resend, then Gmail SMTP.
+ * Null when none is set up (or Gmail is configured but sockets aren't available).
+ */
+export function getMailer(env: WaitlistEnv, fetchImpl: typeof fetch = fetch, connect?: ConnectFn): Mailer | null {
   const binding = env.EMAIL;
   if (binding) {
     return {
@@ -51,6 +57,23 @@ export function getMailer(env: WaitlistEnv, fetchImpl: typeof fetch = fetch): Ma
           throw new MailError("E_NETWORK", (e as Error).name === "TimeoutError" ? "Resend request timed out" : "Resend request failed");
         }
         if (!res.ok) throw new MailError(`HTTP_${res.status}`, `Resend rejected the message (HTTP ${res.status})`);
+      },
+    };
+  }
+  const gmailUser = env.GMAIL_USER?.trim();
+  // Google shows app passwords in groups of four ("abcd efgh ijkl mnop"); the spaces aren't part of it.
+  const gmailPassword = env.GMAIL_APP_PASSWORD?.replace(/\s+/g, "");
+  if (gmailUser && gmailPassword && connect) {
+    return {
+      provider: "gmail",
+      async send(message, idempotencyKey) {
+        if (!SIMPLE_EMAIL.test(gmailUser)) throw new MailError("E_CONFIG", "GMAIL_USER is not a valid email address");
+        try {
+          await sendViaSmtp({ connect, user: gmailUser, password: gmailPassword, message, messageId: idempotencyKey });
+        } catch (e) {
+          if (e instanceof SmtpError) throw new MailError(e.code, `Gmail: ${e.message}`);
+          throw new MailError("E_UNKNOWN", "Gmail send failed");
+        }
       },
     };
   }

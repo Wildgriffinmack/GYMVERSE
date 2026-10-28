@@ -5,3 +5,8 @@ declare module "cloudflare:workers" {
   export const env: WaitlistEnv;
   export function waitUntil(promise: Promise<unknown>): void;
 }
+
+declare module "cloudflare:sockets" {
+  import type { ConnectFn } from "../lib/server/env";
+  export const connect: ConnectFn;
+}

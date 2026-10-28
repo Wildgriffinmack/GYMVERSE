@@ -29,6 +29,16 @@ export interface SendEmailBinding {
   send(message: EmailMessageInput): Promise<{ messageId: string }>;
 }
 
+/** Subset of a `cloudflare:sockets` Socket used by the SMTP sender. */
+export interface SocketLike {
+  readable: ReadableStream<Uint8Array>;
+  writable: WritableStream<Uint8Array>;
+  close(): Promise<void>;
+}
+
+/** `connect()` from `cloudflare:sockets`, injected by the route so Node tests can pass a fake. */
+export type ConnectFn = (address: { hostname: string; port: number }, options?: { secureTransport?: "off" | "on" | "starttls"; allowHalfOpen?: boolean }) => SocketLike;
+
 /**
  * Worker environment. Every field is optional so the site degrades safely:
  * no DB → the API reports "unavailable"; no mail provider → signups are saved and notifications are skipped.
@@ -40,6 +50,10 @@ export interface WaitlistEnv {
   EMAIL?: SendEmailBinding;
   /** Resend API key (optional provider). Secret: add it under the Worker's Settings → Variables and Secrets, or `wrangler secret put`. */
   RESEND_API_KEY?: string;
+  /** Google Workspace / Gmail account that sends notifications over SMTP (optional provider). Secret. */
+  GMAIL_USER?: string;
+  /** 16-character Google app password for GMAIL_USER. Secret. */
+  GMAIL_APP_PASSWORD?: string;
   /** Team inbox for signup notifications. */
   NOTIFY_TO?: string;
   /** Sender for team notifications, e.g. "GYMX Waitlist <waitlist@gymx.life>". Must be on a verified sending domain. */
