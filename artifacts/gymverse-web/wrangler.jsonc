@@ -16,5 +16,20 @@
       "!/_next/static/*",
       "!/*/_next/static/*"
     ]
+  },
+  // Waitlist storage (Workers Free includes D1). No database_id: Cloudflare creates the
+  // database on the first deploy. To use an existing database instead, add its "database_id".
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "gymx-waitlist",
+      "migrations_dir": "migrations"
+    }
+  ],
+  // Non-secret settings. Email provider credentials (RESEND_API_KEY) and WAITLIST_HASH_SALT are
+  // secrets: set them in the Cloudflare dashboard or with `wrangler secret put`, never here.
+  "vars": {
+    "NOTIFY_TO": "team@gymx.life",
+    "CONFIRMATION_EMAILS_ENABLED": "false"
   }
 }

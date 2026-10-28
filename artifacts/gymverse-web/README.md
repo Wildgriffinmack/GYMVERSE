@@ -2,11 +2,12 @@
 
 A mobile-first, one-page landing page that turns traffic from TikTok, Instagram Reels, YouTube Shorts, gym flyers, campus promotion, creator posts and ads into early beta waitlist signups and founding-coach applications.
 
-> **Status: local prototype.** Signups are **not saved anywhere yet**. The form validates and shows the success screen, plus a visible "Preview build" note. Connect a real backend before sending real traffic (see [Before launch](#before-launch)).
+> **Status:** signups are stored in Cloudflare D1 once the DB binding is deployed. Team email notifications need an email provider (see [Team notifications](#team-notifications-teamgymxlife)).
 
 ## Stack
 
-- Next.js 16 (App Router) + TypeScript
+- Next.js 16 App Router code, built and served on Cloudflare Workers by [vinext](https://github.com/cloudflare/vinext) (Vite) + TypeScript
+- Cloudflare D1 for waitlist storage
 - Tailwind CSS 4 (Iron Inferno palette defined in [`app/globals.css`](app/globals.css))
 - Lucide React icons
 - Fonts: Anton, Barlow Condensed and Barlow via `next/font` (self-hosted at build time)
@@ -19,17 +20,18 @@ Requires Node 22.18+ (tests run TypeScript directly). The Cloudflare build uses 
 ```powershell
 cd "artifacts\gymverse-web"
 npm.cmd install          # first time only
-npm.cmd run dev          # http://localhost:3100 (hot reload)
+npm.cmd run dev          # http://localhost:3100 (hot reload, local D1 + email simulator)
 ```
 
 | Command | What it does |
 | --- | --- |
-| `npm.cmd run dev` | Development server on port 3100 |
-| `npm.cmd run build` | Production build (also type-checks) |
-| `npm.cmd run start` | Serve the production build on port 3100 |
+| `npm.cmd run dev` | Development server on port 3100 (page + API, local D1) |
+| `npm.cmd run build` | Production Worker build into `dist/` |
+| `npm.cmd run start` | Run the built Worker locally (Cloudflare workerd runtime) on port 3100 |
 | `npm.cmd run start:lan` | Serve the production build to phones on the same Wi-Fi |
 | `npm.cmd run typecheck` | TypeScript check |
-| `npm.cmd test` | Content, validation and attribution tests |
+| `npm.cmd test` | Content, validation, attribution and waitlist API tests |
+| `npm.cmd run waitlist:export` | Export registrations to CSV (see below) |
 
 ### Test on your phone
 
@@ -127,23 +129,45 @@ Rules of thumb:
 
 Pixels set cookies and share data with Meta and TikTok. Before adding them: add a cookie-consent banner (required for EU/UK visitors), update the privacy policy, and offer a CCPA "Do not sell or share" option for California. Never send names or emails to pixels.
 
-## Connecting a real waitlist (before launch)
+## Waitlist storage and notifications
 
-Submissions go through one swap point in [`lib/submit.ts`](lib/submit.ts):
+Signups are saved by the site's own API (`POST /api/waitlist`, [`app/api/waitlist/route.ts`](app/api/waitlist/route.ts)) into **Cloudflare D1** (binding `DB`, database `gymx-waitlist`, included in Workers Free).
 
-```ts
-export interface WaitlistAdapter {
-  readonly name: string;
-  readonly persistent: boolean;   // false shows the "Preview build" note
-  submit(submission: WaitlistSubmission): Promise<SubmitResult>;
-}
+- **Table** `waitlist_signups`: id (UUID), kind (`member` / `coach`), email (lowercased), name, the form answers, source, attribution, `created_at` (UTC), and notification status. Schema: [`migrations/0001_create_waitlist.sql`](migrations/0001_create_waitlist.sql); the API also applies it automatically (`IF NOT EXISTS`).
+- **Duplicates**: `UNIQUE (kind, email)` in the database. A repeat signup gets the same "You're on the list" response (no enumeration), is not stored twice and sends no second notification. The same email can be both a member and a coach applicant.
+- **Validation**: the same rules run in the browser and on the server ([`lib/waitlist.ts`](lib/waitlist.ts)); the server ignores unknown fields.
+- **Abuse protection**: same-origin check, 8 KB body limit, JSON only, hidden honeypot field, and 5 submissions per IP per 10 minutes (IP stored only as a salted SHA-256 hash).
+- **Privacy**: no endpoint returns stored data. View or export the list with Wrangler or the Cloudflare D1 console only.
+- **Success state** appears only after the API confirms the save; failures show a specific message.
+
+### Team notifications (`team@gymx.life`)
+
+After a new signup is saved, the Worker emails the team in the background (`waitUntil`), so a slow or failed email never affects the signup. Each row records `notify_status` (`sent` / `failed` / `skipped`), attempts and a short error code; failures are logged as `waitlist_notify_failed` without personal data.
+
+Provider (configure one; with none, signups are saved and notifications are `skipped`):
+
+| Provider | Setting | Cost |
+| --- | --- | --- |
+| Cloudflare Email Service | `send_email` binding named `EMAIL` in `wrangler.jsonc` | Sending from `gymx.life` requires Workers Paid (includes 3,000 emails/month) |
+| Resend | secret `RESEND_API_KEY` | Free tier available (check Resend's current limits) |
+
+Variables: `NOTIFY_TO` (default `team@gymx.life`), `NOTIFY_FROM` (must be on your verified sending domain), `CONFIRMATION_EMAILS_ENABLED` (`false`), `CONFIRMATION_FROM`. Secrets: `RESEND_API_KEY`, `WAITLIST_HASH_SALT`.
+
+Member confirmation emails ("You're on the GYMX Waitlist!") are built in [`lib/server/email.ts`](lib/server/email.ts) and stay **off** until `CONFIRMATION_EMAILS_ENABLED` is `true` and a sending domain is verified.
+
+### View and export registrations
+
+```powershell
+npx.cmd wrangler login                       # once
+npm.cmd run waitlist:export                  # writes exports/waitlist-YYYY-MM-DD.csv (git-ignored)
+npx.cmd wrangler d1 execute DB --remote --command "SELECT kind, COUNT(*) FROM waitlist_signups GROUP BY kind"
 ```
 
-Replace `activeAdapter` with one that sends the already-validated, normalized submission to your chosen storage (for example a Next.js route handler writing to a database, or an email-marketing tool). When `persistent` is `true`, the preview note disappears automatically. Re-validate on the server and add spam protection (rate limiting and a honeypot or CAPTCHA) at that point.
-
+Or open Cloudflare → Storage & databases → D1 → `gymx-waitlist` → Explore data. Exports contain personal data: keep them out of Git and shared drives.
 ## Before launch
 
-- [ ] Connect a real waitlist backend (above). Until then, signups are lost.
+- [x] Waitlist storage in Cloudflare D1 (see [Waitlist storage and notifications](#waitlist-storage-and-notifications)).
+- [ ] Choose an email provider and verify a sending domain so 	eam@gymx.life gets notifications.
 - [ ] Publish Privacy and Terms pages; link them, plus Community Guidelines and Contact, in [`lib/site.ts`](lib/site.ts).
 - [ ] Add the real TikTok, Instagram, YouTube and Discord URLs in `lib/site.ts` (empty links show as "coming soon").
 - [x] Production URL defaults to `https://gymx.life` ([`lib/site.ts`](lib/site.ts)); `NEXT_PUBLIC_SITE_URL` overrides it.
@@ -153,19 +177,19 @@ Replace `activeAdapter` with one that sends the already-validated, normalized su
 
 ## Deploy to Cloudflare Workers
 
-The site deploys to Cloudflare Workers (Free plan) with [vinext](https://github.com/cloudflare/vinext), Cloudflare's recommended Next.js-on-Workers path. vinext is in beta; this project uses its stable Wrangler setup (`vinext init --legacy-wrangler-cloudflare-init`). `next dev` / `next build` keep working for local development.
+The site deploys to Cloudflare Workers (Free plan) with [vinext](https://github.com/cloudflare/vinext), Cloudflare's recommended Next.js-on-Workers path. vinext is in beta; this project uses its stable Wrangler setup (`vinext init --legacy-wrangler-cloudflare-init`). `next build` is no longer used: the waitlist API runs only on the Workers runtime.
 
 | Cloudflare Workers Builds setting | Value |
 | --- | --- |
 | Root directory | `artifacts/gymverse-web` |
-| Build command | `npm run build:vinext` |
+| Build command | `npm run build` (same as `npm run build:vinext`) |
 | Deploy command | `npx vinext-cloudflare deploy --config dist/server/wrangler.json --skip-build` |
 | Worker name | `gymx-web` (must match [`wrangler.jsonc`](wrangler.jsonc)) |
 | Node.js | from [`.node-version`](.node-version) |
 | Build watch paths | `artifacts/gymverse-web/*` |
 
-- [`wrangler.jsonc`](wrangler.jsonc): Worker name, `nodejs_compat`, static assets binding only (no KV, D1, R2, secrets or paid services).
-- [`vite.config.ts`](vite.config.ts): vinext + Cloudflare Vite plugin; Tailwind runs through `@tailwindcss/vite` here (PostCSS is used by `next build`).
+- [`wrangler.jsonc`](wrangler.jsonc): Worker name, `nodejs_compat`, static assets, the D1 `DB` binding (free) and non-secret variables. No `database_id`: Cloudflare creates the database on the first deploy (or add the ID of one you created).
+- [`vite.config.ts`](vite.config.ts): vinext + Cloudflare Vite plugin; Tailwind runs through `@tailwindcss/vite`.
 - `package.json` `overrides` pin patched `undici` and `fflate` versions inside build tooling.
 
 Local checks before deploying:
@@ -175,8 +199,6 @@ npm.cmd run build:vinext   # production Worker build into dist/
 npm.cmd run start:vinext   # run the built Worker locally (Cloudflare workerd runtime)
 npx.cmd vinext-cloudflare deploy --config dist/server/wrangler.json --skip-build --dry-run
 ```
-
-If you run both `next build` and `build:vinext` in the same checkout, delete `.next/` before `npm run typecheck` (vinext and Next write different route types there).
 
 The custom domain (`gymx.life`) is attached in the Cloudflare dashboard (Workers → gymx-web → Domains & Routes), not in this repo.
 

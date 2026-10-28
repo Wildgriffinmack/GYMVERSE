@@ -26,6 +26,7 @@ export function useWaitlistForm<V extends object, S extends WaitlistSubmission>(
   const [errors, setErrors] = useState<FieldErrors<V>>({});
   const [attempted, setAttempted] = useState(false);
   const [status, setStatus] = useState<"idle" | "submitting" | "error">("idle");
+  const [errorMessage, setErrorMessage] = useState<string>(WAITLIST.submitError);
   // Bumped on each invalid submit; the effect below moves focus once the errors are rendered.
   const [focusRequest, setFocusRequest] = useState(0);
   const started = useRef(false);
@@ -65,8 +66,10 @@ export function useWaitlistForm<V extends object, S extends WaitlistSubmission>(
     }
     setErrors({});
     setStatus("submitting");
-    const result = await submitWaitlist(prepared.submission);
+    const honeypot = (formRef.current?.elements.namedItem(HONEYPOT_NAME) as HTMLInputElement | null)?.value ?? "";
+    const result = await submitWaitlist(prepared.submission, { honeypot });
     if (!result.ok) {
+      setErrorMessage(result.message);
       setStatus("error");
       return;
     }
@@ -74,7 +77,7 @@ export function useWaitlistForm<V extends object, S extends WaitlistSubmission>(
     opts.onSuccess(result.persisted);
   }
 
-  return { values, errors, status, set, onSubmit, formRef };
+  return { values, errors, status, errorMessage, set, onSubmit, formRef };
 }
 
 export function SubmitButton({ label, submitting }: { label: string; submitting: boolean }) {
@@ -95,12 +98,27 @@ export function SubmitButton({ label, submitting }: { label: string; submitting:
   );
 }
 
-export function FormFooter({ status }: { status: "idle" | "submitting" | "error" }) {
+/** Name of the hidden anti-bot field (must match HONEYPOT_FIELD on the server). */
+export const HONEYPOT_NAME = "website";
+
+/** Off-screen field people never see or fill in; automated form fillers often do. */
+export function Honeypot() {
+  return (
+    <div aria-hidden="true" className="absolute -left-[9999px] h-px w-px overflow-hidden">
+      <label>
+        Website
+        <input type="text" name={HONEYPOT_NAME} tabIndex={-1} autoComplete="off" defaultValue="" />
+      </label>
+    </div>
+  );
+}
+
+export function FormFooter({ status, message = WAITLIST.submitError }: { status: "idle" | "submitting" | "error"; message?: string }) {
   return (
     <>
       {status === "error" ? (
         <p role="alert" className="text-center text-[14.5px] text-hot">
-          {WAITLIST.submitError}
+          {message}
         </p>
       ) : null}
       <p className="text-center text-[13px] leading-relaxed text-ash">{WAITLIST.consent}</p>

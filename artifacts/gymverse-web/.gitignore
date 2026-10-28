@@ -17,3 +17,6 @@ next-env.d.ts
 /dist/
 .vinext/
 .wrangler/
+
+# waitlist exports contain personal data
+exports/

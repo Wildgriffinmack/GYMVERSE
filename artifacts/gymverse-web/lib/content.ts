@@ -238,7 +238,12 @@ export const WAITLIST = {
     previewNote: "Preview build: this signup was not saved. Signups will be stored once the waitlist is connected before launch.",
     again: "Add another signup",
   },
-  submitError: "Something went wrong. Please try again.",
+  submitError: "We couldn’t save your signup. Please try again in a moment.",
+  errors: {
+    network: "We couldn’t reach GYMX. Check your connection and try again.",
+    rateLimited: "Too many attempts from this connection. Please wait a few minutes and try again.",
+    invalid: "Some details didn’t look right. Please check the form and try again.",
+  },
 } as const;
 
 // ---------------------------------------------------------------------------

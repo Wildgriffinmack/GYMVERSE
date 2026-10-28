@@ -142,13 +142,13 @@ describe("submission adapter", () => {
     const s = prepareMember(validMember, CTX, NOW).submission;
     const adapter = createPreviewAdapter(0);
     assert.equal(adapter.persistent, false);
-    assert.deepEqual(await submitWaitlist(s, adapter), { ok: true, persisted: false });
+    assert.deepEqual(await submitWaitlist(s, undefined, adapter), { ok: true, persisted: false });
   });
   it("a failing backend produces a friendly retry message instead of throwing", async () => {
     const s = prepareMember(validMember, CTX, NOW).submission;
     const broken = { name: "broken", persistent: true, submit: async () => { throw new Error("db down"); } };
-    const result = await submitWaitlist(s, broken);
+    const result = await submitWaitlist(s, undefined, broken);
     assert.equal(result.ok, false);
-    assert.equal(result.message, "Something went wrong. Please try again.");
+    assert.equal(result.message, "We couldn’t save your signup. Please try again in a moment.");
   });
 });
