@@ -73,14 +73,14 @@ export const ss = StyleSheet.create({
   muted: { fontSize: 12, lineHeight: 17, color: C.ash },
   kicker: { fontFamily: F.labelHeavy, fontSize: 11.5, letterSpacing: 1.4, textTransform: "uppercase", color: C.flame },
   row: { flexDirection: "row", alignItems: "center", gap: 10 },
-  note: { flexDirection: "row", gap: 8, alignItems: "flex-start", padding: 11, borderRadius: 13, backgroundColor: "rgba(255,247,237,0.05)", borderWidth: StyleSheet.hairlineWidth, borderColor: "rgba(255,247,237,0.18)" },
+  note: { flexDirection: "row", gap: 8, alignItems: "flex-start", padding: 12, borderRadius: 13, backgroundColor: "rgba(255,247,237,0.05)" },
   noteText: { flex: 1, fontSize: 12.5, lineHeight: 18, color: "rgba(255,247,237,0.82)" },
-  btn: { minHeight: 48, borderRadius: 14, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, paddingHorizontal: 14, borderWidth: 1, borderColor: "rgba(255,247,237,0.18)" },
+  btn: { minHeight: 48, borderRadius: 14, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, paddingHorizontal: 14, backgroundColor: "rgba(255,247,237,0.07)" },
   btnText: { fontFamily: F.labelHeavy, fontSize: 14.5, letterSpacing: 1, textTransform: "uppercase", color: C.white },
-  chip: { minHeight: 36, paddingHorizontal: 13, borderRadius: 18, justifyContent: "center", backgroundColor: "rgba(255,247,237,0.06)", borderWidth: 1, borderColor: "rgba(255,247,237,0.08)" },
-  chipOn: { backgroundColor: C.flame, borderColor: C.flame },
+  chip: { minHeight: 36, paddingHorizontal: 13, borderRadius: 18, justifyContent: "center", backgroundColor: "rgba(255,247,237,0.06)" },
+  chipOn: { backgroundColor: C.flame },
   chipText: { fontFamily: F.labelHeavy, fontSize: 13, letterSpacing: 0.9, textTransform: "uppercase", color: "rgba(255,247,237,0.78)" },
-  card: { padding: 14, borderRadius: 18, backgroundColor: "#141414", borderWidth: StyleSheet.hairlineWidth, borderColor: "rgba(255,247,237,0.1)" },
+  card: { padding: 14, borderRadius: 18, backgroundColor: "#141414" },
 });
 
 const s = StyleSheet.create({
@@ -92,7 +92,7 @@ const s = StyleSheet.create({
   demo: { alignSelf: "flex-start", minHeight: 26, paddingHorizontal: 9, justifyContent: "center", borderRadius: 8, backgroundColor: "rgba(9,9,9,0.55)", borderWidth: 1, borderColor: "rgba(255,247,237,0.35)" },
   demoText: { fontFamily: F.labelHeavy, fontSize: 11, letterSpacing: 1.3, color: C.white },
   backdrop: { ...StyleSheet.absoluteFill, backgroundColor: "rgba(0,0,0,0.62)" },
-  sheet: { position: "absolute", left: 0, right: 0, bottom: 0, maxHeight: "88%", paddingTop: 8, borderTopLeftRadius: 26, borderTopRightRadius: 26, backgroundColor: "#141414", borderTopWidth: 1.5, borderColor: "rgba(255,90,31,0.55)" },
+  sheet: { position: "absolute", left: 0, right: 0, bottom: 0, maxHeight: "88%", paddingTop: 8, borderTopLeftRadius: 28, borderTopRightRadius: 28, backgroundColor: "#161616" },
   handle: { alignSelf: "center", width: 40, height: 4, borderRadius: 2, backgroundColor: "rgba(255,247,237,0.25)", marginBottom: 8 },
   sheetHead: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", paddingHorizontal: 16, paddingBottom: 8 },
 });

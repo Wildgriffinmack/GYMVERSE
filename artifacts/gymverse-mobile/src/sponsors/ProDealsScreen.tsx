@@ -4,7 +4,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ArrowLeft, Eye, EyeOff, Info, RotateCcw, ShieldCheck, Tag } from "lucide-react-native";
 import { Glows } from "../components/Tone";
-import { IconBtn, PageHeader, tap } from "../components/ui";
+import { tap, TopBar } from "../components/ui";
 import type { PremiumFeature } from "../membership/entitlements";
 import { useMembership } from "../membership/MembershipContext";
 import { ComingSoonPill } from "../membership/PremiumScreen";
@@ -38,7 +38,7 @@ export function ProDealsScreen({ onBack, onOpenPremium, onToast, hiddenDeals, on
   return (
     <View style={{ flex: 1, backgroundColor: C.bg }}>
       <ScrollView contentContainerStyle={{ paddingBottom: insets.bottom + NAV_GAP + NAV_HEIGHT + 28 }} showsVerticalScrollIndicator={false}>
-        <PageHeader top={insets.top} kicker="GYMX Pro" title="Deals" leading={<IconBtn label="Back" onPress={onBack}><ArrowLeft size={20} color={C.white} /></IconBtn>} />
+        <TopBar top={insets.top} kicker="GYMX Pro" onBack={onBack} />
         <LinearGradient colors={["#3a1306", "#161010", "#0d0d0d"]} start={DIAG.start} end={DIAG.end} style={s.hero}>
           <Glows glows={[{ color: C.gold, cx: "100%", cy: "0%", rx: "80%", ry: "90%", opacity: 0.25 }, { color: C.flame, cx: "0%", cy: "100%", rx: "70%", ry: "70%", opacity: 0.25 }]} />
           <Text style={s.heroTitle}>{SPONSOR_COPY.dealsTitle}</Text>
@@ -131,7 +131,7 @@ export function ProDealsScreen({ onBack, onOpenPremium, onToast, hiddenDeals, on
 }
 
 const s = StyleSheet.create({
-  hero: { marginHorizontal: 16, padding: 18, borderRadius: 24, overflow: "hidden", gap: 10, borderWidth: 1, borderColor: "rgba(255,209,102,0.3)" },
+  hero: { marginHorizontal: 16, padding: 20, borderRadius: 24, overflow: "hidden", gap: 10 },
   heroTitle: { fontFamily: F.display, fontSize: 34, lineHeight: 38, color: C.white },
   heroSub: { fontSize: 15, fontWeight: "600", color: "rgba(255,247,237,0.9)" },
   heroNote: { fontSize: 12, lineHeight: 17, color: "rgba(255,247,237,0.72)" },

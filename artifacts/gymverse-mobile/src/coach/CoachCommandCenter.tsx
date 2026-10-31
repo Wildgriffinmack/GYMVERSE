@@ -5,7 +5,6 @@ import type { ScrollViewInstance } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
-  ArrowLeft,
   ArrowRight,
   CalendarCheck,
   CalendarDays,
@@ -23,7 +22,7 @@ import {
   UserPlus,
 } from "lucide-react-native";
 import { Glows } from "../components/Tone";
-import { IconBtn, Label, PageHeader, tap } from "../components/ui";
+import { Label, tap, TopBar } from "../components/ui";
 import type { PremiumFeature } from "../membership/entitlements";
 import { useMembership } from "../membership/MembershipContext";
 import { ComingSoonPill } from "../membership/PremiumScreen";
@@ -77,7 +76,7 @@ export function CoachCommandCenter({ onBack, onOpenPremium, onToast, state, onCh
   return (
     <View style={{ flex: 1, backgroundColor: C.bg }}>
       <ScrollView ref={scroll} contentContainerStyle={{ paddingBottom: insets.bottom + NAV_GAP + NAV_HEIGHT + 28 }} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled" stickyHeaderIndices={[2]}>
-        <PageHeader top={insets.top} kicker="Coach Pro" title="Command Center" leading={<IconBtn label="Back" onPress={onBack}><ArrowLeft size={20} color={C.white} /></IconBtn>} />
+        <TopBar top={insets.top} kicker="Coach Pro" onBack={onBack} />
 
         <LinearGradient colors={["#221a0a", "#14110b", "#0d0d0d"]} start={DIAG.start} end={DIAG.end} style={s.hero}>
           <Glows glows={[{ color: C.gold, cx: "100%", cy: "0%", rx: "80%", ry: "90%", opacity: 0.22 }, { color: "#FFF7ED", cx: "0%", cy: "100%", rx: "70%", ry: "70%", opacity: 0.08 }]} />
@@ -275,7 +274,7 @@ function Overview({ period, onLocked }: { period: PeriodId; onLocked: (f: Premiu
 }
 
 const s = StyleSheet.create({
-  hero: { marginHorizontal: 16, padding: 18, borderRadius: 24, overflow: "hidden", gap: 10, borderWidth: 1, borderColor: "rgba(255,209,102,0.35)" },
+  hero: { marginHorizontal: 16, padding: 20, borderRadius: 24, overflow: "hidden", gap: 10 },
   heroTop: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
   tag: { flexDirection: "row", alignItems: "center", gap: 5, paddingHorizontal: 9, height: 24, borderRadius: 7, backgroundColor: C.gold },
   tagText: { fontFamily: F.labelHeavy, fontSize: 11, letterSpacing: 1.6, color: INK },
@@ -289,15 +288,15 @@ const s = StyleSheet.create({
   demoTagText: { fontFamily: F.labelHeavy, fontSize: 11, letterSpacing: 1.4, color: C.white },
   stickyBar: { backgroundColor: "rgba(9,9,9,0.97)", paddingVertical: 10, gap: 8 },
   tabs: { paddingHorizontal: 16, gap: 8 },
-  tabBtn: { height: 36, paddingHorizontal: 14, borderRadius: 18, justifyContent: "center", backgroundColor: "rgba(255,247,237,0.06)", borderWidth: 1, borderColor: "rgba(255,247,237,0.08)" },
-  tabOn: { backgroundColor: C.gold, borderColor: C.gold },
+  tabBtn: { height: 36, paddingHorizontal: 14, borderRadius: 18, justifyContent: "center", backgroundColor: "rgba(255,247,237,0.06)" },
+  tabOn: { backgroundColor: C.gold },
   tabText: { fontFamily: F.labelHeavy, fontSize: 14, letterSpacing: 1, textTransform: "uppercase", color: "rgba(255,247,237,0.72)" },
   periods: { flexDirection: "row", marginHorizontal: 16, padding: 3, borderRadius: 12, backgroundColor: "rgba(255,247,237,0.05)" },
   periodBtn: { flex: 1, height: 32, borderRadius: 9, alignItems: "center", justifyContent: "center" },
-  periodOn: { backgroundColor: "rgba(255,209,102,0.18)", borderWidth: 1, borderColor: C.gold },
+  periodOn: { backgroundColor: "rgba(255,209,102,0.2)" },
   periodText: { fontFamily: F.labelHeavy, fontSize: 13, letterSpacing: 1, textTransform: "uppercase", color: C.ash },
   grid: { flexDirection: "row", flexWrap: "wrap", gap: 10 },
-  statCard: { width: "48%", flexGrow: 1, padding: 12, borderRadius: 16, backgroundColor: "#131210", borderWidth: StyleSheet.hairlineWidth, borderColor: "rgba(255,247,237,0.1)", gap: 3 },
+  statCard: { width: "48%", flexGrow: 1, padding: 12, borderRadius: 16, backgroundColor: "#131210", gap: 3 },
   statKey: { borderColor: "rgba(255,209,102,0.5)", backgroundColor: "#17140c" },
   statIcon: { width: 28, height: 28, borderRadius: 9, alignItems: "center", justifyContent: "center", backgroundColor: "rgba(255,209,102,0.12)", marginBottom: 4 },
   statValue: { fontFamily: F.display, fontSize: 24, lineHeight: 28, color: C.white },

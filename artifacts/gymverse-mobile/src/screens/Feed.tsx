@@ -134,6 +134,7 @@ function Reel({ post, height, active, likedIds, savedIds, followed, onLike, onSa
   const [userPlaying, setUserPlaying] = useState(false);
   const playing = active && userPlaying;
   const [burst, setBurst] = useState(0);
+  const [infoH, setInfoH] = useState(0);
   const lastTap = useRef(0);
   const single = useRef<ReturnType<typeof setTimeout> | null>(null);
   const liked = likedIds.includes(post.id);
@@ -141,6 +142,9 @@ function Reel({ post, height, active, likedIds, savedIds, followed, onLike, onSa
   const isFollowing = followed.includes(post.username);
   const isMine = post.username === ME.username;
   const navSpace = insets.bottom + NAV_GAP + NAV_HEIGHT;
+  const infoBottom = navSpace + 22;
+  /** Keep the play control centred in the media but clear of the caption stack on short screens. */
+  const playCenter = infoH ? Math.min(height * 0.6, height - infoBottom - infoH - 44) : height * 0.6;
 
   useEffect(() => {
     if (!active) setUserPlaying(false);
@@ -167,17 +171,16 @@ function Reel({ post, height, active, likedIds, savedIds, followed, onLike, onSa
         <PostArt art={post.art} variant="reel" />
         <LinearGradient colors={["rgba(0,0,0,0.5)", "rgba(0,0,0,0)", "rgba(0,0,0,0)", "rgba(0,0,0,0.6)", "rgba(0,0,0,0.94)"]} locations={[0, 0.2, 0.58, 0.74, 1]} style={StyleSheet.absoluteFill} />
       </Pressable>
-      {isVideo ? <PlayButton visible={!playing} top={height * 0.6} /> : null}
+      {isVideo ? <PlayButton visible={!playing} top={playCenter} /> : null}
       {burst > 0 ? <HeartBurst key={burst} top={height * 0.42} /> : null}
 
-      <View style={[s.badges, { top: insets.top + 100 }]} pointerEvents="none">
-        <Badge tone={post.badgeTone}>{post.badge}</Badge>
-        {post.challenge ? <GlassChip icon={<Flame size={13} color={C.flame} />}>{post.challenge}</GlassChip> : null}
-        {post.created ? <GlassChip icon={<TrendingUp size={13} color={C.flame} />}>{post.onTimeline ? "Added to timeline" : "Just posted"}</GlassChip> : null}
-        {post.moderation === "in_review" ? <GlassChip icon={<ShieldAlert size={13} color={C.gold} />}>In review · only you</GlassChip> : null}
-      </View>
-
-      <View style={[s.info, { bottom: navSpace + 22 }]} pointerEvents="box-none">
+      <View style={[s.info, { bottom: infoBottom }]} pointerEvents="box-none" onLayout={(e) => setInfoH(e.nativeEvent.layout.height)}>
+        <View style={s.badges} pointerEvents="none">
+          <Badge tone={post.badgeTone}>{post.badge}</Badge>
+          {post.challenge ? <GlassChip icon={<Flame size={13} color={C.flame} />}>{post.challenge}</GlassChip> : null}
+          {post.created ? <GlassChip icon={<TrendingUp size={13} color={C.flame} />}>{post.onTimeline ? "Added to timeline" : "Just posted"}</GlassChip> : null}
+          {post.moderation === "in_review" ? <GlassChip icon={<ShieldAlert size={13} color={C.gold} />}>In review · only you</GlassChip> : null}
+        </View>
         <View style={s.author}>
           <Avatar username={post.username} name={post.name} size={38} ring />
           <View style={{ flexShrink: 1 }}>
@@ -311,20 +314,24 @@ function ProgressLine({ running, bottom }: { running: boolean; bottom: number })
   );
 }
 
+/** Paused: one ellipsized line. Playing: two copies scroll as a seamless loop. */
 function Marquee({ text, running }: { text: string; running: boolean }) {
   const [w, setW] = useState(0);
   const x = useRef(new Animated.Value(0)).current;
+  const label = text.replace(/[\s·]+$/, "");
   useEffect(() => {
-    if (!running || !w) return;
+    if (!running || !w) { x.setValue(0); return; }
     const loop = Animated.loop(Animated.timing(x, { toValue: -w, duration: w * 28, easing: Easing.linear, useNativeDriver: true }));
     loop.start();
     return () => { loop.stop(); };
   }, [running, w, x]);
+  if (!running) return <Text style={[s.audio, { flex: 1 }]} numberOfLines={1}>{label}</Text>;
   return (
     <View style={{ flex: 1, overflow: "hidden" }}>
-      <Animated.View style={{ flexDirection: "row", transform: [{ translateX: x }] }}>
-        <Text style={s.audio} numberOfLines={1} onLayout={(e) => setW(e.nativeEvent.layout.width)}>{text}</Text>
-        <Text style={s.audio} numberOfLines={1}>{text}</Text>
+      {/* The track is far wider than any title so Yoga measures each copy at its natural one-line width. */}
+      <Animated.View style={[s.marqueeTrack, { transform: [{ translateX: x }] }]}>
+        <View style={s.marqueeItem} onLayout={(e) => setW(e.nativeEvent.layout.width)}><Text style={s.audio} numberOfLines={1}>{label} ·</Text></View>
+        <View style={s.marqueeItem}><Text style={s.audio} numberOfLines={1}>{label} ·</Text></View>
       </Animated.View>
     </View>
   );
@@ -337,14 +344,14 @@ const s = StyleSheet.create({
   emptyTitle: { fontFamily: F.display, fontSize: 26, color: C.white, textTransform: "uppercase" },
   top: { position: "absolute", top: 0, left: 0, right: 0, paddingBottom: 6 },
   bar: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingLeft: 18, paddingRight: 14, paddingVertical: 4 },
-  streak: { flexDirection: "row", alignItems: "center", gap: 5, height: 34, paddingLeft: 10, paddingRight: 12, borderRadius: 17, backgroundColor: "rgba(255,90,31,0.16)", borderWidth: 1, borderColor: "rgba(255,90,31,0.4)" },
+  streak: { flexDirection: "row", alignItems: "center", gap: 5, height: 34, paddingLeft: 10, paddingRight: 12, borderRadius: 17, backgroundColor: "rgba(255,90,31,0.2)" },
   streakText: { fontFamily: F.label, fontSize: 16, color: C.white },
   dot: { position: "absolute", top: 9, right: 10, width: 7, height: 7, borderRadius: 4, backgroundColor: C.hot, borderWidth: 1.5, borderColor: C.bg },
   tabs: { paddingHorizontal: 18, gap: 22, paddingTop: 8 },
   tab: { alignItems: "center", gap: 7 },
   tabText: { fontFamily: F.label, fontSize: 17, letterSpacing: 0.8, textTransform: "uppercase", color: "rgba(255,247,237,0.55)", ...shadow },
-  tabLine: { height: 3, width: "80%", borderRadius: 2, shadowColor: C.flame, shadowOpacity: 0.95, shadowRadius: 8, shadowOffset: { width: 0, height: 0 } },
-  badges: { position: "absolute", left: 16, right: 80, flexDirection: "row", flexWrap: "wrap", gap: 6 },
+  tabLine: { height: 3, width: "80%", borderRadius: 2, shadowColor: C.flame, shadowOpacity: 0.6, shadowRadius: 6, shadowOffset: { width: 0, height: 0 } },
+  badges: { flexDirection: "row", flexWrap: "wrap", gap: 6, marginBottom: 2 },
   info: { position: "absolute", left: 16, right: 82, gap: 8 },
   author: { flexDirection: "row", alignItems: "center", gap: 10 },
   authorName: { color: C.white, fontSize: 15, fontWeight: "700", ...shadow },
@@ -356,6 +363,8 @@ const s = StyleSheet.create({
   hashtags: { color: C.white, fontSize: 14, fontWeight: "700" },
   audioRow: { flexDirection: "row", alignItems: "center", gap: 8 },
   audio: { color: C.white, fontSize: 13 },
+  marqueeTrack: { flexDirection: "row", width: 4000 },
+  marqueeItem: { paddingRight: 14 },
   catChip: { paddingHorizontal: 9, paddingVertical: 4, borderRadius: 7, backgroundColor: "rgba(255,247,237,0.14)" },
   catText: { fontFamily: F.label, fontSize: 12, letterSpacing: 1.4, textTransform: "uppercase", color: C.white },
   rail: { position: "absolute", right: 10, alignItems: "center", gap: 14 },

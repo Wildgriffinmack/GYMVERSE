@@ -74,7 +74,7 @@ export function ChallengesScreen({ joined, onToggle, onExplorePremium, onFounder
                 <Text style={s.desc}>{c.desc}</Text>
                 <View style={s.meta}>
                   <View style={{ flexDirection: "row" }}>
-                    {FACES.map((f, idx) => <View key={f} style={{ marginLeft: idx ? -8 : 0, borderRadius: 14, borderWidth: 2, borderColor: "rgba(9,9,9,0.7)" }}><Avatar username={f} name={f} size={22} /></View>)}
+                    {FACES.map((f, idx) => <View key={f} style={{ marginLeft: idx ? -8 : 0, borderRadius: 14, borderWidth: 2, borderColor: "rgba(9,9,9,0.7)" }}><Avatar username={f} name={f} size={24} /></View>)}
                   </View>
                   <Users size={13} color="rgba(255,247,237,0.85)" />
                   <Text style={s.metaText}>{c.members} joined  ·  {c.difficulty}</Text>
@@ -116,19 +116,19 @@ export function ChallengesScreen({ joined, onToggle, onExplorePremium, onFounder
 }
 
 const s = StyleSheet.create({
-  live: { flexDirection: "row", alignItems: "center", gap: 8, height: 28, paddingHorizontal: 12, borderRadius: 14, backgroundColor: "rgba(9,9,9,0.5)", borderWidth: StyleSheet.hairlineWidth, borderColor: "rgba(255,247,237,0.14)", marginBottom: 8 },
+  live: { flexDirection: "row", alignItems: "center", gap: 8, height: 28, paddingHorizontal: 12, borderRadius: 14, backgroundColor: "rgba(255,247,237,0.07)" },
   liveText: { fontFamily: F.label, fontSize: 12, letterSpacing: 1.7, textTransform: "uppercase", color: C.white },
-  hero: { marginHorizontal: 16, padding: 18, paddingTop: 20, borderRadius: 28, overflow: "hidden", gap: 16 },
+  hero: { marginHorizontal: 16, padding: 18, paddingTop: 20, borderRadius: 24, overflow: "hidden", gap: 16 },
   ringSub: { marginTop: 3, fontFamily: F.label, fontSize: 11, letterSpacing: 1.5, textTransform: "uppercase", color: C.ash },
   heroTitle: { marginTop: 6, fontFamily: F.display, fontSize: 27, lineHeight: 30, textTransform: "uppercase", color: C.white },
   heroSub: { marginTop: 8, fontSize: 13, color: C.muted },
   chain: { flexDirection: "row", gap: 3 },
   link: { flex: 1, height: 8, borderRadius: 3, backgroundColor: "rgba(255,247,237,0.1)" },
   sectionLabel: { flexDirection: "row", justifyContent: "space-between", paddingHorizontal: 20, paddingTop: 24, paddingBottom: 12 },
-  card: { overflow: "hidden", padding: 18, paddingBottom: 16, borderRadius: 24, borderTopRightRadius: 44 },
+  card: { overflow: "hidden", padding: 18, paddingBottom: 16, borderRadius: 22, borderTopRightRadius: 38 },
   mark: { position: "absolute", right: -16, bottom: -20, transform: [{ rotate: "-12deg" }] },
   duration: { fontFamily: F.label, fontSize: 13, letterSpacing: 1.8, textTransform: "uppercase", color: "rgba(255,247,237,0.88)" },
-  title: { marginTop: 14, fontFamily: F.display, fontSize: 29, lineHeight: 32, textTransform: "uppercase", color: "#fff", textShadowColor: "rgba(0,0,0,0.3)", textShadowRadius: 14 },
+  title: { marginTop: 14, fontFamily: F.display, fontSize: 27, lineHeight: 31, textTransform: "uppercase", color: "#fff", textShadowColor: "rgba(0,0,0,0.3)", textShadowRadius: 14 },
   desc: { marginTop: 6, fontSize: 14, lineHeight: 20, color: "rgba(255,247,237,0.86)" },
   meta: { flexDirection: "row", alignItems: "center", gap: 8, marginTop: 14 },
   metaText: { fontSize: 12.5, fontWeight: "600", color: "rgba(255,247,237,0.86)" },

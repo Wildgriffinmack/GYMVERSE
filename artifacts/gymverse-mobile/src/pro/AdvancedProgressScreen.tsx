@@ -69,7 +69,7 @@ export function AdvancedProgressScreen({ onBack, onOpenPremium, privateNotes, on
   return (
     <View style={{ flex: 1, backgroundColor: C.bg }}>
       <ScrollView contentContainerStyle={{ paddingBottom: insets.bottom + NAV_GAP + NAV_HEIGHT + 28 }} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled" stickyHeaderIndices={[2]}>
-        <PageHeader top={insets.top} kicker="GYMX Pro" title="Advanced" leading={<IconBtn label="Back" onPress={onBack}><ArrowLeft size={20} color={C.white} /></IconBtn>} />
+        <PageHeader top={insets.top} kicker="GYMX Pro" title="Advanced progress" leading={<IconBtn label="Back" onPress={onBack}><ArrowLeft size={20} color={C.white} /></IconBtn>} />
 
         <View style={s.intro}>
           <Glows glows={[{ color: C.gold, cx: "100%", cy: "0%", rx: "70%", ry: "80%", opacity: 0.18 }]} />
@@ -379,7 +379,7 @@ function Stat({ icon, value, label, gold }: { icon: ReactNode; value: string; la
 }
 
 const s = StyleSheet.create({
-  intro: { marginHorizontal: 16, padding: 16, borderRadius: 22, overflow: "hidden", backgroundColor: "#131313", gap: 10, borderWidth: StyleSheet.hairlineWidth, borderColor: "rgba(255,209,102,0.3)" },
+  intro: { marginHorizontal: 16, padding: 16, borderRadius: 22, overflow: "hidden", backgroundColor: "#131313", gap: 10 },
   demoPill: { height: 26, paddingHorizontal: 10, borderRadius: 13, justifyContent: "center", backgroundColor: "rgba(255,247,237,0.08)" },
   demoPillText: { fontFamily: F.labelHeavy, fontSize: 12, letterSpacing: 1.6, color: C.ash },
   introText: { fontSize: 13.5, lineHeight: 19, color: "rgba(255,247,237,0.85)" },
@@ -390,7 +390,7 @@ const s = StyleSheet.create({
   tab: { height: 36, paddingHorizontal: 16, borderRadius: 18, justifyContent: "center", backgroundColor: "rgba(255,247,237,0.06)" },
   tabOn: { backgroundColor: C.gold },
   tabText: { fontFamily: F.labelHeavy, fontSize: 14, letterSpacing: 1.2, textTransform: "uppercase", color: "rgba(255,247,237,0.75)" },
-  card: { padding: 16, borderRadius: 20, backgroundColor: "#141414", borderWidth: StyleSheet.hairlineWidth, borderColor: "rgba(255,247,237,0.08)" },
+  card: { padding: 16, borderRadius: 20, backgroundColor: "#141414" },
   scoreValue: { fontFamily: F.display, fontSize: 34, lineHeight: 38, color: C.white },
   scoreOf: { fontFamily: F.label, fontSize: 12, color: C.ash },
   scoreLabel: { fontFamily: F.labelHeavy, fontSize: 18, letterSpacing: 1, color: C.gold },

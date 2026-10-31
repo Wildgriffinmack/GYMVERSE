@@ -39,7 +39,7 @@ export type ArtLine = { label: string; detail: string };
  * and appear on Home as compact previews. Photo ids refer to src/home/photos.ts.
  */
 export type PostMedia =
-  | { kind: "photos"; layout: "single" | "carousel" | "gallery"; photos: string[] }
+  | { kind: "photos"; layout: "single" | "carousel" | "gallery"; photos: string[]; /** Crop width ÷ height chosen in Create; the feed default applies when absent. */ aspect?: number }
   | { kind: "milestone"; lift: string; value: string; unit: string; detail: string; delta: string; deltaLabel: string };
 
 /** Everything the generated "media" needs. No hardcoded copy lives in the art components. */

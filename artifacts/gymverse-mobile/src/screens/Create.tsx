@@ -1,214 +1,243 @@
-import { useMemo, useRef, useState } from "react";
-import type { ReactNode } from "react";
-import { Animated, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { ArrowRight, Camera, Clapperboard, Dumbbell, Flame, ImagePlus, Sparkles, TrendingUp, Trophy, Video, X } from "lucide-react-native";
-import type { LucideIcon } from "lucide-react-native";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import type { RefObject } from "react";
+import { Animated, Easing, Image, Keyboard, Platform, StyleSheet, View, useWindowDimensions } from "react-native";
 import type { TextInputInstance } from "react-native";
-import type { PostType } from "../data";
-import { ME, POST_CATEGORIES, POST_TYPES } from "../data";
-import { PostArt } from "../components/PostArt";
-import { Avatar, Badge, Cta, GlassChip, IconBtn, Label, PageHeader, tap } from "../components/ui";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import * as ImagePicker from "expo-image-picker";
+import type { Challenge } from "../data";
+import { ME, PERSONAL_RECORDS } from "../data";
+import { useReducedMotion } from "../components/ui";
+import { addLibraryPhoto, photoFor } from "../home/photos";
 import type { PostDraft } from "../utils";
-import { buildPost, parseHashtags } from "../utils";
-import { C, DIAG, F, GRAD, NAV_GAP, NAV_HEIGHT } from "../theme";
+import { C, MOTION } from "../theme";
+import type { ClipType, CreateDraft, CreateMode, CreateStage, CropId, PrBests, PrEntry } from "../create/createDraft";
+import { CAPTION_REQUIRED, CREATE_STAGES, MAX_PHOTOS, cropFor, hasMedia, initialDraft, isDirty, sessionBests, shareProblem, toPostDraft, toggleSelection, withMedia } from "../create/createDraft";
+import { DiscardSheet, HEADER_H, StepHeader } from "../create/CreateParts";
+import { SelectStep } from "../create/SelectStep";
+import { PreviewStep } from "../create/PreviewStep";
+import { DetailsStep } from "../create/DetailsStep";
+import type { OpenRow } from "../create/DetailsStep";
 
-const TYPE_ICONS: Record<PostType, LucideIcon> = { Video, Photo: Camera, "Gym Edit": Clapperboard, Workout: Dumbbell, Transformation: TrendingUp, PR: Trophy, Motivation: Flame };
-const CAPTION_LIMIT = 150;
+const TITLES: Record<CreateStage, string> = { select: "New post", preview: "Preview", details: "New post" };
+const PROFILE_BESTS = sessionBests(PERSONAL_RECORDS, []);
 
-/** `onPost` resolves to null when posted, or to a message when Guardian blocked the post. */
-export function CreateScreen({ onPost, onClose, onToast }: { onPost: (draft: PostDraft) => Promise<string | null>; onClose: () => void; onToast: (m: string) => void }) {
+/** Natural size of a sample or library photo, when it can be known. */
+function sizeOf(id: string): { width?: number; height?: number } {
+  const photo = photoFor(id);
+  if (photo?.width && photo.height) return photo;
+  if (typeof photo?.source === "number") {
+    const asset = Image.resolveAssetSource?.(photo.source);
+    if (asset) return { width: asset.width, height: asset.height };
+  }
+  return {};
+}
+
+/**
+ * Create flow: Select media → Preview → Details. `onPost` resolves to null when posted, or to
+ * Guardian's reason when the post was blocked (the draft is kept so it can be edited).
+ */
+export function CreateScreen({ onPost, onClose, onToast, challenges = [], bests = PROFILE_BESTS, backHandlerRef }: {
+  onPost: (draft: PostDraft) => Promise<string | null>;
+  onClose: () => void;
+  onToast: (m: string) => void;
+  /** Challenges the post can be tagged with (the active one and any joined). */
+  challenges?: Pick<Challenge, "id" | "title">[];
+  /** One-rep bests a new PR has to beat (includes PRs posted earlier this session). */
+  bests?: PrBests;
+  /** App-level Android back hook: returns true when Create handled the press. */
+  backHandlerRef?: RefObject<(() => boolean) | null>;
+}) {
   const insets = useSafeAreaInsets();
-  const [postType, setPostType] = useState<PostType>("Video");
-  const [category, setCategory] = useState("Workout");
-  const [caption, setCaption] = useState("");
-  const [hashtags, setHashtags] = useState("");
-  const [addToTimeline, setAddToTimeline] = useState(false);
-  const [hasMedia, setHasMedia] = useState(false);
+  const { width, height } = useWindowDimensions();
+  const reduced = useReducedMotion();
+  const [initial] = useState(() => initialDraft(bests));
+  const [draft, setDraft] = useState<CreateDraft>(initial);
+  const [stage, setStage] = useState<CreateStage>("select");
+  const [multi, setMulti] = useState(false);
+  const [focus, setFocus] = useState<string | null>(null);
+  const [libraryIds, setLibraryIds] = useState<string[]>([]);
   const [busy, setBusy] = useState(false);
-  const shake = useRef(new Animated.Value(0)).current;
   const [captionError, setCaptionError] = useState(false);
+  const [discardOpen, setDiscardOpen] = useState(false);
+  const [openRow, setOpenRow] = useState<OpenRow | null>(null);
+  const [keyboardOpen, setKeyboardOpen] = useState(false);
   const captionRef = useRef<TextInputInstance>(null);
+  const enter = useRef(new Animated.Value(1)).current;
+  const direction = useRef(1);
+  const mounted = useRef(false);
 
-  const preview = useMemo(() => buildPost({ postType, category, caption: caption || "Your caption here", hashtags, addToTimeline }), [postType, category, caption, hashtags, addToTimeline]);
-  const tags = parseHashtags(hashtags);
+  const bodyHeight = height - insets.top - HEADER_H - insets.bottom;
+  const previewHeight = Math.round(Math.min(width, bodyHeight * 0.5));
+  const challengeOptions = useMemo(() => challenges.map((c) => ({ title: c.title, note: c.id === ME.challengeId ? `Active · day ${ME.challengeDay}` : "Joined" })), [challenges]);
 
-  const chooseType = (type: PostType) => {
-    tap();
-    setPostType(type);
-    if (type === "Gym Edit") setCategory("Motivation");
-    else if (type === "Workout" || type === "Transformation" || type === "PR" || type === "Motivation") setCategory(type);
+  useEffect(() => {
+    const show = Keyboard.addListener(Platform.OS === "ios" ? "keyboardWillShow" : "keyboardDidShow", () => setKeyboardOpen(true));
+    const hide = Keyboard.addListener(Platform.OS === "ios" ? "keyboardWillHide" : "keyboardDidHide", () => setKeyboardOpen(false));
+    return () => { show.remove(); hide.remove(); };
+  }, []);
+
+  // Each step slides in from the side it came from; skipped on first open and with Reduce Motion.
+  useEffect(() => {
+    if (!mounted.current || reduced) { mounted.current = true; enter.setValue(1); return; }
+    enter.setValue(0);
+    const a = Animated.timing(enter, { toValue: 1, duration: MOTION.base, easing: Easing.out(Easing.cubic), useNativeDriver: true });
+    a.start();
+    return () => a.stop();
+  }, [stage, reduced, enter]);
+
+  const go = useCallback((next: CreateStage) => {
+    direction.current = CREATE_STAGES.indexOf(next) >= CREATE_STAGES.indexOf(stage) ? 1 : -1;
+    Keyboard.dismiss();
+    setStage(next);
+  }, [stage]);
+
+  /** Step back, or ask before discarding changes. False means Create can close. */
+  const handleBack = useCallback((): boolean => {
+    if (discardOpen) { setDiscardOpen(false); return true; }
+    if (busy) return true;
+    if (stage === "details") { go("preview"); return true; }
+    if (stage === "preview") { go("select"); return true; }
+    // Dismiss first: on iOS a number pad would otherwise sit on top of the sheet.
+    if (isDirty(draft, initial)) { Keyboard.dismiss(); setDiscardOpen(true); return true; }
+    return false;
+  }, [discardOpen, busy, stage, draft, initial, go]);
+
+  useEffect(() => {
+    if (!backHandlerRef) return;
+    backHandlerRef.current = handleBack;
+    return () => { backHandlerRef.current = null; };
+  }, [backHandlerRef, handleBack]);
+
+  /** The crop follows the first photo's shape until the user picks one. */
+  const autoCrop = (d: CreateDraft, photos: string[]): CropId => {
+    if (d.cropTouched || !photos.length) return d.crop;
+    const size = sizeOf(photos[0]);
+    return cropFor(size.width, size.height);
   };
 
-  const submit = async () => {
+  const tapPhoto = (id: string) => {
+    const photos = toggleSelection(draft.photos, id, multi);
+    if (multi && !draft.photos.includes(id) && photos.length === draft.photos.length) onToast(`You can add up to ${MAX_PHOTOS} photos.`);
+    setDraft((d) => withMedia(d, { photos, crop: autoCrop(d, photos) }));
+    setFocus(photos.includes(id) ? id : photos[photos.length - 1] ?? null);
+  };
+
+  const toggleMulti = () => {
+    if (multi && draft.photos.length > 1) {
+      const keep = focus && draft.photos.includes(focus) ? focus : draft.photos[draft.photos.length - 1];
+      setDraft((d) => withMedia(d, { photos: [keep], crop: autoCrop(d, [keep]) }));
+      setFocus(keep);
+    }
+    setMulti(!multi);
+  };
+
+  /** System photo picker (photos only). Picked images stay on the device for this session. */
+  const openLibrary = async () => {
+    const room = multi ? MAX_PHOTOS - draft.photos.length : 1;
+    if (room <= 0) { onToast(`You can add up to ${MAX_PHOTOS} photos.`); return; }
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ["images"], allowsMultipleSelection: multi, selectionLimit: room, quality: 0.9 });
+      if (result.canceled || !result.assets.length) return;
+      const ids = result.assets.slice(0, room).map((a) => addLibraryPhoto(a.uri, a.width, a.height));
+      const photos = multi ? [...draft.photos, ...ids] : [ids[0]];
+      setLibraryIds((cur) => [...ids, ...cur]);
+      setDraft((d) => withMedia(d, { mode: "photo", photos, crop: autoCrop(d, photos) }));
+      setFocus(ids[ids.length - 1]);
+    } catch {
+      onToast("Couldn't open your photo library.");
+    }
+  };
+
+  const removePhoto = (index: number) => {
+    const photos = draft.photos.filter((_, i) => i !== index);
+    setDraft((d) => withMedia(d, { photos }));
+    setFocus(photos[photos.length - 1] ?? null);
+    if (!photos.length) go("select");
+  };
+
+  const share = async () => {
     if (busy) return;
-    if (!caption.trim()) {
-      setCaptionError(true);
-      Animated.sequence([-8, 7, -5, 3, 0].map((v) => Animated.timing(shake, { toValue: v, duration: 70, useNativeDriver: true }))).start();
-      captionRef.current?.focus();
-      onToast("Add a caption before you post.");
+    const problem = shareProblem(draft, bests);
+    if (problem) {
+      // A missing caption is explained inline next to the field; other problems use a toast.
+      if (problem === CAPTION_REQUIRED) { setCaptionError(true); captionRef.current?.focus(); } else onToast(problem);
       return;
     }
+    Keyboard.dismiss();
     setBusy(true);
-    const blocked = await onPost({ postType, category, caption, hashtags, addToTimeline });
+    const blocked = await onPost(toPostDraft(draft, bests));
+    // On success the app leaves Create; only a Guardian block returns here.
     if (blocked) {
       setBusy(false);
       onToast(`Guardian blocked this post. ${blocked}`);
     }
   };
 
+  const ready = hasMedia(draft, bests);
+  const slide = enter.interpolate({ inputRange: [0, 1], outputRange: [direction.current * 28, 0] });
+
   return (
-    <KeyboardAvoidingView style={{ flex: 1, backgroundColor: C.bg }} behavior={Platform.OS === "ios" ? "padding" : undefined}>
-      <ScrollView contentContainerStyle={{ paddingBottom: insets.bottom + NAV_GAP + NAV_HEIGHT + 24 }} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
-        <PageHeader top={insets.top} kicker="Put your work out there" title="New post" trailing={<IconBtn label="Discard post" onPress={onClose}><X size={20} color={C.white} /></IconBtn>} />
-
-        <View style={s.preview}>
-          <View style={[StyleSheet.absoluteFill, !hasMedia && { opacity: 0.35 }]}><PostArt art={preview.art} variant="card" /></View>
-          <LinearGradient colors={["rgba(0,0,0,0.35)", "transparent", "transparent", "rgba(0,0,0,0.9)"]} locations={[0, 0.22, 0.58, 1]} style={StyleSheet.absoluteFill} pointerEvents="none" />
-          <View style={s.previewTop}>
-            <Badge tone={preview.badgeTone}>{preview.badge}</Badge>
-            {hasMedia ? <GlassChip icon={<Sparkles size={13} color={C.flame} />}>Live preview</GlassChip> : null}
-          </View>
-          <View style={s.previewCaption}>
-            <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
-              <Avatar username={ME.username} name={ME.name} size={28} ring />
-              <Text style={{ color: C.white, fontWeight: "700" }}>@{ME.username}</Text>
-            </View>
-            <Text style={{ color: C.white, fontSize: 14, lineHeight: 20 }} numberOfLines={2}>{caption || "Your caption shows up here."}</Text>
-          </View>
-          {hasMedia ? (
-            <Pressable accessibilityRole="button" onPress={() => { tap(); setHasMedia(false); onToast("Demo media removed."); }} style={s.remove}>
-              <X size={14} color={C.white} /><Text style={s.removeText}>Remove</Text>
-            </Pressable>
-          ) : (
-            <Pressable accessibilityRole="button" accessibilityLabel={`Add ${postType === "Photo" ? "a photo" : "a clip"}`} onPress={() => { tap(); setHasMedia(true); onToast(`${postType} placeholder added.`); }} style={({ pressed }) => [s.drop, pressed && { borderColor: C.flame, transform: [{ scale: 0.97 }] }]}>
-              <LinearGradient colors={GRAD} start={DIAG.start} end={DIAG.end} style={s.dropIcon}><ImagePlus size={26} color="#fff" /></LinearGradient>
-              <Text style={{ color: C.white, fontSize: 16, fontWeight: "700" }}>Tap to add {postType === "Photo" ? "a photo" : "a clip"}</Text>
-              <Text style={{ color: C.ash, fontSize: 12 }}>Demo media · no real upload</Text>
-            </Pressable>
-          )}
-        </View>
-
-        <View style={s.block}>
-          <Label style={s.blockLabel}>Post type</Label>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginHorizontal: -20 }} contentContainerStyle={{ paddingHorizontal: 20, gap: 8 }}>
-            {POST_TYPES.map((type) => {
-              const Icon = TYPE_ICONS[type];
-              const on = postType === type;
-              return <Pill key={type} on={on} solid onPress={() => chooseType(type)} icon={<Icon size={15} color={on ? "#fff" : "rgba(255,247,237,0.78)"} />}>{type}</Pill>;
-            })}
-          </ScrollView>
-        </View>
-
-        <View style={s.block}>
-          <View style={s.labelRow}>
-            <Label>Caption</Label>
-            <Text style={[s.counter, caption.length > CAPTION_LIMIT - 20 && { color: C.gold }]}>{caption.length}/{CAPTION_LIMIT}</Text>
-          </View>
-          <Animated.View style={{ transform: [{ translateX: shake }] }}>
-            <TextInput
-              ref={captionRef}
-              value={caption}
-              onChangeText={(t) => { setCaption(t); if (captionError) setCaptionError(false); }}
-              maxLength={CAPTION_LIMIT}
-              multiline
-              placeholder="What did you show up for today?"
-              placeholderTextColor="rgba(255,247,237,0.34)"
-              style={[s.textarea, captionError && { borderColor: C.hot }]}
-              accessibilityLabel="Caption"
-            />
-          </Animated.View>
-        </View>
-
-        <View style={s.block}>
-          <Label style={s.blockLabel}>Hashtags</Label>
-          <View style={s.hashField}>
-            <Text style={{ fontFamily: F.display, fontSize: 22, color: C.flame }}>#</Text>
-            <TextInput value={hashtags} onChangeText={setHashtags} placeholder="BenchPR Consistency LegDay" placeholderTextColor="rgba(255,247,237,0.34)" autoCapitalize="none" autoCorrect={false} style={s.hashInput} accessibilityLabel="Hashtags" />
-          </View>
-          {tags.length ? <View style={s.tagRow}>{tags.map((t) => <Text key={t} style={s.tag}>{t}</Text>)}</View> : null}
-        </View>
-
-        <View style={s.block}>
-          <Label style={s.blockLabel}>Category</Label>
-          <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
-            {POST_CATEGORIES.map((c) => <Pill key={c} on={category === c} onPress={() => { tap(); setCategory(c); }}>{c}</Pill>)}
-          </View>
-        </View>
-
-        <View style={s.block}>
-          <Pressable accessibilityRole="switch" accessibilityState={{ checked: addToTimeline }} aria-checked={addToTimeline} onPress={() => { tap(); setAddToTimeline((v) => !v); }} style={[s.toggle, addToTimeline && s.toggleOn]}>
-            {addToTimeline ? (
-              <LinearGradient colors={GRAD} start={DIAG.start} end={DIAG.end} style={s.toggleIcon}><TrendingUp size={18} color="#fff" /></LinearGradient>
-            ) : (
-              <View style={[s.toggleIcon, { backgroundColor: "rgba(255,247,237,0.07)" }]}><TrendingUp size={18} color={C.white} /></View>
-            )}
-            <View style={{ flex: 1, gap: 2 }}>
-              <Text style={{ color: C.white, fontSize: 15, fontWeight: "700" }}>Add to Progress Timeline</Text>
-              <Text style={{ color: C.ash, fontSize: 12.5 }}>Keep the moments that matter.</Text>
-            </View>
-            <Switch on={addToTimeline} />
-          </Pressable>
-        </View>
-
-        <View style={s.block}>
-          <Cta title={busy ? "Checking with Guardian…" : "Post to GYMX"} onPress={submit} icon={busy ? undefined : <ArrowRight size={20} color="#fff" strokeWidth={2.6} />} />
-          <Text style={s.fine}>Demo only. Your post appears in this session’s feed.</Text>
-        </View>
-      </ScrollView>
-    </KeyboardAvoidingView>
-  );
-}
-
-function Pill({ on, solid, icon, onPress, children }: { on: boolean; solid?: boolean; icon?: ReactNode; onPress: () => void; children: string }) {
-  const content = (
-    <>
-      {icon}
-      <Text style={{ color: on ? "#fff" : "rgba(255,247,237,0.78)", fontSize: 14, fontWeight: "600" }}>{children}</Text>
-    </>
-  );
-  return (
-    <Pressable accessibilityRole="button" accessibilityState={{ selected: on }} aria-selected={on} onPress={onPress} style={({ pressed }) => ({ transform: [{ scale: pressed ? 0.95 : 1 }] })}>
-      {on && solid ? (
-        <LinearGradient colors={GRAD} start={DIAG.start} end={DIAG.end} style={s.pill}>{content}</LinearGradient>
-      ) : (
-        <View style={[s.pill, { backgroundColor: on ? "rgba(255,90,31,0.16)" : "rgba(255,247,237,0.06)", borderWidth: 1.5, borderColor: on ? C.flame : "transparent" }]}>{content}</View>
-      )}
-    </Pressable>
-  );
-}
-
-function Switch({ on }: { on: boolean }) {
-  return (
-    <View style={[s.switch, { backgroundColor: on ? C.flame : "rgba(255,247,237,0.16)" }]}>
-      <View style={[s.knob, { transform: [{ translateX: on ? 20 : 0 }] }]} />
+    <View style={s.screen}>
+      <StepHeader
+        top={insets.top}
+        stage={stage}
+        title={TITLES[stage]}
+        onBack={() => { if (!handleBack()) onClose(); }}
+        action={stage === "details" ? { kind: "share", busy, onPress: share } : { kind: "next", enabled: ready, onPress: () => go(stage === "select" ? "preview" : "details") }}
+      />
+      <Animated.View style={[s.body, { opacity: enter.interpolate({ inputRange: [0, 1], outputRange: [0.2, 1] }), transform: [{ translateX: slide }] }]}>
+        {stage === "select" ? (
+          <SelectStep
+            draft={draft}
+            bests={bests}
+            width={width}
+            previewHeight={previewHeight}
+            bottom={insets.bottom}
+            keyboardOpen={keyboardOpen}
+            multi={multi}
+            focus={focus}
+            libraryIds={libraryIds}
+            onMode={(mode: CreateMode) => setDraft((d) => withMedia(d, { mode }))}
+            onToggleMulti={toggleMulti}
+            onTapPhoto={tapPhoto}
+            onOpenLibrary={openLibrary}
+            onClip={(clip: ClipType) => setDraft((d) => withMedia(d, { clip }))}
+            onPr={(patch: Partial<PrEntry>) => setDraft((d) => withMedia(d, { pr: { ...d.pr, ...patch } }))}
+          />
+        ) : stage === "preview" ? (
+          <PreviewStep
+            draft={draft}
+            bests={bests}
+            bottom={insets.bottom}
+            onCrop={(crop) => setDraft((d) => ({ ...d, crop, cropTouched: true }))}
+            onReplace={() => go("select")}
+            onRemove={removePhoto}
+            onEditMedia={() => go("select")}
+          />
+        ) : (
+          <DetailsStep
+            draft={draft}
+            bottom={insets.bottom}
+            busy={busy}
+            captionRef={captionRef}
+            captionError={captionError}
+            challenges={challengeOptions}
+            open={openRow}
+            onOpen={setOpenRow}
+            onCaption={(caption) => { setDraft((d) => ({ ...d, caption })); if (captionError && caption.trim()) setCaptionError(false); }}
+            onHashtags={(hashtags) => setDraft((d) => ({ ...d, hashtags }))}
+            onCategory={(category) => setDraft((d) => ({ ...d, category, categoryTouched: true }))}
+            onChallenge={(challenge) => setDraft((d) => ({ ...d, challenge }))}
+            onTimeline={(addToTimeline) => setDraft((d) => ({ ...d, addToTimeline }))}
+          />
+        )}
+      </Animated.View>
+      <DiscardSheet visible={discardOpen} bottom={insets.bottom} onDiscard={() => { setDiscardOpen(false); onClose(); }} onKeep={() => setDiscardOpen(false)} />
     </View>
   );
 }
 
 const s = StyleSheet.create({
-  preview: { marginHorizontal: 16, aspectRatio: 4 / 5, borderRadius: 28, overflow: "hidden", backgroundColor: "#0b0b0b" },
-  previewTop: { position: "absolute", top: 16, left: 16, right: 110, flexDirection: "row", flexWrap: "wrap", gap: 6 },
-  previewCaption: { position: "absolute", left: 16, right: 16, bottom: 16, gap: 8 },
-  remove: { position: "absolute", top: 14, right: 14, flexDirection: "row", alignItems: "center", gap: 5, height: 32, paddingHorizontal: 12, borderRadius: 16, backgroundColor: "rgba(9,9,9,0.55)" },
-  removeText: { fontFamily: F.label, fontSize: 13, letterSpacing: 1, textTransform: "uppercase", color: C.white },
-  drop: { position: "absolute", top: "20%", bottom: "32%", left: "13%", right: "13%", alignItems: "center", justifyContent: "center", gap: 8, borderRadius: 24, borderWidth: 1.5, borderStyle: "dashed", borderColor: "rgba(255,247,237,0.4)", backgroundColor: "rgba(9,9,9,0.3)" },
-  dropIcon: { width: 58, height: 58, borderRadius: 29, alignItems: "center", justifyContent: "center", marginBottom: 4 },
-  block: { paddingHorizontal: 20, paddingTop: 24 },
-  blockLabel: { marginBottom: 12 },
-  labelRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 12 },
-  counter: { fontFamily: F.label, fontSize: 12, letterSpacing: 1, color: C.ash },
-  pill: { flexDirection: "row", alignItems: "center", gap: 7, height: 40, paddingHorizontal: 16, borderRadius: 20 },
-  textarea: { minHeight: 96, paddingHorizontal: 16, paddingTop: 14, paddingBottom: 14, borderRadius: 18, fontSize: 18, lineHeight: 25, color: C.white, backgroundColor: "rgba(255,247,237,0.045)", textAlignVertical: "top", borderWidth: 1.5, borderColor: "transparent" },
-  hashField: { flexDirection: "row", alignItems: "center", gap: 8, height: 52, paddingHorizontal: 16, borderRadius: 16, backgroundColor: "rgba(255,247,237,0.045)" },
-  hashInput: { flex: 1, height: "100%", fontSize: 16, fontWeight: "600", color: C.white },
-  tagRow: { flexDirection: "row", flexWrap: "wrap", gap: 6, marginTop: 10 },
-  tag: { paddingHorizontal: 10, paddingVertical: 5, borderRadius: 8, overflow: "hidden", fontSize: 13, fontWeight: "700", color: "#ffb08f", backgroundColor: "rgba(255,90,31,0.12)" },
-  toggle: { flexDirection: "row", alignItems: "center", gap: 12, padding: 14, borderRadius: 20, backgroundColor: "rgba(255,247,237,0.045)", borderWidth: 1, borderColor: "transparent" },
-  toggleOn: { backgroundColor: "rgba(255,90,31,0.1)", borderColor: "rgba(255,90,31,0.4)" },
-  toggleIcon: { width: 42, height: 42, borderRadius: 13, alignItems: "center", justifyContent: "center" },
-  switch: { width: 50, height: 30, borderRadius: 15, padding: 3 },
-  knob: { width: 24, height: 24, borderRadius: 12, backgroundColor: "#fff" },
-  fine: { marginTop: 12, textAlign: "center", fontSize: 12, color: C.ash },
+  screen: { flex: 1, backgroundColor: C.bg },
+  body: { flex: 1 },
 });

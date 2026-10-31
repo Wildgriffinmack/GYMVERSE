@@ -9,7 +9,7 @@ import { PostArt } from "../components/PostArt";
 import { Badge, GradText, IconBtn, Label, PageHeader, tap } from "../components/ui";
 import { Rise } from "./Welcome";
 import { AdvancedProgressPromo } from "../pro/ProgressPromo";
-import { C, F, NAV_GAP, NAV_HEIGHT } from "../theme";
+import { C, F, NAV_GAP, NAV_HEIGHT, RADIUS, SURFACE } from "../theme";
 
 const SUMMARY = [
   { Icon: Dumbbell, value: "124", label: "Workouts" },
@@ -40,20 +40,19 @@ export function ProgressScreen({ timeline, onBack, onAdvanced }: { timeline: Tim
         </View>
         <View style={s.ends}>
           <Text style={s.end}>Day 1</Text>
-          <Text style={[s.end, { color: C.white }]}>6 months of progress.</Text>
           <Text style={s.end}>Today</Text>
         </View>
       </View>
 
       <View style={s.summary}>
         {SUMMARY.map(({ Icon, value, label, gold }) => (
-          <LinearGradient key={label} colors={["rgba(255,90,31,0.1)", "rgba(255,247,237,0.025)"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={s.chip}>
+          <View key={label} style={s.chip}>
             <View style={[s.chipIcon, gold && { backgroundColor: "rgba(255,209,102,0.14)" }]}><Icon size={18} color={gold ? C.gold : C.flame} /></View>
             <View>
               <Text style={[s.chipValue, gold && { color: C.gold }]}>{value}</Text>
               <Text style={s.chipLabel}>{label}</Text>
             </View>
-          </LinearGradient>
+          </View>
         ))}
       </View>
 
@@ -95,12 +94,12 @@ export function ProgressScreen({ timeline, onBack, onAdvanced }: { timeline: Tim
 }
 
 const s = StyleSheet.create({
-  title: { fontFamily: F.display, fontSize: 46, lineHeight: 50, textTransform: "uppercase", color: C.white },
-  track: { height: 10, marginTop: 20, borderRadius: 5, overflow: "hidden", backgroundColor: "rgba(255,247,237,0.08)" },
+  title: { fontFamily: F.display, fontSize: 40, lineHeight: 44, textTransform: "uppercase", color: C.white },
+  track: { height: 8, marginTop: 20, borderRadius: 4, overflow: "hidden", backgroundColor: "rgba(255,247,237,0.08)" },
   ends: { flexDirection: "row", justifyContent: "space-between", marginTop: 10 },
   end: { fontFamily: F.label, fontSize: 12, letterSpacing: 1.4, textTransform: "uppercase", color: C.ash },
-  summary: { flexDirection: "row", flexWrap: "wrap", gap: 10, paddingHorizontal: 16, paddingTop: 22 },
-  chip: { width: "48.5%", flexDirection: "row", alignItems: "center", gap: 12, padding: 14, borderRadius: 18 },
+  summary: { flexDirection: "row", flexWrap: "wrap", gap: 10, paddingHorizontal: 16, paddingTop: 24 },
+  chip: { width: "48.5%", flexGrow: 1, flexDirection: "row", alignItems: "center", gap: 12, padding: 14, borderRadius: RADIUS.lg - 2, backgroundColor: SURFACE.raised },
   chipIcon: { width: 36, height: 36, borderRadius: 12, alignItems: "center", justifyContent: "center", backgroundColor: "rgba(255,90,31,0.14)" },
   chipValue: { fontFamily: F.display, fontSize: 26, lineHeight: 30, color: C.white },
   chipLabel: { fontFamily: F.label, fontSize: 11, letterSpacing: 1.3, textTransform: "uppercase", color: C.ash },

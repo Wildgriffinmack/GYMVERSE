@@ -4,17 +4,17 @@ import { Animated, Easing, Pressable, ScrollView, StyleSheet, Text, View, useWin
 import { LinearGradient } from "expo-linear-gradient";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Svg, { Text as SvgText } from "react-native-svg";
-import { ArrowRight, BarChart3, Bookmark, Briefcase, ChevronRight, Clapperboard, ClipboardList, Crown, Flame, Grid3x3, MessageSquare, Palette, Pin, Play, Settings, Share2, Shield, ShieldAlert, Target, Video } from "lucide-react-native";
+import { BarChart3, Bookmark, Briefcase, Clapperboard, ClipboardList, Crown, Flame, Grid3x3, MessageSquare, Palette, Pin, Play, Settings, Share2, Shield, ShieldAlert, Target, Video } from "lucide-react-native";
 import type { BadgeTone, Post, PostArtData } from "../data";
 import { CHALLENGES, ME, PERSONAL_RECORDS, PROFILE_EXTRA_TILES } from "../data";
 import { PostArt } from "../components/PostArt";
 import { PostThumb } from "../home/HomePost";
 import { Glows } from "../components/Tone";
-import { Avatar, Badge, GradText, IconBtn, Label, ProgressRing, Verified, tap, thump } from "../components/ui";
+import { Avatar, Badge, GradText, IconBtn, IconMark, Label, ListGroup, ListRow, ProgressRing, Tag, Verified, tap, useReducedMotion } from "../components/ui";
 import { PINNED_ART } from "../pro/ProfileStudio";
 import { FounderBadge } from "../founders/FounderBadge";
 import { formatCount } from "../utils";
-import { C, DIAG, F, GRAD, GRAD_GOLD, GRAD_PR, NAV_GAP, NAV_HEIGHT } from "../theme";
+import { C, DIAG, F, GRAD, GRAD_GOLD, GRAD_PR, GUTTER, LINE, NAV_GAP, NAV_HEIGHT, RADIUS, SURFACE, TEXT, TINT, TYPE } from "../theme";
 
 type Props = {
   myPosts: Post[];
@@ -81,32 +81,33 @@ export function ProfileScreen({ myPosts, savedPosts, onOpenPost, onTimeline, onC
   const challenge = CHALLENGES.find((c) => c.id === ME.challengeId)!;
   const created = myPosts.filter((p) => p.created).length;
   const pct = Math.round((ME.challengeDay / challenge.totalDays) * 100);
-  const coverH = 196 + insets.top;
+  const coverH = 176 + insets.top;
   const tileW = (width - 4) / 3;
+  const hasPremiumTools = !!(onPremium || onStudio || onCreatorStudio || onCoachCenter);
 
   return (
     <ScrollView style={{ flex: 1, backgroundColor: C.bg }} contentContainerStyle={{ paddingBottom: insets.bottom + NAV_GAP + NAV_HEIGHT + 24 }} showsVerticalScrollIndicator={false} stickyHeaderIndices={[4]}>
       <View style={{ height: coverH, overflow: "hidden" }}>
         <LinearGradient colors={look?.banner ?? creator?.banner ?? coach?.banner ?? ["#FF5A1F", "#8D1B10", "#1A0805"]} locations={[0, 0.58, 1]} start={{ x: 0.2, y: 0 }} end={{ x: 0.8, y: 1 }} style={StyleSheet.absoluteFill} />
-        <Glows glows={[{ color: C.gold, cx: "88%", cy: "0%", rx: "70%", ry: "90%", opacity: 0.55 }, { color: C.hot, cx: "0%", cy: "100%", rx: "90%", ry: "100%", opacity: 0.6 }]} />
+        <Glows glows={[{ color: C.gold, cx: "88%", cy: "0%", rx: "70%", ry: "90%", opacity: 0.45 }, { color: C.hot, cx: "0%", cy: "100%", rx: "90%", ry: "100%", opacity: 0.5 }]} />
         <Svg style={{ position: "absolute", left: -6, bottom: -18 }} width={width + 40} height={170}>
-          <SvgText x="0" y="150" fontFamily={F.display} fontSize="160" fill="none" stroke="rgba(255,247,237,0.28)" strokeWidth="1.5">{ME.name.toUpperCase()}</SvgText>
+          <SvgText x="0" y="150" fontFamily={F.display} fontSize="160" fill="none" stroke="rgba(255,247,237,0.2)" strokeWidth="1.5">{ME.name.toUpperCase()}</SvgText>
         </Svg>
-        <LinearGradient colors={["rgba(9,9,9,0)", C.bg]} locations={[0.35, 1]} style={StyleSheet.absoluteFill} />
-        <View style={[s.coverActions, { top: insets.top + 12 }]}>
-          <IconBtn label="Share profile" onPress={() => onToast("Profile link copied.")} style={{ backgroundColor: "rgba(9,9,9,0.35)" }}><Share2 size={18} color={C.white} /></IconBtn>
-          <IconBtn label="Settings" onPress={() => onToast("Settings aren’t part of this demo.")} onLongPress={onDevTools} style={{ backgroundColor: "rgba(9,9,9,0.35)" }}><Settings size={18} color={C.white} /></IconBtn>
+        <LinearGradient colors={["rgba(9,9,9,0)", C.bg]} locations={[0.3, 1]} style={StyleSheet.absoluteFill} />
+        <View style={[s.coverActions, { top: insets.top + 10 }]}>
+          <IconBtn label="Share profile" onPress={() => onToast("Profile link copied.")} style={s.coverBtn}><Share2 size={18} color={C.white} /></IconBtn>
+          <IconBtn label="Settings" onPress={() => onToast("Settings aren’t part of this demo.")} onLongPress={onDevTools} style={s.coverBtn}><Settings size={18} color={C.white} /></IconBtn>
         </View>
       </View>
 
       <View style={s.identity}>
         <GlowRing colors={look?.ring}>
-          <Avatar username={ME.username} name={ME.name} size={96} />
+          <Avatar username={ME.username} name={ME.name} size={92} />
         </GlowRing>
-        <View style={{ flexDirection: "row", alignItems: "center", gap: 6, marginTop: 14 }}>
-          <Text style={s.name}>{ME.name}</Text>
+        <View style={s.nameRow}>
+          <Text style={s.name} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>{ME.name}</Text>
           {/* The generic check mark is hidden under the coach look so it can't read as coaching certification. */}
-          {coach ? null : <Verified size={22} />}
+          {coach ? null : <Verified size={20} />}
           {/* One primary membership badge at a time. */}
           {look?.badge ? <Badge tone={look.badge.tone}>{look.badge.label}</Badge> : creator?.badge ? <Badge tone="flame">{creator.badge}</Badge> : coach?.badge ? <Badge tone="ash">{coach.badge}</Badge> : null}
         </View>
@@ -115,7 +116,7 @@ export function ProfileScreen({ myPosts, savedPosts, onOpenPost, onTimeline, onC
           <View style={s.creatorIdentity}><Clapperboard size={11} color={C.flame} /><Text style={s.creatorIdentityText}>{creator.identityLabel}</Text></View>
         ) : null}
         {coach ? (
-          <View style={{ flexDirection: "row", flexWrap: "wrap", justifyContent: "center", gap: 6, marginTop: 6 }}>
+          <View style={{ flexDirection: "row", flexWrap: "wrap", justifyContent: "center", gap: 6, marginTop: 8 }}>
             <View style={s.coachSpecialty}><Briefcase size={11} color={C.gold} /><Text style={s.coachSpecialtyText}>{coach.specialty}</Text></View>
             {coach.verificationPreview ? (
               <View style={s.coachVerify} accessibilityLabel={coach.verificationPreview}><ShieldAlert size={11} color={C.ash} /><Text style={s.coachVerifyText}>{coach.verificationPreview}</Text></View>
@@ -124,7 +125,10 @@ export function ProfileScreen({ myPosts, savedPosts, onOpenPost, onTimeline, onC
         ) : null}
         {founder ? <View style={{ marginTop: 8 }}><FounderBadge /></View> : null}
         <Text style={s.bio}>{ME.bio}</Text>
-        <View style={s.goal}><Target size={14} color={C.flame} /><Text style={{ color: C.white, fontSize: 13, fontWeight: "600" }}>Goal · {ME.goal}</Text></View>
+        <View style={s.goal}>
+          <Target size={14} color={C.flame} />
+          <Text style={s.goalText}>Goal · {ME.goal}</Text>
+        </View>
         <View style={s.stats}>
           <Stat label="Followers" value={ME.followers} />
           <Stat label="Following" value={ME.following} divider />
@@ -133,108 +137,68 @@ export function ProfileScreen({ myPosts, savedPosts, onOpenPost, onTimeline, onC
         </View>
       </View>
 
-      <View style={{ paddingHorizontal: 16, paddingTop: 28 }}>
-        <View style={s.rowBetween}><Label>Personal records</Label><Label accent>LB</Label></View>
-        <View style={{ flexDirection: "row", gap: 10 }}>
-          {PERSONAL_RECORDS.map((pr) => (
-            <LinearGradient key={pr.lift} colors={["rgba(255,209,102,0.75)", "rgba(255,90,31,0.3)", "rgba(255,247,237,0.04)"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={s.prBorder}>
-              <View style={s.pr}>
-                <Glows glows={[{ color: C.gold, cx: "100%", cy: "0%", rx: "60%", ry: "50%", opacity: 0.22 }]} />
-                <Label>{pr.lift}</Label>
-                <GradText vertical colors={GRAD_PR} style={s.prValue}>{pr.value}</GradText>
-                <Text style={s.prDelta}>{pr.delta}</Text>
-              </View>
-            </LinearGradient>
+      <View style={{ paddingHorizontal: 16, paddingTop: 32 }}>
+        <View style={s.sectionRow}><Label>Personal records</Label><Label accent>LB</Label></View>
+        <View style={s.prs}>
+          {PERSONAL_RECORDS.map((pr, i) => (
+            <View key={pr.lift} style={[s.pr, i > 0 && s.prDivider]} accessible accessibilityLabel={`${pr.lift} personal record ${pr.value} pounds, ${pr.delta}`}>
+              <Label>{pr.lift}</Label>
+              <GradText vertical colors={GRAD_PR} style={s.prValue}>{pr.value}</GradText>
+              <Text style={s.prDelta}>{pr.delta}</Text>
+            </View>
           ))}
         </View>
 
-        <Pressable accessibilityRole="button" onPress={() => { tap(); onChallenges(); }} style={({ pressed }) => [{ marginTop: 14, borderRadius: 20, overflow: "hidden", transform: [{ scale: pressed ? 0.98 : 1 }] }]}>
-          <LinearGradient colors={["rgba(255,90,31,0.18)", "rgba(255,90,31,0.02)"]} start={{ x: 0, y: 0.5 }} end={{ x: 1, y: 0.5 }} style={s.challenge}>
-            <ProgressRing value={pct} size={46} stroke={4.5}><Flame size={16} color={C.flame} fill={C.flame} /></ProgressRing>
-            <View style={{ flex: 1, gap: 3 }}>
-              <Label accent>Current challenge</Label>
-              <Text style={{ color: C.white, fontSize: 15, fontWeight: "700" }}>30-Day Consistency Challenge</Text>
-              <Text style={{ color: C.ash, fontSize: 12.5 }}>Day {ME.challengeDay} of {challenge.totalDays}</Text>
-            </View>
-            <ChevronRight size={20} color={C.ash} />
-          </LinearGradient>
-        </Pressable>
+        <Label style={s.groupLabel}>Training</Label>
+        <ListGroup>
+          <ListRow
+            icon={<ProgressRing value={pct} size={40} stroke={4}><Flame size={15} color={C.flame} fill={C.flame} /></ProgressRing>}
+            title={challenge.title}
+            subtitle={`Current challenge · Day ${ME.challengeDay} of ${challenge.totalDays}`}
+            accessibilityLabel={`Current challenge, ${challenge.title}, day ${ME.challengeDay} of ${challenge.totalDays}`}
+            onPress={onChallenges}
+          />
+          <ListRow
+            icon={<IconMark icon={BarChart3} tone="flame" solid size={40} />}
+            title="Progress Timeline"
+            subtitle="6 months · 124 workouts · +45 lb"
+            accessibilityLabel="View Progress Timeline"
+            onPress={onTimeline}
+          />
+        </ListGroup>
 
-        <Pressable accessibilityRole="button" accessibilityLabel="View Progress Timeline" onPress={() => { thump(); onTimeline(); }} style={({ pressed }) => [s.ctaShadow, { transform: [{ scale: pressed ? 0.98 : 1 }] }]}>
-          <LinearGradient colors={GRAD} start={DIAG.start} end={DIAG.end} style={s.timelineCta}>
-            <View style={s.ctaIcon}><BarChart3 size={22} color="#fff" /></View>
-            <View style={{ flex: 1, gap: 4 }}>
-              <Text style={s.ctaTitle}>View Progress Timeline</Text>
-              <Text style={{ color: "rgba(255,255,255,0.88)", fontSize: 12.5 }}>6 months · 124 workouts · +45 lb</Text>
-            </View>
-            <ArrowRight size={20} color="#fff" strokeWidth={2.6} />
-          </LinearGradient>
-        </Pressable>
-
-        {onPremium ? (
-          <Pressable accessibilityRole="button" accessibilityLabel="GYMX Premium, memberships coming soon" onPress={() => { tap(); onPremium(); }} style={({ pressed }) => [{ marginTop: 12, borderRadius: 20, transform: [{ scale: pressed ? 0.98 : 1 }] }]}>
-            <LinearGradient colors={["rgba(255,209,102,0.7)", "rgba(255,90,31,0.35)", "rgba(255,247,237,0.06)"]} start={DIAG.start} end={DIAG.end} style={s.premiumBorder}>
-              <View style={s.premiumRow}>
-                <LinearGradient colors={GRAD_GOLD} start={DIAG.start} end={DIAG.end} style={s.premiumIcon}><Crown size={20} color="#1c0f00" /></LinearGradient>
-                <View style={{ flex: 1, gap: 3 }}>
-                  <Text style={s.premiumTitle}>GYMX Premium</Text>
-                  <Text style={s.premiumSub}>Memberships coming soon</Text>
-                </View>
-                <ChevronRight size={20} color={C.gold} />
-              </View>
-            </LinearGradient>
-          </Pressable>
+        {hasPremiumTools ? (
+          <>
+            <View style={[s.sectionRow, s.groupLabel]}><Label>GYMX Premium</Label><Tag tone="gold">Coming soon</Tag></View>
+            <ListGroup>
+              {onPremium ? (
+                <ListRow icon={<IconMark icon={Crown} tone="gold" solid size={40} />} title="Memberships" subtitle="Compare Pro, Creator and Coach plans" accessibilityLabel="GYMX Premium, memberships coming soon" onPress={onPremium} />
+              ) : null}
+              {onStudio ? (
+                <ListRow icon={<IconMark icon={Palette} tone="gold" size={40} />} title="Profile Studio" badge={<Tag tone="gold">PRO</Tag>} subtitle={look ? "Premium look on · this session" : "Banners, glow ring, PRO badge"} accessibilityLabel="Profile Studio, GYMX Pro preview, coming soon" onPress={onStudio} />
+              ) : null}
+              {onCreatorStudio ? (
+                <ListRow icon={<IconMark icon={Video} tone="flame" size={40} />} title="Creator Studio" badge={<Tag tone="flame">CREATOR</Tag>} subtitle={creator ? "Creator look on · this session" : "Analytics, scheduling, campaigns"} accessibilityLabel="Creator Studio, Creator Pro tools preview, coming soon" onPress={onCreatorStudio} />
+              ) : null}
+              {onCoachCenter ? (
+                <ListRow icon={<IconMark icon={ClipboardList} tone="bone" size={40} />} title="Coach Command Center" badge={<Tag tone="bone">COACH</Tag>} subtitle={coach ? "Coach look on · this session" : "Leads, bookings, services"} accessibilityLabel="Coach Command Center, Coach Pro tools preview, coming soon" onPress={onCoachCenter} />
+              ) : null}
+            </ListGroup>
+          </>
         ) : null}
 
-        {onStudio ? (
-          <Pressable accessibilityRole="button" accessibilityLabel="Profile Studio, GYMX Pro preview, coming soon" onPress={() => { tap(); onStudio(); }} style={({ pressed }) => [s.studioRow, { transform: [{ scale: pressed ? 0.98 : 1 }] }]}>
-            <View style={s.studioIcon}><Palette size={18} color={C.gold} /></View>
-            <View style={{ flex: 1, gap: 2 }}>
-              <Text style={s.studioTitle}>Profile Studio</Text>
-              <Text style={s.studioSub}>{look ? "Premium look on · this session" : "Banners, glow ring, PRO badge · Coming Soon"}</Text>
-            </View>
-            <View style={s.proChip}><Text style={s.proChipText}>PRO</Text></View>
-            <ChevronRight size={18} color={C.ash} />
-          </Pressable>
-        ) : null}
-
-        {onCreatorStudio ? (
-          <Pressable accessibilityRole="button" accessibilityLabel="Creator Studio, Creator Pro tools preview, coming soon" onPress={() => { tap(); onCreatorStudio(); }} style={({ pressed }) => [s.studioRow, { transform: [{ scale: pressed ? 0.98 : 1 }] }]}>
-            <View style={[s.studioIcon, { backgroundColor: "rgba(255,90,31,0.14)" }]}><Video size={18} color={C.flame} /></View>
-            <View style={{ flex: 1, gap: 2 }}>
-              <Text style={s.studioTitle}>Creator Studio</Text>
-              <Text style={s.studioSub}>{creator ? "Creator look on · this session" : "Creator Pro tools preview · Coming Soon"}</Text>
-            </View>
-            <View style={[s.proChip, { backgroundColor: C.flame }]}><Text style={[s.proChipText, { color: "#fff" }]}>CREATOR</Text></View>
-            <ChevronRight size={18} color={C.ash} />
-          </Pressable>
-        ) : null}
-
-        {onCoachCenter ? (
-          <Pressable accessibilityRole="button" accessibilityLabel="Coach Command Center, Coach Pro tools preview, coming soon" onPress={() => { tap(); onCoachCenter(); }} style={({ pressed }) => [s.studioRow, { transform: [{ scale: pressed ? 0.98 : 1 }] }]}>
-            <View style={s.studioIcon}><ClipboardList size={18} color={C.gold} /></View>
-            <View style={{ flex: 1, gap: 2 }}>
-              <Text style={s.studioTitle}>Coach Command Center</Text>
-              <Text style={s.studioSub}>{coach ? "Coach look on · this session" : "Leads, bookings, services · Coming Soon"}</Text>
-            </View>
-            <View style={[s.proChip, { backgroundColor: C.white }]}><Text style={[s.proChipText, { color: "#1c1407" }]}>COACH</Text></View>
-            <ChevronRight size={18} color={C.ash} />
-          </Pressable>
-        ) : null}
-
+        {/* Founders is a recognition concept, not a membership, so it sits outside the GYMX Premium group. */}
         {onFounders ? (
-          <Pressable accessibilityRole="button" accessibilityLabel="GYMX Founders, recognition concept" onPress={() => { tap(); onFounders(); }} style={({ pressed }) => [s.studioRow, founder && s.founderRow, { transform: [{ scale: pressed ? 0.98 : 1 }] }]}>
-            <View style={[s.studioIcon, { backgroundColor: "#1a1208" }]}><Shield size={18} color={C.gold} /></View>
-            <View style={{ flex: 1, gap: 2 }}>
-              <Text style={s.studioTitle}>GYMX Founders</Text>
-              <Text style={s.studioSub}>{founder ? "Founder recognition preview on · this session" : "Recognition concept · not a membership"}</Text>
-            </View>
-            <ChevronRight size={18} color={C.ash} />
-          </Pressable>
+          <>
+            <Label style={s.groupLabel}>Community</Label>
+            <ListGroup>
+              <ListRow icon={<IconMark icon={Shield} tone="gold" size={40} />} title="GYMX Founders" subtitle={founder ? "Founder recognition preview on · this session" : "Recognition concept · not a membership"} accessibilityLabel="GYMX Founders, recognition concept" onPress={onFounders} style={founder ? s.founderRow : undefined} />
+            </ListGroup>
+          </>
         ) : null}
       </View>
 
-      <View style={{ paddingTop: 26 }}>
+      <View style={{ paddingTop: 28 }}>
         {founder ? (
           <LinearGradient colors={["#FFE6A3", "#C9962E", "#FF7A2F"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={s.founderFrame}>
             <View style={s.founderCard}>
@@ -297,7 +261,7 @@ export function ProfileScreen({ myPosts, savedPosts, onOpenPost, onTimeline, onC
             </View>
             {coach.featuredService ? <Text style={s.coachLine}>Featured service · {coach.featuredService}</Text> : null}
             {coach.inquiryButton ? (
-              <Pressable accessibilityRole="button" accessibilityLabel="Coaching inquiry button preview" onPress={() => { tap(); onToast("Preview only — inquiries can't be sent in this demo."); }} style={s.coachInquiry}>
+              <Pressable accessibilityRole="button" accessibilityLabel="Coaching inquiry button preview" onPress={() => { tap(); onToast("Preview only — inquiries can't be sent in this demo."); }} style={({ pressed }) => [s.coachInquiry, pressed && { opacity: 0.85 }]}>
                 <MessageSquare size={14} color="#1c1407" />
                 <Text style={s.coachInquiryText}>Send a coaching inquiry</Text>
               </Pressable>
@@ -351,38 +315,41 @@ export function ProfileScreen({ myPosts, savedPosts, onOpenPost, onTimeline, onC
           ))}
         </View>
       ) : (
-        <Text style={s.empty}>Tap the bookmark on any post to save it here.</Text>
+        <View style={s.emptyWrap}>
+          <Bookmark size={24} color={C.ash} />
+          <Text style={s.emptyTitle}>Nothing saved yet</Text>
+          <Text style={s.empty}>Tap the bookmark on any post to save it here.</Text>
+        </View>
       )}
     </ScrollView>
   );
 }
 
+/** Avatar ring: a slow rotating sweep in the profile's ring colours. */
 function GlowRing({ children, colors }: { children: ReactNode; colors?: [string, string, string, string, string] }) {
   const r = useRef(new Animated.Value(0)).current;
+  const reduced = useReducedMotion();
   useEffect(() => {
+    if (reduced) return;
     const loop = Animated.loop(Animated.timing(r, { toValue: 1, duration: 6000, easing: Easing.linear, useNativeDriver: true }));
     loop.start();
     return () => loop.stop();
-  }, [r]);
+  }, [r, reduced]);
   return (
     <View style={s.ringWrap}>
       <Animated.View style={[StyleSheet.absoluteFill, { borderRadius: 60, overflow: "hidden", transform: [{ rotate: r.interpolate({ inputRange: [0, 1], outputRange: ["0deg", "360deg"] }) }] }]}>
         <LinearGradient colors={colors ?? [C.gold, C.flame, C.hot, C.flame, C.gold]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={StyleSheet.absoluteFill} />
       </Animated.View>
       <View style={{ padding: 4, borderRadius: 52, backgroundColor: C.bg }}>{children}</View>
-      <LinearGradient colors={GRAD} start={DIAG.start} end={DIAG.end} style={s.streakBadge}>
-        <Flame size={13} color="#fff" fill="#fff" />
-        <Text style={{ fontFamily: F.labelHeavy, fontSize: 15, color: "#fff" }}>{ME.streak}</Text>
-      </LinearGradient>
     </View>
   );
 }
 
 function Stat({ label, value, divider, streak }: { label: string; value: string; divider?: boolean; streak?: boolean }) {
   return (
-    <View style={[{ flex: 1, alignItems: "center", gap: 5 }, divider && { borderLeftWidth: StyleSheet.hairlineWidth, borderLeftColor: "rgba(255,247,237,0.14)" }]}>
+    <View style={[{ flex: 1, alignItems: "center", gap: 4 }, divider && { borderLeftWidth: StyleSheet.hairlineWidth, borderLeftColor: LINE.strong }]}>
       <View style={{ flexDirection: "row", alignItems: "center", gap: 3 }}>
-        {streak ? <Flame size={16} color={C.flame} fill={C.flame} /> : null}
+        {streak ? <Flame size={15} color={C.flame} fill={C.flame} /> : null}
         <Text style={[s.statValue, streak && { color: C.flame }]}>{value}</Text>
       </View>
       <Text style={s.statLabel}>{label}</Text>
@@ -400,26 +367,25 @@ function GridTile({ w, onPress, label, children }: { w: number; onPress: () => v
 
 const s = StyleSheet.create({
   coverActions: { position: "absolute", right: 16, flexDirection: "row", gap: 8 },
-  identity: { alignItems: "center", marginTop: -64, paddingHorizontal: 20 },
-  ringWrap: { width: 112, height: 112, borderRadius: 56, alignItems: "center", justifyContent: "center", shadowColor: C.flame, shadowOpacity: 0.65, shadowRadius: 20, shadowOffset: { width: 0, height: 0 }, elevation: 12 },
-  streakBadge: { position: "absolute", right: -10, bottom: 2, flexDirection: "row", alignItems: "center", gap: 3, height: 28, paddingLeft: 8, paddingRight: 10, borderRadius: 14, borderWidth: 3, borderColor: C.bg },
-  name: { fontFamily: F.display, fontSize: 40, lineHeight: 44, textTransform: "uppercase", color: C.white },
-  handle: { marginTop: 2, fontSize: 14, fontWeight: "600", color: C.ash },
-  bio: { maxWidth: 300, marginTop: 10, textAlign: "center", fontSize: 15, lineHeight: 21, color: "rgba(255,247,237,0.9)" },
-  goal: { flexDirection: "row", alignItems: "center", gap: 7, marginTop: 12, paddingHorizontal: 14, paddingVertical: 8, borderRadius: 999, backgroundColor: "rgba(255,90,31,0.1)", borderWidth: 1, borderColor: "rgba(255,90,31,0.3)" },
-  stats: { flexDirection: "row", alignSelf: "stretch", marginTop: 22 },
-  statValue: { fontFamily: F.display, fontSize: 26, color: C.white },
-  statLabel: { fontFamily: F.label, fontSize: 11, letterSpacing: 1.5, textTransform: "uppercase", color: C.ash },
-  rowBetween: { flexDirection: "row", justifyContent: "space-between", marginBottom: 12 },
-  prBorder: { flex: 1, borderRadius: 20, padding: 1 },
-  pr: { borderRadius: 19, paddingHorizontal: 12, paddingVertical: 13, gap: 6, overflow: "hidden", backgroundColor: "#141414" },
-  prValue: { fontFamily: F.display, fontSize: 38, lineHeight: 42 },
-  prDelta: { fontSize: 11, fontWeight: "600", color: C.ash },
-  challenge: { flexDirection: "row", alignItems: "center", gap: 14, paddingVertical: 12, paddingHorizontal: 14 },
-  ctaShadow: { marginTop: 12, borderRadius: 22, shadowColor: C.hot, shadowOpacity: 0.45, shadowRadius: 18, shadowOffset: { width: 0, height: 10 }, elevation: 10 },
-  timelineCta: { flexDirection: "row", alignItems: "center", gap: 14, paddingVertical: 16, paddingLeft: 14, paddingRight: 18, borderRadius: 22 },
-  ctaIcon: { width: 46, height: 46, borderRadius: 15, alignItems: "center", justifyContent: "center", backgroundColor: "rgba(0,0,0,0.2)" },
-  ctaTitle: { fontFamily: F.labelHeavy, fontSize: 19, letterSpacing: 1, textTransform: "uppercase", color: "#fff" },
+  coverBtn: { backgroundColor: "rgba(9,9,9,0.32)" },
+  identity: { alignItems: "center", marginTop: -58, paddingHorizontal: GUTTER },
+  ringWrap: { width: 106, height: 106, borderRadius: 53, alignItems: "center", justifyContent: "center", shadowColor: C.flame, shadowOpacity: 0.3, shadowRadius: 12, shadowOffset: { width: 0, height: 0 }, elevation: 6 },
+  nameRow: { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6, marginTop: 14, maxWidth: "100%" },
+  name: { ...TYPE.title, fontSize: 34, lineHeight: 38, flexShrink: 1 },
+  handle: { marginTop: 2, fontSize: 14, fontWeight: "600", color: TEXT.tertiary },
+  bio: { maxWidth: 320, marginTop: 12, textAlign: "center", fontSize: 15, lineHeight: 21, color: TEXT.secondary },
+  goal: { flexDirection: "row", alignItems: "center", gap: 7, marginTop: 14, paddingHorizontal: 12, height: 32, borderRadius: RADIUS.pill, backgroundColor: TINT.flame },
+  goalText: { color: TEXT.primary, fontSize: 13, fontWeight: "600" },
+  stats: { flexDirection: "row", alignSelf: "stretch", marginTop: 24 },
+  statValue: { ...TYPE.metric, fontSize: 24, lineHeight: 28 },
+  statLabel: { ...TYPE.eyebrow, fontSize: 11, letterSpacing: 1.3 },
+  sectionRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", paddingHorizontal: 4 },
+  groupLabel: { marginTop: 32, marginBottom: 12, paddingHorizontal: 4 },
+  prs: { flexDirection: "row", marginTop: 14 },
+  pr: { flex: 1, paddingHorizontal: 4, gap: 2 },
+  prDivider: { paddingLeft: 16, borderLeftWidth: StyleSheet.hairlineWidth, borderLeftColor: LINE.strong },
+  prValue: { fontFamily: F.display, fontSize: 40, lineHeight: 46 },
+  prDelta: { fontSize: 12, fontWeight: "600", color: TEXT.tertiary },
   tabs: { flexDirection: "row", backgroundColor: "rgba(9,9,9,0.97)", borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: C.line },
   tab: { flex: 1, height: 48, alignItems: "center", justifyContent: "center" },
   tabText: { fontFamily: F.label, fontSize: 15, letterSpacing: 1.5, textTransform: "uppercase", color: C.ash },
@@ -429,46 +395,37 @@ const s = StyleSheet.create({
   newText: { fontFamily: F.labelHeavy, fontSize: 11, letterSpacing: 1.1, textTransform: "uppercase", color: "#1c0f00" },
   views: { position: "absolute", left: 7, bottom: 7, flexDirection: "row", alignItems: "center", gap: 4 },
   viewsText: { fontFamily: F.label, fontSize: 12, color: C.white, textShadowColor: "rgba(0,0,0,0.9)", textShadowRadius: 6 },
-  premiumBorder: { borderRadius: 20, padding: 1.2 },
-  premiumRow: { flexDirection: "row", alignItems: "center", gap: 14, paddingVertical: 13, paddingLeft: 14, paddingRight: 16, borderRadius: 19, backgroundColor: "#141414" },
-  premiumIcon: { width: 42, height: 42, borderRadius: 14, alignItems: "center", justifyContent: "center" },
-  premiumTitle: { fontFamily: F.labelHeavy, fontSize: 17, letterSpacing: 1, textTransform: "uppercase", color: C.white },
-  premiumSub: { fontFamily: F.label, fontSize: 12, letterSpacing: 1.6, textTransform: "uppercase", color: C.gold },
-  studioRow: { flexDirection: "row", alignItems: "center", gap: 12, marginTop: 10, paddingVertical: 12, paddingHorizontal: 14, borderRadius: 18, backgroundColor: "rgba(255,247,237,0.04)" },
-  studioIcon: { width: 38, height: 38, borderRadius: 12, alignItems: "center", justifyContent: "center", backgroundColor: "rgba(255,209,102,0.12)" },
-  studioTitle: { fontFamily: F.labelHeavy, fontSize: 16, letterSpacing: 0.8, textTransform: "uppercase", color: C.white },
-  studioSub: { fontSize: 12, color: C.ash },
-  proChip: { paddingHorizontal: 7, height: 20, borderRadius: 6, justifyContent: "center", backgroundColor: C.gold },
-  proChipText: { fontFamily: F.labelHeavy, fontSize: 11, letterSpacing: 1.2, color: "#1c0f00" },
-  pinned: { flexDirection: "row", alignItems: "center", gap: 12, marginHorizontal: 16, marginBottom: 20, padding: 10, borderRadius: 18, backgroundColor: "rgba(255,209,102,0.07)", borderWidth: 1, borderColor: "rgba(255,209,102,0.3)" },
-  pinnedArt: { width: 76, height: 76, borderRadius: 12, overflow: "hidden" },
+  pinned: { flexDirection: "row", alignItems: "center", gap: 12, marginHorizontal: 16, marginBottom: 20, padding: 12, borderRadius: RADIUS.lg, backgroundColor: SURFACE.raised },
+  pinnedArt: { width: 72, height: 72, borderRadius: 12, overflow: "hidden" },
   pinnedLabel: { fontFamily: F.labelHeavy, fontSize: 11, letterSpacing: 1.4, textTransform: "uppercase", color: C.gold },
   pinnedTitle: { marginTop: 3, fontSize: 15, fontWeight: "700", color: C.white },
-  creatorIdentity: { flexDirection: "row", alignItems: "center", gap: 5, marginTop: 6, paddingHorizontal: 9, paddingVertical: 4, borderRadius: 8, backgroundColor: "rgba(255,90,31,0.12)" },
+  creatorIdentity: { flexDirection: "row", alignItems: "center", gap: 5, marginTop: 8, paddingHorizontal: 9, paddingVertical: 4, borderRadius: 8, backgroundColor: TINT.flame },
   creatorIdentityText: { fontFamily: F.labelHeavy, fontSize: 11, letterSpacing: 1.4, color: C.flame },
-  creatorStrip: { marginHorizontal: 16, marginBottom: 20, padding: 12, borderRadius: 18, backgroundColor: "rgba(255,90,31,0.07)", borderWidth: 1, borderColor: "rgba(255,90,31,0.3)" },
+  creatorStrip: { marginHorizontal: 16, marginBottom: 20, padding: 14, borderRadius: RADIUS.lg, backgroundColor: SURFACE.raised },
   creatorStripKicker: { fontFamily: F.labelHeavy, fontSize: 11, letterSpacing: 1.3, textTransform: "uppercase", color: C.flame },
   creatorStatValue: { fontFamily: F.display, fontSize: 20, color: C.white },
   creatorStatLabel: { fontFamily: F.label, fontSize: 10.5, letterSpacing: 1, textTransform: "uppercase", color: C.ash },
-  creatorLink: { paddingHorizontal: 9, height: 24, borderRadius: 12, justifyContent: "center", backgroundColor: "rgba(255,247,237,0.07)" },
+  creatorLink: { paddingHorizontal: 10, height: 26, borderRadius: 13, justifyContent: "center", backgroundColor: SURFACE.fill },
   creatorLinkText: { fontSize: 12, color: C.white },
-  coachSpecialty: { flexDirection: "row", alignItems: "center", gap: 5, paddingHorizontal: 9, paddingVertical: 4, borderRadius: 8, backgroundColor: "rgba(255,209,102,0.12)" },
+  coachSpecialty: { flexDirection: "row", alignItems: "center", gap: 5, paddingHorizontal: 9, paddingVertical: 4, borderRadius: 8, backgroundColor: TINT.gold },
   coachSpecialtyText: { fontFamily: F.labelHeavy, fontSize: 11, letterSpacing: 1.3, textTransform: "uppercase", color: C.gold },
-  coachVerify: { flexDirection: "row", alignItems: "center", gap: 5, paddingHorizontal: 8, paddingVertical: 4, borderRadius: 8, borderWidth: 1, borderStyle: "dashed", borderColor: "rgba(163,163,163,0.6)" },
+  coachVerify: { flexDirection: "row", alignItems: "center", gap: 5, paddingHorizontal: 8, paddingVertical: 4, borderRadius: 8, borderWidth: 1, borderStyle: "dashed", borderColor: "rgba(168,162,154,0.6)" },
   coachVerifyText: { fontFamily: F.labelHeavy, fontSize: 10.5, letterSpacing: 0.9, color: C.ash },
-  coachStrip: { marginHorizontal: 16, marginBottom: 20, padding: 12, gap: 8, borderRadius: 18, backgroundColor: "rgba(255,209,102,0.06)", borderWidth: 1, borderColor: "rgba(255,209,102,0.35)" },
+  coachStrip: { marginHorizontal: 16, marginBottom: 20, padding: 14, gap: 8, borderRadius: RADIUS.lg, backgroundColor: SURFACE.raised },
   coachKicker: { fontFamily: F.labelHeavy, fontSize: 11, letterSpacing: 1.3, textTransform: "uppercase", color: C.gold },
   coachLine: { fontSize: 13.5, fontWeight: "600", color: C.white },
-  coachInquiry: { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 7, height: 40, borderRadius: 12, backgroundColor: C.gold },
+  coachInquiry: { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 7, height: 44, borderRadius: 12, backgroundColor: C.gold },
   coachInquiryText: { fontFamily: F.labelHeavy, fontSize: 13.5, letterSpacing: 1, textTransform: "uppercase", color: "#1c1407" },
-  coachQuote: { fontSize: 13, lineHeight: 18, color: "rgba(255,247,237,0.82)" },
+  coachQuote: { fontSize: 13, lineHeight: 18, color: TEXT.secondary },
   coachMeta: { fontSize: 12, color: C.ash },
-  founderRow: { borderWidth: 1, borderColor: "rgba(255,209,102,0.45)" },
-  founderFrame: { marginHorizontal: 16, marginBottom: 20, padding: 1.5, borderRadius: 19 },
-  founderCard: { padding: 13, gap: 6, borderRadius: 18, backgroundColor: "#121110" },
+  founderRow: { backgroundColor: "rgba(255,209,102,0.06)" },
+  founderFrame: { marginHorizontal: 16, marginBottom: 20, padding: 1, borderRadius: RADIUS.lg },
+  founderCard: { padding: 14, gap: 6, borderRadius: RADIUS.lg - 1, backgroundColor: "#121110" },
   founderKicker: { fontFamily: F.labelHeavy, fontSize: 11.5, letterSpacing: 1.3, textTransform: "uppercase", color: C.gold },
-  founderText: { fontSize: 13, lineHeight: 18, color: "rgba(255,247,237,0.85)" },
+  founderText: { fontSize: 13, lineHeight: 18, color: TEXT.secondary },
   founderNote: { fontSize: 11.5, color: C.ash },
   pinnedNote: { marginTop: 2, fontSize: 11.5, color: C.ash },
-  empty: { padding: 32, textAlign: "center", color: C.ash, fontSize: 14 },
+  emptyWrap: { alignItems: "center", gap: 8, paddingHorizontal: 32, paddingVertical: 40 },
+  emptyTitle: { fontSize: 16, fontWeight: "700", color: TEXT.primary },
+  empty: { textAlign: "center", color: C.ash, fontSize: 14, lineHeight: 20 },
 });

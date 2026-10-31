@@ -8,7 +8,7 @@ import type { Comment, Post } from "../data";
 import { ME } from "../data";
 import { Avatar, IconBtn, tap, thump } from "../components/ui";
 import { formatCount } from "../utils";
-import { C, DIAG, F, GRAD } from "../theme";
+import { C, DIAG, F, GRAD, RADIUS, SURFACE, TEXT } from "../theme";
 
 /** `onAdd` resolves to false when Guardian blocked the comment, so the draft is kept for editing. */
 export function CommentsSheet({ post, comments, onAdd, onClose }: { post: Post | null; comments: Comment[]; onAdd: (text: string) => Promise<boolean>; onClose: () => void }) {
@@ -93,17 +93,17 @@ export function CommentsSheet({ post, comments, onAdd, onClose }: { post: Post |
 }
 
 const s = StyleSheet.create({
-  backdrop: { ...StyleSheet.absoluteFill, backgroundColor: "rgba(0,0,0,0.55)" },
+  backdrop: { ...StyleSheet.absoluteFill, backgroundColor: SURFACE.scrim },
   wrap: { flex: 1, justifyContent: "flex-end" },
-  sheet: { height: "70%", borderTopLeftRadius: 28, borderTopRightRadius: 28, backgroundColor: "#151515", borderTopWidth: StyleSheet.hairlineWidth, borderColor: "rgba(255,247,237,0.12)" },
-  handle: { alignSelf: "center", width: 42, height: 4, borderRadius: 2, marginTop: 10, backgroundColor: "rgba(255,247,237,0.22)" },
+  sheet: { height: "70%", borderTopLeftRadius: RADIUS.xl, borderTopRightRadius: RADIUS.xl, backgroundColor: SURFACE.sheet },
+  handle: { alignSelf: "center", width: 40, height: 4, borderRadius: 2, marginTop: 10, backgroundColor: "rgba(255,247,237,0.2)" },
   head: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingLeft: 20, paddingRight: 16, paddingVertical: 10 },
-  title: { fontFamily: F.label, fontSize: 18, letterSpacing: 1.4, textTransform: "uppercase", color: C.white },
+  title: { fontFamily: F.labelHeavy, fontSize: 17, letterSpacing: 1.3, textTransform: "uppercase", color: C.white },
   comment: { flexDirection: "row", gap: 12, alignItems: "flex-start" },
-  meta: { fontSize: 13, color: C.ash },
-  body: { marginTop: 3, fontSize: 14, lineHeight: 20, color: "rgba(255,247,237,0.9)" },
+  meta: { fontSize: 13, color: TEXT.tertiary },
+  body: { marginTop: 3, fontSize: 14.5, lineHeight: 20, color: TEXT.secondary },
   pending: { marginTop: 4, fontFamily: F.label, fontSize: 11, letterSpacing: 1.2, textTransform: "uppercase", color: C.gold },
   form: { flexDirection: "row", alignItems: "center", gap: 10, paddingHorizontal: 14, paddingTop: 12, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: C.line },
-  input: { flex: 1, height: 46, paddingHorizontal: 18, borderRadius: 23, fontSize: 14, color: C.white, backgroundColor: "rgba(255,247,237,0.07)" },
+  input: { flex: 1, height: 46, paddingHorizontal: 18, borderRadius: 23, fontSize: 14.5, color: C.white, backgroundColor: SURFACE.fill },
   send: { width: 46, height: 46, borderRadius: 23, alignItems: "center", justifyContent: "center" },
 });

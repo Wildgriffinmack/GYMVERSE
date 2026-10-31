@@ -40,7 +40,7 @@ import {
 } from "lucide-react-native";
 import { PostArt } from "../components/PostArt";
 import { Glows } from "../components/Tone";
-import { Avatar, Badge, IconBtn, Label, PageHeader, tap } from "../components/ui";
+import { Avatar, Badge, IconBtn, Label, tap, TopBar } from "../components/ui";
 import { ME } from "../data";
 import { formatCount } from "../utils";
 import type { PremiumFeature } from "../membership/entitlements";
@@ -118,7 +118,7 @@ export function CreatorStudioScreen({ onBack, onOpenPremium, onToast, state, onC
   return (
     <View style={{ flex: 1, backgroundColor: C.bg }}>
       <ScrollView contentContainerStyle={{ paddingBottom: insets.bottom + NAV_GAP + NAV_HEIGHT + 28 }} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled" stickyHeaderIndices={[2]}>
-        <PageHeader top={insets.top} kicker="Creator Pro" title="Studio" leading={<IconBtn label="Back" onPress={onBack}><ArrowLeft size={20} color={C.white} /></IconBtn>} />
+        <TopBar top={insets.top} kicker="Creator Pro" onBack={onBack} />
 
         <LinearGradient colors={["#3a0d06", "#170707", "#0d0d0d"]} start={DIAG.start} end={DIAG.end} style={s.hero}>
           <Glows glows={[{ color: C.hot, cx: "100%", cy: "0%", rx: "80%", ry: "90%", opacity: 0.35 }, { color: C.flame, cx: "0%", cy: "100%", rx: "70%", ry: "70%", opacity: 0.25 }]} />
@@ -799,7 +799,7 @@ function ToggleRow({ label, value, onChange }: { label: string; value: boolean; 
 }
 
 const s = StyleSheet.create({
-  hero: { marginHorizontal: 16, padding: 18, borderRadius: 24, overflow: "hidden", gap: 10, borderWidth: StyleSheet.hairlineWidth, borderColor: "rgba(255,90,31,0.35)" },
+  hero: { marginHorizontal: 16, padding: 20, borderRadius: 24, overflow: "hidden", gap: 10 },
   heroTop: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
   rec: { flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 9, height: 24, borderRadius: 7, backgroundColor: "rgba(9,9,9,0.5)" },
   recDot: { width: 7, height: 7, borderRadius: 4, backgroundColor: C.hot },
@@ -817,16 +817,16 @@ const s = StyleSheet.create({
   tabText: { fontFamily: F.labelHeavy, fontSize: 14, letterSpacing: 1.1, textTransform: "uppercase", color: "rgba(255,247,237,0.72)" },
   periods: { flexDirection: "row", marginHorizontal: 16, padding: 3, borderRadius: 12, backgroundColor: "rgba(255,247,237,0.05)" },
   periodBtn: { flex: 1, height: 32, borderRadius: 9, alignItems: "center", justifyContent: "center" },
-  periodOn: { backgroundColor: "rgba(255,90,31,0.28)", borderWidth: 1, borderColor: C.flame },
+  periodOn: { backgroundColor: "rgba(255,90,31,0.24)" },
   periodText: { fontFamily: F.labelHeavy, fontSize: 13, letterSpacing: 1, textTransform: "uppercase", color: C.ash },
   sectionTitle: { fontFamily: F.display, fontSize: 24, lineHeight: 28, textTransform: "uppercase", color: C.white },
   grid: { flexDirection: "row", flexWrap: "wrap", gap: 10 },
-  statCard: { width: "48%", flexGrow: 1, padding: 12, borderRadius: 16, backgroundColor: "#141414", borderWidth: StyleSheet.hairlineWidth, borderColor: "rgba(255,247,237,0.08)", gap: 3 },
-  statHot: { borderColor: "rgba(255,90,31,0.5)", backgroundColor: "#1a0f0b" },
+  statCard: { width: "48%", flexGrow: 1, padding: 12, borderRadius: 16, backgroundColor: "#141414", gap: 3 },
+  statHot: { backgroundColor: "#1d110c" },
   statIcon: { width: 28, height: 28, borderRadius: 9, alignItems: "center", justifyContent: "center", backgroundColor: "rgba(255,90,31,0.12)", marginBottom: 4 },
   statValue: { fontFamily: F.display, fontSize: 24, lineHeight: 28, color: C.white },
   statLabel: { fontFamily: F.label, fontSize: 11, letterSpacing: 1.1, textTransform: "uppercase", color: C.ash },
-  card: { padding: 14, borderRadius: 20, backgroundColor: "#141414", borderWidth: StyleSheet.hairlineWidth, borderColor: "rgba(255,247,237,0.08)" },
+  card: { padding: 14, borderRadius: 20, backgroundColor: "#141414" },
   muted: { fontSize: 12, lineHeight: 17, color: C.ash, marginTop: 4 },
   catRow: { paddingVertical: 8, paddingHorizontal: 8, borderRadius: 12, gap: 6 },
   catRowOn: { backgroundColor: "rgba(255,90,31,0.1)" },
@@ -837,7 +837,7 @@ const s = StyleSheet.create({
   metricRow: { flexDirection: "row", gap: 8, marginTop: 10, marginBottom: 6 },
   metricValue: { fontFamily: F.display, fontSize: 20, lineHeight: 24, color: C.white },
   metricLabel: { fontFamily: F.label, fontSize: 10.5, letterSpacing: 1, textTransform: "uppercase", color: C.ash },
-  postCard: { flexDirection: "row", alignItems: "center", gap: 12, padding: 10, borderRadius: 18, backgroundColor: "#141414", borderWidth: StyleSheet.hairlineWidth, borderColor: "rgba(255,247,237,0.08)" },
+  postCard: { flexDirection: "row", alignItems: "center", gap: 12, padding: 10, borderRadius: 18, backgroundColor: "#141414" },
   thumb: { width: 66, height: 88, borderRadius: 12, overflow: "hidden" },
   rank: { position: "absolute", top: 4, left: 4, paddingHorizontal: 5, borderRadius: 5, overflow: "hidden", fontFamily: F.labelHeavy, fontSize: 11, color: "#fff", backgroundColor: C.flame },
   postTitle: { fontFamily: F.labelHeavy, fontSize: 15, letterSpacing: 0.6, color: C.white },

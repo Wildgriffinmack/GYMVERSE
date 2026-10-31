@@ -1,4 +1,4 @@
-import type { BadgeTone, FeedTab, Post, PostArtData, PostType, PostVisual, TimelineEntry } from "./data";
+import type { BadgeTone, FeedTab, Post, PostArtData, PostMedia, PostType, PostVisual, TimelineEntry } from "./data";
 import { ME } from "./data";
 
 export function formatCount(value: number): string {
@@ -112,6 +112,10 @@ export type PostDraft = {
   caption: string;
   hashtags: string;
   addToTimeline: boolean;
+  /** Home media for photo and PR posts. Clips leave it unset and keep their generated art. */
+  media?: PostMedia;
+  /** Title of the challenge the post is tagged with. */
+  challenge?: string;
 };
 
 export function parseHashtags(raw: string): string[] {
@@ -125,6 +129,7 @@ export function parseHashtags(raw: string): string[] {
 
 export function buildPost(draft: PostDraft): Post {
   const feed = categoryToFeed(draft.category);
+  const media = draft.media;
   return {
     id: `local-${Date.now()}`,
     username: ME.username,
@@ -139,9 +144,14 @@ export function buildPost(draft: PostDraft): Post {
     comments: 0,
     saves: 0,
     audio: `Original audio · ${ME.username}`,
-    art: buildArt(draft.postType, draft.category, draft.caption),
+    // PR posts carry their real numbers into thumbnails and the timeline.
+    art: media?.kind === "milestone"
+      ? { visual: "pr", stat: media.value, unit: media.unit, headline: media.lift, subline: `${media.detail} · Personal best` }
+      : buildArt(draft.postType, draft.category, draft.caption),
     created: true,
     onTimeline: draft.addToTimeline,
+    ...(media ? { media } : {}),
+    ...(draft.challenge ? { challenge: draft.challenge } : {}),
     ...badgeFor(draft.postType, draft.category),
   };
 }

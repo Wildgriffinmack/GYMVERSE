@@ -9,7 +9,7 @@ import { BarlowCondensed_600SemiBold } from "@expo-google-fonts/barlow-condensed
 import { BarlowCondensed_700Bold } from "@expo-google-fonts/barlow-condensed/700Bold";
 import { BarlowCondensed_800ExtraBold } from "@expo-google-fonts/barlow-condensed/800ExtraBold";
 import type { Comment, FeedTab, Post, Screen, TimelineEntry } from "./src/data";
-import { CHALLENGES, INITIAL_TIMELINE, ME, STARTER_POSTS, seedComments } from "./src/data";
+import { CHALLENGES, INITIAL_TIMELINE, ME, PERSONAL_RECORDS, STARTER_POSTS, seedComments } from "./src/data";
 import type { PostDraft } from "./src/utils";
 import { buildPost, timelineEntryFrom } from "./src/utils";
 import { BottomNav, Toast } from "./src/components/ui";
@@ -17,6 +17,7 @@ import { WelcomeScreen } from "./src/screens/Welcome";
 import { FeedScreen } from "./src/screens/Feed";
 import { ExploreScreen } from "./src/screens/Explore";
 import { CreateScreen } from "./src/screens/Create";
+import { sessionBests } from "./src/create/createDraft";
 import { ChallengesScreen } from "./src/screens/Challenges";
 import { ProfileScreen } from "./src/screens/Profile";
 import { ProgressScreen } from "./src/screens/Progress";
@@ -107,6 +108,8 @@ function Gymverse() {
   /** Challenges is no longer a tab; Back returns to Explore or Profile, whichever opened it. */
   const [challengesFrom, setChallengesFrom] = useState<Screen>("explore");
   const toastTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  /** Lets the Create flow handle Android back first (step back or discard prompt). */
+  const createBack = useRef<(() => boolean) | null>(null);
 
   const showToast = useCallback((text: string) => {
     clearTimeout(toastTimer.current);
@@ -127,6 +130,7 @@ function Gymverse() {
     const sub = BackHandler.addEventListener("hardwareBackPress", () => {
       if (commentPostId) { setCommentPostId(null); return true; }
       if (sponsorSheet) { setSponsorSheet(null); return true; }
+      if (screen === "create" && createBack.current?.()) return true;
       if (screen === "progress") { navigate("profile"); return true; }
       if (screen === "premium") { navigate(premiumFrom); return true; }
       if (screen === "pro_progress") { navigate(proFrom); return true; }
@@ -190,6 +194,8 @@ function Gymverse() {
   const feedPosts = useMemo(() => (__DEV__ && extendedDemoFeed ? [...posts, ...DEMO_FILLER] : posts), [posts, extendedDemoFeed]);
   /** The Clips tab (existing short-form experience) shows only clips; Home photo / PR posts stay on Home. */
   const clipFeed = useMemo(() => clipPosts(feedPosts), [feedPosts]);
+  /** A new PR has to beat the profile's records and any PR already posted this session. */
+  const prBests = useMemo(() => sessionBests(PERSONAL_RECORDS, posts), [posts]);
   const openSponsorExplore = useCallback((p: SponsoredPlacement) => setSponsorSheet({ mode: "detail", placement: p }), []);
   const openSponsorOptions = useCallback((p: SponsoredPlacement) => setSponsorSheet({ mode: "options", placement: p }), []);
   const hideSponsored = (p: SponsoredPlacement) => {
@@ -376,7 +382,7 @@ function Gymverse() {
       content = <ExploreScreen onOpenFeed={openFeed} onChallenges={() => openChallenges("explore")} />;
       break;
     case "create":
-      content = <CreateScreen onPost={createPost} onClose={() => navigate("home")} onToast={showToast} />;
+      content = <CreateScreen onPost={createPost} onClose={() => navigate("home")} onToast={showToast} challenges={CHALLENGES.filter((c) => c.id === ME.challengeId || joined.includes(c.id))} bests={prBests} backHandlerRef={createBack} />;
       break;
     case "challenges":
       content = <ChallengesScreen joined={joined} onToggle={toggleChallenge} onExplorePremium={(id) => openPremiumChallenge(id, "challenges")} onFounders={() => openFounders("challenges")} premiumProgress={premiumProgress} onBack={() => navigate(challengesFrom)} />;
@@ -454,7 +460,8 @@ function Gymverse() {
   return (
     <View style={{ flex: 1 }}>
       <ScreenTransition key={screen}>{content}</ScreenTransition>
-      {screen !== "welcome" ? <BottomNav active={screen} onNavigate={navigate} bottom={insets.bottom} /> : null}
+      {/* Create is a focused, full-screen flow with its own close/back controls. */}
+      {screen !== "welcome" && screen !== "create" ? <BottomNav active={screen} onNavigate={navigate} bottom={insets.bottom} /> : null}
       <CommentsSheet
         post={commentPost}
         comments={commentPost ? [...(addedComments[commentPost.id] ?? []), ...seedComments(commentPost.id)] : []}

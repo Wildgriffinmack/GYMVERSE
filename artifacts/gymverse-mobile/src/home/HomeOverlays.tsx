@@ -7,9 +7,9 @@ import type { LucideIcon } from "lucide-react-native";
 import type { Post } from "../data";
 import { ShareIcon } from "../components/GymIcons";
 import { IconBtn, tap } from "../components/ui";
-import { C } from "../theme";
+import { C, LINE, RADIUS, SURFACE } from "../theme";
 import { isClip } from "./homeFeed";
-import { PHOTOS } from "./photos";
+import { photoFor } from "./photos";
 
 /** "…" menu for a Home post: follow/unfollow, watch in Clips, share. Uses the app's existing actions. */
 export function PostMenu({ post, following, isMine, onClose, onFollow, onShare, onOpenClip }: {
@@ -76,11 +76,14 @@ function ViewerBody({ photos, index, onClose }: { photos: string[]; index: numbe
         getItemLayout={(_, i) => ({ length: width, offset: width * i, index: i })}
         onScroll={onScroll}
         scrollEventThrottle={32}
-        renderItem={({ item }) => (
-          <View style={{ width, height, justifyContent: "center" }}>
-            {PHOTOS[item] ? <Image source={PHOTOS[item].source} accessibilityLabel={PHOTOS[item].alt} resizeMode="contain" style={{ width, height: height * 0.78 }} /> : null}
-          </View>
-        )}
+        renderItem={({ item }) => {
+          const photo = photoFor(item);
+          return (
+            <View style={{ width, height, justifyContent: "center" }}>
+              {photo ? <Image source={photo.source} accessibilityLabel={photo.alt} resizeMode="contain" style={{ width, height: height * 0.78 }} /> : null}
+            </View>
+          );
+        }}
       />
       <View style={[s.viewerTop, { paddingTop: insets.top + 8 }]}>
         <Text style={s.viewerCount} accessibilityLiveRegion="polite">{current + 1} / {photos.length}</Text>
@@ -91,12 +94,12 @@ function ViewerBody({ photos, index, onClose }: { photos: string[]; index: numbe
 }
 
 const s = StyleSheet.create({
-  backdrop: { ...StyleSheet.absoluteFill, backgroundColor: "rgba(0,0,0,0.55)" },
-  sheet: { position: "absolute", left: 0, right: 0, bottom: 0, paddingTop: 8, borderTopLeftRadius: 20, borderTopRightRadius: 20, backgroundColor: C.iron },
-  handle: { alignSelf: "center", width: 38, height: 4, borderRadius: 2, marginBottom: 8, backgroundColor: "rgba(255,247,237,0.2)" },
-  row: { flexDirection: "row", alignItems: "center", gap: 14, minHeight: 52, paddingHorizontal: 22 },
+  backdrop: { ...StyleSheet.absoluteFill, backgroundColor: SURFACE.scrim },
+  sheet: { position: "absolute", left: 0, right: 0, bottom: 0, paddingTop: 10, borderTopLeftRadius: RADIUS.xl, borderTopRightRadius: RADIUS.xl, backgroundColor: SURFACE.sheet },
+  handle: { alignSelf: "center", width: 40, height: 4, borderRadius: 2, marginBottom: 8, backgroundColor: "rgba(255,247,237,0.2)" },
+  row: { flexDirection: "row", alignItems: "center", gap: 14, minHeight: 54, paddingHorizontal: 22 },
   rowText: { color: C.white, fontSize: 15.5, fontWeight: "500" },
-  cancel: { minHeight: 50, marginTop: 4, alignItems: "center", justifyContent: "center", borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: "rgba(255,247,237,0.1)" },
+  cancel: { minHeight: 52, marginTop: 4, alignItems: "center", justifyContent: "center", borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: LINE.hairline },
   cancelText: { color: C.ash, fontSize: 15, fontWeight: "600" },
   viewer: { flex: 1, backgroundColor: "#000" },
   viewerTop: { position: "absolute", left: 0, right: 0, top: 0, flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: 16 },

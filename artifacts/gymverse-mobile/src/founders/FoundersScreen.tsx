@@ -3,7 +3,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ArrowLeft, Circle, Info, ShieldCheck, Sparkles, Users } from "lucide-react-native";
 import { Glows } from "../components/Tone";
-import { IconBtn, PageHeader, tap } from "../components/ui";
+import { tap, TopBar } from "../components/ui";
 import { useMembership } from "../membership/MembershipContext";
 import { ComingSoonPill } from "../membership/PremiumScreen";
 import { C, DIAG, F, NAV_GAP, NAV_HEIGHT } from "../theme";
@@ -17,7 +17,7 @@ export function FoundersScreen({ onBack, founderPreview }: { onBack: () => void;
   const planName = tier === "FREE" ? "Free" : plan.displayName;
   return (
     <ScrollView style={{ flex: 1, backgroundColor: C.bg }} contentContainerStyle={{ paddingBottom: insets.bottom + NAV_GAP + NAV_HEIGHT + 28 }} showsVerticalScrollIndicator={false}>
-      <PageHeader top={insets.top} kicker="Recognition concept" title="Founders" leading={<IconBtn label="Back" onPress={onBack}><ArrowLeft size={20} color={C.white} /></IconBtn>} />
+      <TopBar top={insets.top} kicker="Recognition concept" onBack={onBack} />
 
       <LinearGradient colors={["#1b1508", "#0f0d0a", "#090909"]} start={DIAG.start} end={DIAG.end} style={s.hero}>
         <Glows glows={[{ color: C.gold, cx: "50%", cy: "0%", rx: "90%", ry: "70%", opacity: 0.2 }, { color: C.flame, cx: "50%", cy: "100%", rx: "80%", ry: "50%", opacity: 0.16 }]} />
@@ -78,7 +78,7 @@ export function FoundersScreen({ onBack, founderPreview }: { onBack: () => void;
 }
 
 const s = StyleSheet.create({
-  hero: { marginHorizontal: 16, padding: 20, borderRadius: 26, overflow: "hidden", alignItems: "center", gap: 10, borderWidth: 1, borderColor: "rgba(255,209,102,0.35)" },
+  hero: { marginHorizontal: 16, padding: 22, borderRadius: 26, overflow: "hidden", alignItems: "center", gap: 10 },
   title: { marginTop: 4, fontFamily: F.display, fontSize: 32, letterSpacing: 1, color: C.white, textAlign: "center" },
   tagline: { fontFamily: F.labelHeavy, fontSize: 16, letterSpacing: 0.6, color: C.gold, textAlign: "center" },
   desc: { fontSize: 14, lineHeight: 20, color: "rgba(255,247,237,0.85)", textAlign: "center" },
@@ -88,16 +88,16 @@ const s = StyleSheet.create({
   body: { fontSize: 14, lineHeight: 20, color: "rgba(255,247,237,0.86)" },
   muted: { fontSize: 12.5, lineHeight: 17, color: C.ash },
   grid: { flexDirection: "row", flexWrap: "wrap", gap: 8, marginTop: 10 },
-  combo: { width: "48%", flexGrow: 1, padding: 12, borderRadius: 14, backgroundColor: "#141210", borderWidth: StyleSheet.hairlineWidth, borderColor: "rgba(255,209,102,0.3)" },
+  combo: { width: "48%", flexGrow: 1, padding: 12, borderRadius: 14, backgroundColor: "#15130f" },
   comboTitle: { fontFamily: F.labelHeavy, fontSize: 14, letterSpacing: 0.6, color: C.gold, marginBottom: 2 },
   benefit: { flexDirection: "row", gap: 10, alignItems: "flex-start", padding: 12, borderRadius: 14, backgroundColor: "#131313" },
   benefitTitle: { fontFamily: F.labelHeavy, fontSize: 15, color: C.white },
-  first: { marginTop: 22, padding: 16, borderRadius: 20, overflow: "hidden", borderWidth: 1, borderColor: "rgba(255,90,31,0.35)" },
+  first: { marginTop: 22, padding: 16, borderRadius: 20, overflow: "hidden" },
   firstTitle: { marginTop: 6, fontFamily: F.display, fontSize: 30, color: C.white },
   kicker: { fontFamily: F.labelHeavy, fontSize: 11.5, letterSpacing: 1.3, textTransform: "uppercase", color: C.flame },
   row: { flexDirection: "row", alignItems: "center", gap: 8 },
-  note: { flexDirection: "row", gap: 8, alignItems: "flex-start", padding: 11, borderRadius: 13, backgroundColor: "rgba(255,209,102,0.07)", borderWidth: StyleSheet.hairlineWidth, borderColor: "rgba(255,209,102,0.3)" },
+  note: { flexDirection: "row", gap: 8, alignItems: "flex-start", padding: 12, borderRadius: 13, backgroundColor: "rgba(255,209,102,0.07)" },
   noteText: { flex: 1, fontSize: 12.5, lineHeight: 18, color: "rgba(255,247,237,0.82)" },
-  back: { marginTop: 18, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, height: 46, borderRadius: 14, borderWidth: 1, borderColor: "rgba(255,247,237,0.18)" },
+  back: { marginTop: 18, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, height: 46, borderRadius: 14, backgroundColor: "rgba(255,247,237,0.06)" },
   backText: { fontFamily: F.labelHeavy, fontSize: 14.5, letterSpacing: 1, textTransform: "uppercase", color: C.white },
 });

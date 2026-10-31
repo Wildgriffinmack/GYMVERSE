@@ -7,7 +7,7 @@ import { ArrowRight } from "lucide-react-native";
 import { STARTER_POSTS } from "../data";
 import { PostArt } from "../components/PostArt";
 import { Glows } from "../components/Tone";
-import { Cta, GradText, Label, tap } from "../components/ui";
+import { Cta, GradText, Label, tap, useReducedMotion } from "../components/ui";
 import { C, F } from "../theme";
 
 /** Floating, blurred-looking mock posts behind the brand. Positions are fractions of the screen. */
@@ -65,7 +65,9 @@ export function WelcomeScreen({ onEnter }: { onEnter: () => void }) {
 
 function Floater({ delay, style, children }: { delay: number; style: object; children: ReactNode }) {
   const y = useRef(new Animated.Value(0)).current;
+  const reduced = useReducedMotion();
   useEffect(() => {
+    if (reduced) return;
     const loop = Animated.loop(Animated.sequence([
       Animated.delay(delay),
       Animated.timing(y, { toValue: -14, duration: 4500, easing: Easing.inOut(Easing.sin), useNativeDriver: true }),
@@ -73,7 +75,7 @@ function Floater({ delay, style, children }: { delay: number; style: object; chi
     ]));
     loop.start();
     return () => loop.stop();
-  }, [delay, y]);
+  }, [delay, y, reduced]);
   return (
     <Animated.View style={[s.float, style, { transform: [...((style as { transform?: object[] }).transform ?? []), { translateY: y }] }]}>
       {children}
@@ -91,11 +93,13 @@ export function Rise({ delay = 0, style, children }: { delay?: number; style?: o
 
 export function Pulse({ color = C.hot }: { color?: string }) {
   const a = useRef(new Animated.Value(1)).current;
+  const reduced = useReducedMotion();
   useEffect(() => {
+    if (reduced) { a.setValue(1); return; }
     const loop = Animated.loop(Animated.sequence([Animated.timing(a, { toValue: 0.3, duration: 800, useNativeDriver: true }), Animated.timing(a, { toValue: 1, duration: 800, useNativeDriver: true })]));
     loop.start();
     return () => loop.stop();
-  }, [a]);
+  }, [a, reduced]);
   return <Animated.View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: color, opacity: a }} />;
 }
 
@@ -105,7 +109,7 @@ const s = StyleSheet.create({
   liveText: { fontFamily: F.label, fontSize: 12, letterSpacing: 1.7, textTransform: "uppercase", color: C.white },
   body: { flex: 1, justifyContent: "flex-end", paddingHorizontal: 24, zIndex: 5 },
   brand: { fontFamily: F.display, color: C.white, includeFontPadding: false },
-  tagline: { marginTop: 14, color: C.white, fontSize: 23, fontWeight: "800", letterSpacing: -0.4 },
+  tagline: { marginTop: 14, color: C.white, fontSize: 21, lineHeight: 27, fontWeight: "800", letterSpacing: -0.3 },
   support: { marginTop: 8, color: C.muted, fontSize: 15, fontWeight: "500" },
   link: { fontFamily: F.label, fontSize: 14, letterSpacing: 2.5, textTransform: "uppercase", color: C.muted },
 });

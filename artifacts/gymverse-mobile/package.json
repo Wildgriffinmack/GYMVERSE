@@ -10,6 +10,7 @@
     "expo-constants": "~58.0.13",
     "expo-font": "~58.0.9",
     "expo-haptics": "~58.0.7",
+    "expo-image-picker": "~58.0.10",
     "expo-linear-gradient": "~58.0.3",
     "expo-status-bar": "~58.0.4",
     "lucide-react-native": "^1.61.0",
@@ -28,7 +29,7 @@
     "android": "expo start --go --android",
     "ios": "expo start --go --ios",
     "typecheck": "tsc --noEmit",
-    "test:membership": "node --test tests/membership.test.mjs tests/pro.test.mjs tests/creator.test.mjs tests/coach.test.mjs tests/sponsor.test.mjs tests/challenge.test.mjs tests/phase8.test.mjs tests/rebrand.test.mjs tests/home.test.mjs"
+    "test:membership": "node --test tests/membership.test.mjs tests/pro.test.mjs tests/creator.test.mjs tests/coach.test.mjs tests/sponsor.test.mjs tests/challenge.test.mjs tests/phase8.test.mjs tests/rebrand.test.mjs tests/home.test.mjs tests/create.test.mjs"
   },
   "private": true
 }

@@ -2,7 +2,9 @@ import Svg, { Circle, Path } from "react-native-svg";
 import { C } from "../theme";
 
 /**
- * GYMX interaction icons (24×24 grid). White outlines with an Inferno accent, matching the Home Feed design.
+ * GYMX interaction icons (24×24 grid). Monochrome outlines at rest; the Inferno accent appears only when
+ * an action is active (liked, saved), so orange in the feed always means "you did this".
+ * Pass `accent` to tint the detail strokes explicitly.
  * Bicep and house outlines are adapted from Lucide ("biceps-flexed", "house"), ISC License, © Lucide Contributors.
  */
 type IconProps = { size?: number; color?: string; accent?: string; strokeWidth?: number };
@@ -12,25 +14,27 @@ const STROKE = 1.7;
 const line = { strokeLinecap: "round", strokeLinejoin: "round" } as const;
 
 const ARM = "M12.409 13.017A5 5 0 0 1 22 15c0 3.866-4 7-9 7-4.077 0-8.153-.82-10.371-2.462-.426-.316-.631-.832-.62-1.362C2.118 12.723 2.627 2 10 2a3 3 0 0 1 3 3 2 2 0 0 1-2 2c-1.105 0-1.64-.444-2-1";
-// First half of the arm's outer curve, used for the accent stroke.
+// First half of the arm's outer curve, used for the optional accent stroke.
 const ARM_ACCENT = "M2.009 18.176C2.064 15.45 2.218 11.406 3.281 8.043";
 
 /** Like: flexing bicep. Filled with the accent when liked. */
-export function FlexIcon({ size = 26, color = C.white, accent = C.flame, strokeWidth = STROKE, active = false }: ToggleIconProps) {
-  const ink = active ? accent : color;
+export function FlexIcon({ size = 26, color = C.white, accent, strokeWidth = STROKE, active = false }: ToggleIconProps) {
+  const fill = accent ?? C.flame;
+  const ink = active ? fill : color;
   const detail = active ? C.bg : color;
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-      <Path d={ARM} stroke={ink} strokeWidth={strokeWidth} fill={active ? accent : "none"} {...line} />
+      <Path d={ARM} stroke={ink} strokeWidth={strokeWidth} fill={active ? fill : "none"} {...line} />
       <Path d="M15 14a5 5 0 0 0-7.584 2" stroke={detail} strokeWidth={strokeWidth} {...line} />
       <Path d="M9.964 6.825C8.019 7.977 9.5 13 8 15" stroke={detail} strokeWidth={strokeWidth} {...line} />
-      {active ? null : <Path d={ARM_ACCENT} stroke={accent} strokeWidth={strokeWidth + 0.6} {...line} />}
+      {!active && accent ? <Path d={ARM_ACCENT} stroke={accent} strokeWidth={strokeWidth + 0.6} {...line} /> : null}
     </Svg>
   );
 }
 
 /** Comment: speech bubble with three vertical "rep" bars. */
-export function CommentIcon({ size = 26, color = C.white, accent = C.flame, strokeWidth = STROKE }: IconProps) {
+export function CommentIcon({ size = 26, color = C.white, accent, strokeWidth = STROKE }: IconProps) {
+  const detail = accent ?? color;
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
       <Path
@@ -39,36 +43,38 @@ export function CommentIcon({ size = 26, color = C.white, accent = C.flame, stro
         strokeWidth={strokeWidth}
         {...line}
       />
-      <Path d="M9.4 9.2v3.6" stroke={accent} strokeWidth={strokeWidth + 0.3} {...line} />
-      <Path d="M12 8.2v5.6" stroke={accent} strokeWidth={strokeWidth + 0.3} {...line} />
+      <Path d="M9.4 9.2v3.6" stroke={detail} strokeWidth={strokeWidth + 0.3} {...line} />
+      <Path d="M12 8.2v5.6" stroke={detail} strokeWidth={strokeWidth + 0.3} {...line} />
       <Path d="M14.6 9.2v3.6" stroke={color} strokeWidth={strokeWidth + 0.3} {...line} />
     </Svg>
   );
 }
 
 /** Share: athletic forward arrow with a speed line. */
-export function ShareIcon({ size = 26, color = C.white, accent = C.flame, strokeWidth = STROKE }: IconProps) {
+export function ShareIcon({ size = 26, color = C.white, accent, strokeWidth = STROKE }: IconProps) {
+  const detail = accent ?? color;
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
       <Path d="M13.2 5.2 20.8 12l-7.6 6.8v-3.9c-4.4-.2-7.8 1.1-10.4 4.3.9-5.3 4.6-8.9 10.4-9.4V5.2Z" stroke={color} strokeWidth={strokeWidth} {...line} />
-      <Path d="M4.4 10.1c1.3-2 3.1-3.3 5.4-3.9" stroke={accent} strokeWidth={strokeWidth + 0.3} {...line} />
-      <Circle cx={15.7} cy={12} r={1.25} fill={accent} />
+      <Path d="M4.4 10.1c1.3-2 3.1-3.3 5.4-3.9" stroke={detail} strokeWidth={strokeWidth + 0.3} {...line} />
+      <Circle cx={15.7} cy={12} r={1.25} fill={detail} />
     </Svg>
   );
 }
 
 /** Save: bookmark with three horizontal lines. Filled with the accent when saved. */
-export function SaveIcon({ size = 26, color = C.white, accent = C.flame, strokeWidth = STROKE, active = false }: ToggleIconProps) {
+export function SaveIcon({ size = 26, color = C.white, accent, strokeWidth = STROKE, active = false }: ToggleIconProps) {
+  const fill = accent ?? C.flame;
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
       <Path
         d="M6.5 3.75h11a.75.75 0 0 1 .75.75v15.6l-6.25-4.3-6.25 4.3V4.5a.75.75 0 0 1 .75-.75Z"
-        stroke={active ? accent : color}
+        stroke={active ? fill : color}
         strokeWidth={strokeWidth}
-        fill={active ? accent : "none"}
+        fill={active ? fill : "none"}
         {...line}
       />
-      <Path d="M9.3 7.4h5.4M9.3 10h5.4M10.4 12.6h3.2" stroke={active ? C.bg : accent} strokeWidth={strokeWidth + 0.1} {...line} />
+      <Path d="M9.3 7.4h5.4M9.3 10h5.4M10.4 12.6h3.2" stroke={active ? C.bg : accent ?? color} strokeWidth={strokeWidth + 0.1} {...line} />
     </Svg>
   );
 }

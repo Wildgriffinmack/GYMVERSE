@@ -39,3 +39,15 @@ Docs: https://docs.expo.dev/eas/index.md
 - If `ios/` and `android/` directories do not exist, they are generated (Continuous Native Generation). Never create or edit them by hand — configure native behavior in `app.json` and config plugins.
 - Expo Go only includes its bundled native modules. After adding a library with native code, the app needs a development build: `npx expo run:ios|android` locally, or `eas build --profile development`.
 - Prefer recommended Expo modules over third-party libraries, and check your available skills before adding dependencies. Docs: https://docs.expo.dev/versions/latest/index.md
+
+## GYMX design system
+
+All styling decisions live in `src/theme.ts` (tokens) and `src/components/ui.tsx` (shared primitives). Compose these instead of hard-coding values.
+
+- **Tokens:** `SURFACE` (page → raised → sheet), `TEXT` (primary/secondary/tertiary/disabled, all AA on dark), `LINE`, `TINT`, `TYPE` (hero, title, section, metric, heading, body, eyebrow, button, tag), `SPACE` (4-pt), `GUTTER` (20), `RADIUS`, `ICON`, `HIT` (44pt min touch target), `ELEVATION`, `MOTION`.
+- **Primitives:** `PageHeader` (top-level screens), `TopBar` (detail screens whose hero carries the headline), `SectionHeader`, `Button` (`primary` | `gold` | `solid` | `tinted` | `secondary` | `ghost`), `Tag`, `IconMark`, `ListGroup` + `ListRow` (grouped settings-style rows instead of stacked cards), `Divider`, `IconBtn`, `Cta` (one per screen).
+- **Gradient policy:** the Inferno gradient (`GRAD`) is for brand moments only — the primary CTA, the wordmark X, active indicators and achievements (PRs, streaks). Gold (`GRAD_GOLD`) signals premium/membership. Never use gradients for borders or decorative boxes.
+- **Surfaces, not outlines:** separate content with whitespace and lighter surfaces. Reserve borders for state (selection, validation errors).
+- **Feed icons** are monochrome at rest; Inferno appears only when an action is active (liked, saved).
+- **Motion:** perpetual/decorative loops must check `useReducedMotion()` and stay still when the OS setting is on.
+- **Membership:** paid plans always read "Coming Soon". No prices, billing copy or purchase actions (enforced by `tests/membership.test.mjs`).
